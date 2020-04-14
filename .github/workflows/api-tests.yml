@@ -27,7 +27,7 @@ jobs:
     - run: npm ci
       working-directory: ./api
     - run: cp ./api/.env.example ./api/.env
-    - run: npm run build --if-present
+    - run: adonis migration:run
       working-directory: ./api
     - run: npm test
       working-directory: ./api
