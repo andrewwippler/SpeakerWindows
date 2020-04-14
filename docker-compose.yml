@@ -9,10 +9,8 @@ services:
       - ./tmp/db:/var/lib/mysql
       - ./tmp/seeds:/docker-entrypoint-initdb.d
     environment:
-      MYSQL_ROOT_PASSWORD: rails
+      MYSQL_ROOT_PASSWORD: adonis
       MYSQL_DATABASE: speaker_illus
-      MYSQL_USER: speaker
-      MYSQL_PASSWORD: windows
     ports:
       - 3306:3306
 
@@ -31,8 +29,8 @@ services:
       DB_CONNECTION: mysql
       DB_HOST: db
       DB_PORT: 3306
-      DB_USER: speaker
-      DB_PASSWORD: windows
+      DB_USER: root
+      DB_PASSWORD: adonis
       DB_DATABASE: speaker_illus
       HASH_DRIVER: bcrypt
     ports:

@@ -1,2 +1,3 @@
 tmp/*
 mariadb_dump.sql
+!tmp/.gitkeep
