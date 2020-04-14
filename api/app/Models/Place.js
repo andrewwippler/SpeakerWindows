@@ -8,6 +8,10 @@ class Place extends Model {
   illustrations () {
     return this.belongsTo('App/Models/Illustration')
   }
+
+  static get visible () {
+    return ['place', 'location', 'used']
+  }
 }
 
 module.exports = Place
