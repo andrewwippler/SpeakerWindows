@@ -1,15 +1,21 @@
 {
   "name": "speaker-windows-api",
-  "version": "4.1.0",
+  "version": "0.1.0",
   "adonis-version": "4.1.0",
-  "description": "",
+  "description": "Speaker Windows is a personal, searchable repository of illustrations which are categorized by tags. This is a replacement to paper, word doc folder, and evernote/onenote notebook filing systems.",
   "main": "index.js",
   "scripts": {
     "start": "node server.js",
     "test": "node ace test"
   },
   "author": "",
-  "license": "UNLICENSED",
+  "license": "Apache-2.0",
+  "licenses": [
+    {
+      "type": "Apache-2.0",
+      "url": "http://www.apache.org/licenses/LICENSE-2.0"
+    }
+  ],
   "private": true,
   "dependencies": {
     "@adonisjs/ace": "^5.0.8",

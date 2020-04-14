@@ -8,7 +8,13 @@ The project aims to have an testable API which allows the use of multiuser authe
 
 ## Upgrading
 
-TBD
+1. Clone this repository
+2. Place .sql backup inside `./tmp/seeds`
+3. `docker-compose up`
+4. `docker-compose exec api bash`
+5. `adonis migration:run`
+
+TODO: Update user password
 
 ## Project Timeline
 
@@ -16,22 +22,26 @@ Version 0.1.0
 
 - Imported schema from Speaker-Illustrations
 - Migration guide
-- API tests
 - CI/CD (GitHub Actions?)
 
 Version 0.2.0
+
+- API tests
+- Set up models and controllers
+
+Version 0.3.0
 
 - Multiuser Auth
 - Image uploads
 - Sharing roles (Owner, Creator, Editor, Read-Only)
 - Sharing ID
 
-Version 0.3.0
+Version 0.4.0
 
 - Basic UI
 - User Preferences
 
-Version 0.4.0
+Version 0.5.0
 
 - Browser Extension
 
