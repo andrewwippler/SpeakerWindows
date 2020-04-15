@@ -71,6 +71,8 @@ class UserSchema extends Schema {
       t.timestamps()
     })
     this.createIfNotExists('places', t => {
+      t.increments()
+      t.integer('illustration_id')
       t.string('place')
       t.string('location')
       t.datetime('used')

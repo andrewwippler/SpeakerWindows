@@ -32,5 +32,26 @@ test('Created tags are State Case', async ({ client }) => {
     name: 'Adonis Is Cool',
   }])
 
+})
+
+test('Can get tags with search query', async ({ client }) => {
+  await Tag.createMany({
+    name: 'adonis 101',
+  },{
+    name: 'cool is andrew',
+  },{
+    name: 'cooking',
+  },{
+    name: 'adonis is cool',
+  })
+
+  const response = await client.get('/tags?q=co').end()
+
+  response.assertStatus(200)
+  response.assertJSON([{
+    name: 'Cool Is Andrew',
+  }, {
+    name: 'Cooking',
+  }])
 
 })

@@ -26,5 +26,5 @@ Route
 
   Route.get('/tags', 'TagController.index')
   Route.get('/illustrations', 'IllustrationController.index')
-  Route.get('/places/:illustration_id', 'PlaceController.index')
+  Route.get('/places/:illustration_id', 'PlaceController.show')
 

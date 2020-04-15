@@ -3,7 +3,7 @@
 /** @typedef {import('@adonisjs/framework/src/Request')} Request */
 /** @typedef {import('@adonisjs/framework/src/Response')} Response */
 /** @typedef {import('@adonisjs/framework/src/View')} View */
-const Place = use('App/Models/Places')
+const Place = use('App/Models/Place')
 
 class PlaceController {
     /**
@@ -16,7 +16,7 @@ class PlaceController {
    * @param {View} ctx.view
    */
   async show({ params, request, response, view }) {
-    Place.
+    return Place.query().where({illustration_id: params.illustration_id}).fetch()
   }
 }
 
