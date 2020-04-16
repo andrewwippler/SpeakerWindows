@@ -27,6 +27,7 @@ Route
 
 // illustrations
 Route.get('/illustrations', 'IllustrationController.index')
+Route.post('/illustrations', 'IllustrationController.create')
 Route.get('/illustrations/:id', 'IllustrationController.show')
 
 //tags

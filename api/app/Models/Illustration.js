@@ -2,8 +2,17 @@
 
 /** @type {typeof import('@adonisjs/lucid/src/Lucid/Model')} */
 const Model = use('Model')
+const _ = require('lodash')
 
 class Illustration extends Model {
+  static boot () {
+    super.boot()
+
+    // Uppercase name
+    this.addHook('beforeCreate', async (i) => {
+      i.title = _.startCase(i.title)
+    })
+  }
 
   //relationships
 

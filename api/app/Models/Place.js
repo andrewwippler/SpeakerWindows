@@ -9,6 +9,10 @@ class Place extends Model {
     return this.belongsTo('App/Models/Illustration')
   }
 
+  static async createPlace(illustration, place) {
+    return await this.findOrCreate({...place, illustration_id: illustration.id})
+  }
+
   static get visible () {
     return ['place', 'location', 'used']
   }

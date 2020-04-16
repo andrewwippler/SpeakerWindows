@@ -33,6 +33,67 @@ test('Create Illustrations', async ({ client }) => {
   })
 })
 
+test('Create Illustrations with tags and places', async ({ client, assert }) => {
+  const illus = {
+    author: 'testing',
+    title: 'testy mctest',
+    source: 'test',
+    content: 'this shall pass',
+    tags: [
+      'work', 'Home', 'testing camel case'
+    ],
+    places: [
+      {
+        place: 'place1',
+        location: 'loc1',
+        used: '2020-04-16 20:12:37',
+      },
+      {
+        place: 'place2',
+        location: 'loc2',
+        used: '2020-04-16 19:52:37',
+      }
+    ]
+  }
+  const response = await client.post('/illustrations').send(illus).end()
+
+  response.assertStatus(200)
+  assert.equal(response.body.message,'Created successfully')
+  assert.isNumber(response.body.id)
+
+  const verify = await client.get('/illustrations/' + response.body.id).end()
+  verify.assertStatus(200)
+  assert.equal(verify.body.title, 'Testy Mctest') // should be State Case
+  assert.equal(verify.body.tags[0].name, 'Home') // should be alphabetical
+  assert.equal(verify.body.places[1].place, 'place1')
+})
+
+
+test.skip('Create Illustrations with lots of tags', async ({ client, assert }) => {
+  const tags = [...Array(1000).keys()]
+  const illus = {
+    author: 'testing',
+    title: 'testy mctest',
+    source: 'test',
+    content: 'this shall pass',
+    tags
+  }
+  console.log(illus.tags.length)
+  const response = await client.post('/illustrations').send(illus).end()
+
+  response.assertStatus(200)
+  assert.equal(response.body.message,'Created successfully')
+  assert.isNumber(response.body.id)
+
+  const verify = await client.get('/illustrations/' + response.body.id).end()
+  verify.assertStatus(200)
+  assert.equal(verify.body.tags.length, 1000) // should be State Case
+})
+
+test.skip('Update Illustration', async ({ client, assert }) => { })
+
+test.skip('Delete Illustration', async ({ client, assert }) => { })
+
 test('Illustration is not present in unrelated tag', async ({ client, assert }) => {
 
   const illustration = await Illustration.findByOrFail('title', 'Tester')
