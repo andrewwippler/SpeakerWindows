@@ -79,18 +79,21 @@ class UserSchema extends Schema {
       t.timestamps()
     })
     this.createIfNotExists('ill_tags', t => {
-      t.integer('illustration_id')
-      t.integer('tag_id')
+      t.integer('illustration_id').unsigned().index('illustration_id')
+      t.foreign('illustration_id').references('illustrations.id').onDelete('cascade')
+      t.integer('tag_id').unsigned().index('tag_id')
+      t.foreign('tag_id').references('tags.id').onDelete('cascade')
       t.timestamps()
     })
   }
 
   down () {
+    this.drop('tokens')
+    this.drop('ill_tags')
     this.drop('users')
     this.drop('tags')
     this.drop('illustrations')
     this.drop('places')
-    this.drop('ill_tags')
   }
 }
 
