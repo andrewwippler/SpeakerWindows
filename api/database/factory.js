@@ -13,33 +13,35 @@
 
 /** @type {import('@adonisjs/lucid/src/Factory')} */
 const Factory = use('Factory')
+const _ = require('lodash')
 
-Factory.blueprint('App/Models/User', (faker) => {
+
+Factory.blueprint('App/Models/User', (faker, i ,data) => {
   return {
-    email: faker.email(),
-    password: faker.password()
+    email: _.get(data, 'email', faker.email()),
+    password: _.get(data, 'password', faker.password())
   }
 })
 
-Factory.blueprint('App/Models/Tag', (faker) => {
+Factory.blueprint('App/Models/Tag', (faker, i ,data) => {
   return {
-    name: faker.word()
+    name: _.get(data, 'name', faker.word())
   }
 })
 
-Factory.blueprint('App/Models/Place', (faker) => {
+Factory.blueprint('App/Models/Place', (faker, i ,data) => {
   return {
-    place: faker.company(),
-    location: faker.city() + ', ' + faker.state(),
-    used: faker.birthday()
+    place: _.get(data, 'place', faker.company()),
+    location: _.get(data, 'location', faker.city() + ', ' + faker.state()),
+    used: _.get(data, 'used', faker.birthday())
   }
 })
 
-Factory.blueprint('App/Models/Illustration', (faker) => {
+Factory.blueprint('App/Models/Illustration', (faker, i ,data) => {
   return {
-    title: faker.sentence(),
-    author: faker.name(),
-    source: faker.url(),
-    content: faker.paragraph()
+    title: _.get(data, 'title', faker.sentence()),
+    author: _.get(data, 'author', faker.name()),
+    source: _.get(data, 'source', faker.url()),
+    content: _.get(data, 'content', faker.paragraph())
   }
 })
