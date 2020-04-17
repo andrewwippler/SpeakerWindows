@@ -52,18 +52,17 @@ class IllustrationController {
     const illustration = await Illustration.create({author, title, source, content})
 
     if (tags && tags.length > 0) {
-      _.forEach(tags, async (tag) => {
-        const tg = await Tag.findOrCreate({name: tag})
+      tags.map(async tag => {
+        const tg = await Tag.findOrCreate({ name: tag })
         await illustration.tags().attach(tg.id)
       })
     }
 
     if (places && places.length > 0) {
-      _.forEach(places, async (place) => {
+      places.map(async (place) => {
         await Place.createPlace(illustration, place)
       })
     }
-
 
     return response.send({message: 'Created successfully', id: illustration.id})
   }

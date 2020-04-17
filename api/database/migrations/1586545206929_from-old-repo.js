@@ -59,7 +59,7 @@ class UserSchema extends Schema {
 
     this.createIfNotExists('tags', table => {
       table.increments('id')
-      table.string('name')
+      table.string('name').index('tag_name_index')
       table.timestamps()
     })
     this.createIfNotExists('illustrations', t => {
