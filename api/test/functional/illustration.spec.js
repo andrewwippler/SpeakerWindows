@@ -87,7 +87,25 @@ test('Create Illustrations with lots of tags', async ({ client, assert }) => {
   verify.assertStatus(200)
 })
 
-test.skip('Update Illustration', async ({ client, assert }) => { })
+test.skip('Update Illustration', async ({ client, assert }) => {
+  const illustration = await Illustration.findBy('title', 'Tester')
+  const tagTwo = await Tag.find(testTagIdTwo)
+  const tagOne = await Tag.find(testTagIdOne)
+
+  const illus = {
+    author: 'Tester testing',
+    title: 'Testy mctest tester 123',
+    source: 'Testing',
+    content: 'This, too, shall pass',
+    tags: [tagOne.name, tagTwo.name]
+  }
+  console.log(illus)
+
+  const response = await client.put('/illustrations/' + illustration.id).send(illus).end()
+  response.assertStatus(200)
+  assert.equal(response.body.message, 'Updated successfully')
+
+ })
 
 test.skip('Delete Illustration', async ({ client, assert }) => { })
 
