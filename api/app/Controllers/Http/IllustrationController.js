@@ -20,7 +20,7 @@ class IllustrationController {
    * @param {Response} ctx.response
    * @param {View} ctx.view
    */
-  async show({ params, request, response, view }) {
+  async show({ params, response }) {
 
     const illustration = await Illustration.find(_.get(params, 'id', 0))
 
@@ -37,15 +37,15 @@ class IllustrationController {
   }
 
     /**
-   * Render a form to be used for creating a new tag.
-   * GET tags/create
+   * Create/save a new illustration.
+   * POST illustrations
    *
    * @param {object} ctx
    * @param {Request} ctx.request
    * @param {Response} ctx.response
    * @param {View} ctx.view
    */
-  async create({ request, response, view }) {
+  async store({ request, response }) {
 
     const { author, title, source, content, tags, places } = request.post()
 
@@ -65,6 +65,57 @@ class IllustrationController {
     }
 
     return response.send({message: 'Created successfully', id: illustration.id})
+  }
+
+    /**
+   * Update illustration details.
+   * PUT or PATCH illustrations/:id
+   *
+   * @param {object} ctx
+   * @param {Request} ctx.request
+   * @param {Response} ctx.response
+   */
+  async update({ params, request, response }) {
+    const { author, title, source, content, tags } = request.post()
+    // places are on their own URI. Tags can be in the illustration post
+
+    let illustration = await Illustration.find(params.id)
+
+    illustration.author = author
+    illustration.title = title
+    illustration.source = source
+    illustration.content = content
+
+    await illustration.save()
+
+    if (tags && tags.length > 0) {
+      // drop the tags and re-add them
+      await illustration.tags().detach()
+
+      tags.map(async tag => {
+        const tg = await Tag.findOrCreate({ name: tag })
+        await illustration.tags().attach(tg.id)
+      })
+    }
+    const returnValue = illustration.toJSON()
+    returnValue.tags = tags
+
+    return response.send({message: 'Updated successfully', illustration: returnValue})
+  }
+
+    /**
+   * Delete a illustration with id.
+   * DELETE illustrations/:id
+   *
+   * @param {object} ctx
+   * @param {Request} ctx.request
+   * @param {Response} ctx.response
+   */
+  async destroy({ params, request, response }) {
+    let illustration = await Illustration.find(params.id)
+    await illustration.places().delete()
+    await illustration.delete()
+    return response.send({message: `Deleted illustration id: ${illustration.id}`})
   }
 }
 

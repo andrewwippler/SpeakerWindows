@@ -23,7 +23,7 @@ after(async () => {
   // executed after all the tests for a given suite
 })
 
-test('get list of tags', async ({ client }) => {
+test('get list of tags (i.e. index page)', async ({ client }) => {
 
   const response = await client.get('/tags').end()
 
@@ -44,15 +44,27 @@ test('Created tags are State Case', async ({ client }) => {
 
 })
 
-// test('Can get tags with search query', async ({ client }) => {
+test.skip('Can get tags with search query', async ({ client }) => {
 
-//   const response = await client.get('/tags?q=co').end()
+  const response = await client.get('/tags?q=co').end()
 
-//   response.assertStatus(200)
-//   response.assertJSON([{
-//     name: 'Cool Is Andrew',
-//   }, {
-//     name: 'Cooking',
-//   }])
+  response.assertStatus(200)
+  response.assertJSON([{
+    name: 'Cool Is Andrew',
+  }, {
+    name: 'Cooking',
+  }])
 
-// })
+})
+
+test.skip('Can update tag', async ({ client }) => {
+
+})
+
+test.skip('Can delete tag an unassociate tags', async ({ client }) => {
+
+})
+
+test.skip('Deleting a tag does not delete associating illustration', async ({ client }) => {
+
+})

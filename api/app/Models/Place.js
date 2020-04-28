@@ -10,7 +10,8 @@ class Place extends Model {
   }
 
   static async createPlace(illustration, place) {
-    return await this.findOrCreate({...place, illustration_id: illustration.id})
+
+    return await this.create({...place, illustration_id: illustration.id})
   }
 
   static get visible () {

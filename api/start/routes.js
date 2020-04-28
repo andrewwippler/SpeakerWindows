@@ -27,8 +27,10 @@ Route
 
 // illustrations
 Route.get('/illustrations', 'IllustrationController.index')
-Route.post('/illustrations', 'IllustrationController.create')
+Route.post('/illustrations', 'IllustrationController.store')
 Route.get('/illustrations/:id', 'IllustrationController.show')
+Route.put('/illustrations/:id', 'IllustrationController.update')
+Route.delete('/illustrations/:id', 'IllustrationController.destroy')
 
 //tags
 Route.get('/tags', 'TagController.index')

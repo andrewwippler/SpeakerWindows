@@ -3,6 +3,7 @@
 const { test, trait, before } = use('Test/Suite')('Illustration')
 const Illustration = use('App/Models/Illustration')
 const Tag = use('App/Models/Tag')
+const Place = use('App/Models/Place')
 const Factory = use('Factory')
 let testTagIdOne, testTagIdTwo = 0
 
@@ -61,7 +62,7 @@ test('Create Illustrations with tags and places', async ({ client, assert }) => 
   assert.equal(response.body.message,'Created successfully')
   assert.isNumber(response.body.id)
 
-  const verify = await client.get('/illustrations/' + response.body.id).end()
+  const verify = await client.get(`/illustrations/${response.body.id}`).end()
   verify.assertStatus(200)
   assert.equal(verify.body.title, 'Testy Mctest') // should be State Case
   assert.equal(verify.body.tags[0].name, 'Home') // should be alphabetical
@@ -83,11 +84,28 @@ test('Create Illustrations with lots of tags', async ({ client, assert }) => {
   assert.equal(response.body.message,'Created successfully')
   assert.isNumber(response.body.id)
 
-  const verify = await client.get('/illustrations/' + response.body.id).end()
+  const verify = await client.get(`/illustrations/${response.body.id}`).end()
   verify.assertStatus(200)
+
+  const illustrationWithThousandTags = await Illustration.query()
+    .where({ id: response.body.id })
+    .with('tags')
+    .fetch();
+    const illustrationWithThousandTagsLength = await illustrationWithThousandTags.toJSON()[0].tags.length
+  assert.equal(illustrationWithThousandTagsLength, tags.length)
+}).retry(2)
+
+test('Illustration is not present in unrelated tag', async ({ client, assert }) => {
+
+  const illustration = await Illustration.findByOrFail('title', 'Tester')
+  const tag = await Tag.find(testTagIdTwo)
+  const response = await client.get(`/illustrations/${illustration.id}`).end()
+
+  assert.equal(response.body.tags.length, 1)
+  assert.notEqual(response.body.tags[0].name, tag.name)
 })
 
-test.skip('Update Illustration', async ({ client, assert }) => {
+test('Update Illustration', async ({ client, assert }) => {
   const illustration = await Illustration.findBy('title', 'Tester')
   const tagTwo = await Tag.find(testTagIdTwo)
   const tagOne = await Tag.find(testTagIdOne)
@@ -97,29 +115,42 @@ test.skip('Update Illustration', async ({ client, assert }) => {
     title: 'Testy mctest tester 123',
     source: 'Testing',
     content: 'This, too, shall pass',
-    tags: [tagOne.name, tagTwo.name]
+    tags: [tagOne.name, tagTwo.name, "third tag"]
   }
-  console.log(illus)
 
-  const response = await client.put('/illustrations/' + illustration.id).send(illus).end()
+  const response = await client.put(`/illustrations/${illustration.id}`).send(illus).end()
   response.assertStatus(200)
   assert.equal(response.body.message, 'Updated successfully')
+  assert.equal(response.body.illustration.author, illus.author)
+  assert.equal(response.body.illustration.title, illus.title)
+  assert.equal(response.body.illustration.source, illus.source)
+  assert.equal(response.body.illustration.content, illus.content)
+  assert.equal(response.body.illustration.tags.length, 3)
 
  })
 
-test.skip('Delete Illustration', async ({ client, assert }) => { })
+test('Delete Illustration', async ({ client, assert }) => {
+  const illustration = await Factory.model('App/Models/Illustration').create({title: 'Testing Delete'})
+  const tags = await Factory.model('App/Models/Tag').create({ name: 'Do Not Delete' })
+  const place = await Factory.model('App/Models/Place').make()
 
-test('Illustration is not present in unrelated tag', async ({ client, assert }) => {
+  await illustration.tags().attach(tags.id)
+  await illustration.places().save(place)
 
-  const illustration = await Illustration.findByOrFail('title', 'Tester')
-  const tag = await Tag.find(testTagIdTwo)
-  const response = await client.get('/illustrations/' + illustration.id).end()
+  const response = await client.delete(`/illustrations/${illustration.id}`).end()
+  response.assertStatus(200)
+  response.assertJSON({ 'message': `Deleted illustration id: ${illustration.id}` })
 
-  assert.equal(response.body.tags.length, 1)
-  assert.notEqual(response.body.tags[0].name, tag.name)
+  const responseFourOhThree = await client.get(`/illustrations/${illustration.id}`).end()
+  responseFourOhThree.assertStatus(403)
+
+  // check to see the place is no longer there
+  const deletedPlace = await Place.find({illustration_id: illustration.id})
+  assert.isTrue(!deletedPlace)
+
 })
 
-test('403 on unknown illustration', async ({ client, assert }) => {
+test('403 on unknown illustration', async ({ client }) => {
   const response = await client.get('/illustrations/99999999999').end()
   response.assertStatus(403)
   response.assertJSON({"message": "You are not allowed to access this resource"})
