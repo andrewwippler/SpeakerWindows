@@ -36,6 +36,7 @@ jobs:
     - run: npm ci
       working-directory: ./api
     - run: cp ./api/.env.example ./api/.env
+    - run: sleep 30
     - run: npm run coverage
       working-directory: ./api
       env:
