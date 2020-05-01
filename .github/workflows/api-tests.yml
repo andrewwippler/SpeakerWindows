@@ -43,3 +43,7 @@ jobs:
         CI: true
         PORT: ${{ job.services.mariadb.ports[3306] }}
         DB_CONNECTION: mysql
+    - uses: actions/upload-artifact@v2
+      with:
+        name: Test-Coverage
+        path: api/test/coverage # or path/to/artifact
