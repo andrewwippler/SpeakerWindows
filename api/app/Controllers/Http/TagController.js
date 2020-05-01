@@ -4,6 +4,8 @@
 /** @typedef {import('@adonisjs/framework/src/Response')} Response */
 /** @typedef {import('@adonisjs/framework/src/View')} View */
 const Tag = use('App/Models/Tag')
+
+const _ = require('lodash')
 /**
  * Resourceful controller for interacting with tags
  */
@@ -17,55 +19,32 @@ class TagController {
    * @param {Response} ctx.response
    * @param {View} ctx.view
    */
-  async index({ request, response, view }) {
+  async index({}) {
     return await Tag.query().fetch()
   }
 
-  /**
-   * Render a form to be used for creating a new tag.
-   * GET tags/create
+    /**
+   * search tags.
+   * GET tags/:name
    *
    * @param {object} ctx
    * @param {Request} ctx.request
    * @param {Response} ctx.response
    * @param {View} ctx.view
    */
-  async create ({ request, response, view }) {
-  }
+  async search({ params, request, response }) {
 
-  /**
-   * Create/save a new tag.
-   * POST tags
-   *
-   * @param {object} ctx
-   * @param {Request} ctx.request
-   * @param {Response} ctx.response
-   */
-  async store ({ request, response }) {
-  }
+    const tag = _.get(params, 'name', '')
 
-  /**
-   * Display a single tag.
-   * GET tags/:id
-   *
-   * @param {object} ctx
-   * @param {Request} ctx.request
-   * @param {Response} ctx.response
-   * @param {View} ctx.view
-   */
-  async show ({ params, request, response, view }) {
-  }
+    // assuming bad data can be sent here. Raw should parameterize input
+    // https://security.stackexchange.com/q/172297/35582
+    const tagQuery = await Tag.query().whereRaw('name LIKE ?', `${tag}%`).orderBy('name').fetch()
 
-  /**
-   * Render a form to update an existing tag.
-   * GET tags/:id/edit
-   *
-   * @param {object} ctx
-   * @param {Request} ctx.request
-   * @param {Response} ctx.response
-   * @param {View} ctx.view
-   */
-  async edit ({ params, request, response, view }) {
+    if (tagQuery.toJSON().length < 1) {
+      return response.status(204).send({ message: 'no results found' })
+    }
+
+    return tagQuery
   }
 
   /**
@@ -76,7 +55,19 @@ class TagController {
    * @param {Request} ctx.request
    * @param {Response} ctx.response
    */
-  async update ({ params, request, response }) {
+  async update({ params, request, response }) {
+
+    const { name } = request.post()
+    // places are on their own URI. Tags can be in the illustration post
+
+    let tag = await Tag.find(params.id)
+
+    tag.name = name
+
+    await tag.save()
+
+    return response.send({message: 'Updated successfully'})
+
   }
 
   /**
@@ -87,7 +78,11 @@ class TagController {
    * @param {Request} ctx.request
    * @param {Response} ctx.response
    */
-  async destroy ({ params, request, response }) {
+  async destroy({ params, request, response }) {
+
+    let tag = await Tag.find(params.id)
+    await tag.delete()
+    return response.send({message: `Deleted tag id: ${tag.id}`})
   }
 }
 

@@ -33,7 +33,11 @@ Route.put('/illustrations/:id', 'IllustrationController.update')
 Route.delete('/illustrations/:id', 'IllustrationController.destroy')
 
 //tags
+//are created on new illustrations only
 Route.get('/tags', 'TagController.index')
+Route.get('/tags/:name', 'TagController.search')
+Route.put('/tags/:id', 'TagController.update')
+Route.delete('/tags/:id', 'TagController.destroy')
 
 // places
 Route.get('/places/:illustration_id', 'PlaceController.show')

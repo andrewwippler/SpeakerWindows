@@ -44,27 +44,49 @@ test('Created tags are State Case', async ({ client }) => {
 
 })
 
-test.skip('Can get tags with search query', async ({ client }) => {
+test('Can get tags with search query', async ({ client, assert }) => {
 
-  const response = await client.get('/tags?q=co').end()
+  const response = await client.get('/tags/co').end()
 
   response.assertStatus(200)
-  response.assertJSON([{
-    name: 'Cool Is Andrew',
-  }, {
-    name: 'Cooking',
-  }])
+  assert.equal(response.body.length, 2)
+  assert.equal(response.body[0].name, 'Cooking')
 
 })
 
-test.skip('Can update tag', async ({ client }) => {
+test('403 on bad tag search', async ({ client }) => {
+
+  const response = await client.get('/tags/zzzzzzzzzzzzzzzznotatagzzzzzzz').end()
+
+  response.assertStatus(204)
+
+  const zeroResponse = await client.get('/tags/0').end()
+
+  zeroResponse.assertStatus(204)
 
 })
 
-test.skip('Can delete tag an unassociate tags', async ({ client }) => {
+test('Can update tag', async ({ client, assert }) => {
+  const tag = await Tag.findBy('name', 'Adonis 101')
+
+  const updatedTag = {name: 'Adonis 102'}
+
+  const response = await client.put(`/tags/${tag.id}`).send(updatedTag).end()
+  response.assertStatus(200)
+  assert.equal(response.body.message, 'Updated successfully')
+
+  const findTag = await Tag.find(tag.id)
+  assert.equal(findTag.name, 'Adonis 102')
 
 })
 
-test.skip('Deleting a tag does not delete associating illustration', async ({ client }) => {
+test('Can delete tag', async ({ client }) => {
+
+  const tag = await Tag.create({ name: 'Delete Meh' })
+
+  const response = await client.delete(`/tags/${tag.id}`).end()
+  response.assertStatus(200)
+  response.assertJSON({ 'message': `Deleted tag id: ${tag.id}` })
 
 })
+
