@@ -46,7 +46,7 @@ test('Created tags are State Case', async ({ client }) => {
 
 test('Can get tags with search query', async ({ client, assert }) => {
 
-  const response = await client.get('/tags/co').end()
+  const response = await client.get('/tags/coo').end()
 
   response.assertStatus(200)
   assert.isTrue(response.body.length >= 2)
