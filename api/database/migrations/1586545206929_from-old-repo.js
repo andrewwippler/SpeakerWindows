@@ -4,9 +4,13 @@ const Schema = use('Schema')
 
 class UserSchema extends Schema {
   async up() {
-    const exists = await this.hasTable('users')
+    const usersExists = await this.hasTable('users')
+    const tagsExists = await this.hasTable('tags')
+    const illustrationsExists = await this.hasTable('illustrations')
+    const placesExists = await this.hasTable('places')
+    const ill_tagsExists = await this.hasTable('ill_tags')
 
-    if (!!exists) {
+    if (!!usersExists) {
       this.createIfNotExists('users', table => {
         // existing
         table.dropUnique('email', 'index_users_on_email')
@@ -47,7 +51,7 @@ class UserSchema extends Schema {
         table.string('last_sign_in_ip')
         table.timestamps()
       })
-      this.createIfNotExists('tokens', table => {
+      this.create('tokens', table => {
         table.increments()
         table.integer('user_id').unsigned().references('id').inTable('users')
         table.string('token', 255).notNullable().unique()
@@ -56,13 +60,16 @@ class UserSchema extends Schema {
         table.timestamps()
       })
     }
+    if (!tagsExists) {
+      this.create('tags', table => {
+        table.increments('id')
+        table.string('name').index('tag_name_index')
+        table.timestamps()
+      })
+    }
 
-    this.createIfNotExists('tags', table => {
-      table.increments('id')
-      table.string('name').index('tag_name_index')
-      table.timestamps()
-    })
-    this.createIfNotExists('illustrations', t => {
+    if (!illustrationsExists) {
+    this.create('illustrations', t => {
       t.increments('id')
       t.string('title').index('illustration_titles')
       t.string('author').index('illustration_authors')
@@ -70,7 +77,9 @@ class UserSchema extends Schema {
       t.text('content')
       t.timestamps()
     })
-    this.createIfNotExists('places', t => {
+    }
+    if (!placesExists) {
+    this.create('places', t => {
       t.increments()
       t.integer('illustration_id')
       t.string('place')
@@ -78,13 +87,17 @@ class UserSchema extends Schema {
       t.datetime('used')
       t.timestamps()
     })
-    this.createIfNotExists('ill_tags', t => {
-      t.integer('illustration_id').unsigned().index('illustration_id')
-      t.foreign('illustration_id').references('illustrations.id').onDelete('cascade')
-      t.integer('tag_id').unsigned().index('tag_id')
-      t.foreign('tag_id').references('tags.id').onDelete('cascade')
-      t.timestamps()
-    })
+    }
+
+    if (!ill_tagsExists) {
+      this.create('ill_tags', t => {
+        t.integer('illustration_id').unsigned().index('illustration_id')
+        t.foreign('illustration_id').references('illustrations.id').onDelete('cascade')
+        t.integer('tag_id').unsigned().index('tag_id')
+        t.foreign('tag_id').references('tags.id').onDelete('cascade')
+        t.timestamps()
+      })
+    }
   }
 
   down () {
