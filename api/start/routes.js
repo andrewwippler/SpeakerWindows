@@ -41,4 +41,6 @@ Route.delete('/tags/:id', 'TagController.destroy')
 
 // places
 Route.get('/places/:illustration_id', 'PlaceController.show')
-
+Route.post('/places/:illustration_id', 'PlaceController.store')
+Route.put('/places/:id', 'PlaceController.update')
+Route.delete('/places/:id', 'PlaceController.destroy')

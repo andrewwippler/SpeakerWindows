@@ -49,7 +49,7 @@ test('Can get tags with search query', async ({ client, assert }) => {
   const response = await client.get('/tags/co').end()
 
   response.assertStatus(200)
-  assert.equal(response.body.length, 2)
+  assert.isTrue(response.body.length >= 2)
   assert.equal(response.body[0].name, 'Cooking')
 
 })

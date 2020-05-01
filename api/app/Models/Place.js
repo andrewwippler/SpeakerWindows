@@ -3,6 +3,9 @@
 /** @type {typeof import('@adonisjs/lucid/src/Lucid/Model')} */
 const Model = use('Model')
 
+const _ = require('lodash')
+const moment = require('moment')
+
 class Place extends Model {
 
   illustrations () {
@@ -11,11 +14,14 @@ class Place extends Model {
 
   static async createPlace(illustration, place) {
 
+    // fixes bad timestamps and gives a default value
+    place.used = moment(_.get(place, 'used', moment())).format('YYYY-MM-DD HH:mm:ss')
+
     return await this.create({...place, illustration_id: illustration.id})
   }
 
   static get visible () {
-    return ['place', 'location', 'used']
+    return ['id', 'place', 'location', 'used']
   }
 }
 

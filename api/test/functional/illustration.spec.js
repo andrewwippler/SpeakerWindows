@@ -21,17 +21,21 @@ before(async () => {
 
 trait('Test/ApiClient')
 
-test('Create Illustrations', async ({ client }) => {
-  const illustration = await Illustration.findBy('title', 'Tester')
-  const response = await client.get('/illustrations/'+illustration.id).end()
+test('Create Illustrations', async ({ client, assert }) => {
+  const illustration =  {
+    author: 'testy mctest',
+    title: 'New Post',
+    source: 'test',
+    content: 'this shall pass as new',
+  }
+  const response = await client.post('/illustrations').send(illustration).end()
 
   response.assertStatus(200)
-  response.assertJSONSubset({
-    author: illustration.author,
-    title: illustration.title,
-    source: illustration.source,
-    content: illustration.content
-  })
+  assert.equal(response.body.message,'Created successfully')
+  assert.isNumber(response.body.id)
+
+  const verify = await client.get(`/illustrations/${response.body.id}`).end()
+  verify.assertJSONSubset(illustration)
 })
 
 test('Create Illustrations with tags and places', async ({ client, assert }) => {
