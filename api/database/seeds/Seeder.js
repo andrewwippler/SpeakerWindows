@@ -15,7 +15,7 @@ const Factory = use('Factory')
 
 class Seeder {
   async run() {
-    const users = await Factory.model('App/Models/User').createMany(3)
+    // const users = await Factory.model('App/Models/User').createMany(3)
     const illustrations = await Factory.model('App/Models/Illustration').createMany(5)
     const places = await Factory.model('App/Models/Place').makeMany(3)
     const tags = await Factory.model('App/Models/Tag').createMany(10)

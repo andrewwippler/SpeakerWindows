@@ -5,18 +5,27 @@ const Model = use('Model')
 
 /** @type {import('@adonisjs/framework/src/Hash')} */
 const Hash = use('Hash')
+const { uuid, empty } = require('uuidv4')
+const _ = require('lodash')
 
 class User extends Model {
+
   static boot () {
     super.boot()
 
-    /**
-     * A hook to hash the user password before saving
-     * it to the database.
-     */
     this.addHook('beforeSave', async (userInstance) => {
+      /**
+       * A hook to hash the user password before saving
+       * it to the database.
+       */
       if (userInstance.dirty.password) {
         userInstance.password = await Hash.make(userInstance.password)
+        _.unset(userInstance, 'password_confirmation')
+      }
+
+      // fix migrated users
+      if (!userInstance.uid || userInstance.uid == empty()) {
+        userInstance.uid = uuid()
       }
     })
   }
@@ -36,7 +45,7 @@ class User extends Model {
   }
 
   static get hidden () {
-    return ['password']
+    return ['id', 'password', 'created_at', 'updated_at']
   }
 }
 

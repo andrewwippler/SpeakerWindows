@@ -14,12 +14,15 @@
 /** @type {import('@adonisjs/lucid/src/Factory')} */
 const Factory = use('Factory')
 const _ = require('lodash')
+const { uuid } = require('uuidv4');
 
 
-Factory.blueprint('App/Models/User', (faker, i ,data) => {
+Factory.blueprint('App/Models/User', (faker, i, data) => {
+  let same_password = _.get(data, 'password', faker.password())
   return {
     email: _.get(data, 'email', faker.email()),
-    password: _.get(data, 'password', faker.password())
+    password: same_password,
+    password_confirmation: same_password,
   }
 })
 

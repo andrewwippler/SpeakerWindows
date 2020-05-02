@@ -17,12 +17,11 @@
 const Route = use('Route')
 
 //auth
-Route
-  .post('login', 'UserController.login')
-  .middleware('guest')
+Route.post('register', 'UserController.store').validator('User').middleware('guest')
+Route.post('login', 'UserController.login').middleware('throttle:5,120')
 
 Route
-  .get('users/:id', 'UserController.show')
+  .get('users/:uid', 'UserController.show')
   .middleware('auth')
 
 // illustrations
