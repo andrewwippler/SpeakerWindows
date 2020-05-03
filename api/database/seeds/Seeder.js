@@ -12,10 +12,11 @@
 
 /** @type {import('@adonisjs/lucid/src/Factory')} */
 const Factory = use('Factory')
+const User = use('App/Models/User')
 
 class Seeder {
   async run() {
-    // const users = await Factory.model('App/Models/User').createMany(3)
+    const user = User.create({email: 'test@test.com', password: 'Test1234'})
     const illustrations = await Factory.model('App/Models/Illustration').createMany(5)
     const places = await Factory.model('App/Models/Place').makeMany(3)
     const tags = await Factory.model('App/Models/Tag').createMany(10)

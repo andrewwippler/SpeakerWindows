@@ -45,6 +45,7 @@ Factory.blueprint('App/Models/Illustration', (faker, i ,data) => {
     title: _.get(data, 'title', faker.sentence()),
     author: _.get(data, 'author', faker.name()),
     source: _.get(data, 'source', faker.url()),
-    content: _.get(data, 'content', faker.paragraph())
+    content: _.get(data, 'content', faker.paragraph()),
+    user_id: _.get(data, 'user_id', faker.integer({ min: 1, max: 22 }))
   }
 })

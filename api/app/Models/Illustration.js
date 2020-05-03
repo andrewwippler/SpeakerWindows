@@ -26,6 +26,10 @@ class Illustration extends Model {
     ).pivotTable('ill_tags')
   }
 
+  users() {
+    return this.belongsTo('App/Models/User')
+  }
+
 }
 
 module.exports = Illustration

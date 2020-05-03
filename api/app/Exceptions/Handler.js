@@ -29,6 +29,9 @@ class ExceptionHandler extends BaseExceptionHandler {
     if (error.name === 'TooManyRequests') {
       return response.status(error.status).send({ message: 'Too many requests. Please wait 30 minutes and try again.' })
     }
+    if (error.name === 'InvalidJwtToken') {
+      return response.status(error.status).send({ message: 'You must be authenticated to perform this action.' })
+    }
 
 
     response.status(error.status).send(error.message)

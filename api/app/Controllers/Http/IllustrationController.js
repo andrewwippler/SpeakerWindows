@@ -20,18 +20,24 @@ class IllustrationController {
    * @param {Response} ctx.response
    * @param {View} ctx.view
    */
-  async show({ params, response }) {
+  async show({ params, auth, response }) {
 
-    const illustration = await Illustration.find(_.get(params, 'id', 0))
+    const illustrationQuery = await Illustration.query()
+      .where('id', _.get(params, 'id', 0))
+      .andWhere('user_id', `${auth.user.id}`)
+      .with('tags', (builder) => {
+        builder.orderBy('name', 'asc')
+      })
+      .with('places', (builder) => {
+        builder.orderBy('used', 'asc')
+      })
+      .fetch()
+
+    const illustration = illustrationQuery.toJSON()[0];
 
     if (!illustration) {
-      return response.status(403).send({ message: 'You are not allowed to access this resource' })
+      return response.status(403).send({ message: 'You do not have permission to access this resource' })
     }
-
-    await illustration.loadMany({
-      tags: (builder) => builder.orderBy('name', 'asc'),
-      places: (builder) => builder.orderBy('used', 'asc')
-    })
 
     return illustration
   }
@@ -45,12 +51,11 @@ class IllustrationController {
    * @param {Response} ctx.response
    * @param {View} ctx.view
    */
-  async store({ request, response }) {
+  async store({ request, auth, response }) {
 
     const { author, title, source, content, tags, places } = request.post()
-
-    const illustration = await Illustration.create({author, title, source, content})
-
+    const user_id = auth.user.id
+    const illustration = await Illustration.create({author, title, source, content, user_id})
     if (tags && tags.length > 0) {
       tags.map(async tag => {
         const tg = await Tag.findOrCreate({ name: tag })
@@ -75,11 +80,15 @@ class IllustrationController {
    * @param {Request} ctx.request
    * @param {Response} ctx.response
    */
-  async update({ params, request, response }) {
+  async update({ params, auth, request, response }) {
     const { author, title, source, content, tags } = request.post()
     // places are on their own URI. Tags can be in the illustration post
 
-    let illustration = await Illustration.find(params.id)
+    let illustration = await Illustration.findBy('id', _.get(params, 'id', 0))
+
+    if (!illustration.toJSON()[0] && illustration.user_id != auth.user.id) {
+      return response.status(403).send({ message: 'You do not have permission to access this resource' })
+    }
 
     illustration.author = author
     illustration.title = title
@@ -111,8 +120,14 @@ class IllustrationController {
    * @param {Request} ctx.request
    * @param {Response} ctx.response
    */
-  async destroy({ params, request, response }) {
-    let illustration = await Illustration.find(params.id)
+  async destroy({ params, auth, response }) {
+
+    let illustration = await Illustration.findBy('id', _.get(params, 'id', 0))
+
+    if (!illustration.toJSON()[0] && illustration.user_id != auth.user.id) {
+      return response.status(403).send({ message: 'You do not have permission to access this resource' })
+    }
+
     await illustration.places().delete()
     await illustration.delete()
     return response.send({message: `Deleted illustration id: ${illustration.id}`})

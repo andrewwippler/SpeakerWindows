@@ -44,6 +44,10 @@ class User extends Model {
     return this.hasMany('App/Models/Token')
   }
 
+  illustrations() {
+    return this.hasMany('App/Models/Illustration')
+  }
+
   static get hidden () {
     return ['id', 'password', 'created_at', 'updated_at']
   }
