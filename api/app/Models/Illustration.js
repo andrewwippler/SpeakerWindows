@@ -30,6 +30,10 @@ class Illustration extends Model {
     return this.belongsTo('App/Models/User')
   }
 
+  static get hidden () {
+    return ['user_id']
+  }
+
 }
 
 module.exports = Illustration

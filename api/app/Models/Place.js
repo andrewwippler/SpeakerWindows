@@ -12,17 +12,18 @@ class Place extends Model {
     return this.belongsTo('App/Models/Illustration')
   }
 
-  static async createPlace(illustration, place) {
+  static async createPlace(illustration, place, user_id) {
 
     // fixes bad timestamps and gives a default value
     place.used = moment(_.get(place, 'used', moment())).format('YYYY-MM-DD HH:mm:ss')
 
-    return await this.create({...place, illustration_id: illustration.id})
+    return await this.create({...place, illustration_id: illustration.id, user_id})
   }
 
   static get visible () {
     return ['id', 'place', 'location', 'used']
   }
+
 }
 
 module.exports = Place

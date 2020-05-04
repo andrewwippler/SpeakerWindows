@@ -14,7 +14,6 @@
 /** @type {import('@adonisjs/lucid/src/Factory')} */
 const Factory = use('Factory')
 const _ = require('lodash')
-const { uuid } = require('uuidv4');
 
 
 Factory.blueprint('App/Models/User', (faker, i, data) => {
@@ -28,7 +27,8 @@ Factory.blueprint('App/Models/User', (faker, i, data) => {
 
 Factory.blueprint('App/Models/Tag', (faker, i ,data) => {
   return {
-    name: _.get(data, 'name', faker.word())
+    name: _.get(data, 'name', faker.word()),
+    user_id: _.get(data, 'user_id', faker.integer({ min: 1, max: 22 }))
   }
 })
 
@@ -36,7 +36,8 @@ Factory.blueprint('App/Models/Place', (faker, i ,data) => {
   return {
     place: _.get(data, 'place', faker.company()),
     location: _.get(data, 'location', faker.city() + ', ' + faker.state()),
-    used: _.get(data, 'used', faker.birthday())
+    used: _.get(data, 'used', faker.birthday()),
+    user_id: _.get(data, 'user_id', faker.integer({ min: 1, max: 22 }))
   }
 })
 

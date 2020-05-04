@@ -19,8 +19,8 @@ class TagController {
    * @param {Response} ctx.response
    * @param {View} ctx.view
    */
-  async index({}) {
-    return await Tag.query().fetch()
+  async index({auth}) {
+    return await Tag.query().where('user_id', `${auth.user.id}`).orderBy('name').fetch()
   }
 
     /**
@@ -32,13 +32,13 @@ class TagController {
    * @param {Response} ctx.response
    * @param {View} ctx.view
    */
-  async search({ params, request, response }) {
+  async search({ params, auth, response }) {
 
     const tag = _.get(params, 'name', '')
 
     // assuming bad data can be sent here. Raw should parameterize input
     // https://security.stackexchange.com/q/172297/35582
-    const tagQuery = await Tag.query().whereRaw('name LIKE ?', `${tag}%`).orderBy('name').fetch()
+    const tagQuery = await Tag.query().whereRaw('name LIKE ?', `${tag}%`).andWhere('user_id', `${auth.user.id}`).orderBy('name').fetch()
 
     if (tagQuery.toJSON().length < 1) {
       return response.status(204).send({ message: 'no results found' })
@@ -55,12 +55,16 @@ class TagController {
    * @param {Request} ctx.request
    * @param {Response} ctx.response
    */
-  async update({ params, request, response }) {
+  async update({ params, auth, request, response }) {
 
     const { name } = request.post()
     // places are on their own URI. Tags can be in the illustration post
 
     let tag = await Tag.find(params.id)
+
+    if (!tag.toJSON()[0] && tag.user_id != auth.user.id) {
+      return response.status(403).send({ message: 'You do not have permission to access this resource' })
+    }
 
     tag.name = name
 
@@ -78,9 +82,14 @@ class TagController {
    * @param {Request} ctx.request
    * @param {Response} ctx.response
    */
-  async destroy({ params, request, response }) {
+  async destroy({ params, auth, response }) {
 
     let tag = await Tag.find(params.id)
+
+    if (!tag.toJSON()[0] && tag.user_id != auth.user.id) {
+      return response.status(403).send({ message: 'You do not have permission to access this resource' })
+    }
+
     await tag.delete()
     return response.send({message: `Deleted tag id: ${tag.id}`})
   }

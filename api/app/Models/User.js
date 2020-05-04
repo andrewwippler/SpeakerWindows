@@ -48,6 +48,14 @@ class User extends Model {
     return this.hasMany('App/Models/Illustration')
   }
 
+  tags() {
+    return this.hasMany('App/Models/Tag')
+  }
+
+  places() {
+    return this.hasMany('App/Models/Place')
+  }
+
   static get hidden () {
     return ['id', 'password', 'created_at', 'updated_at']
   }

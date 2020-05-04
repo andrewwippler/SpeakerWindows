@@ -16,8 +16,14 @@ class PlaceController {
    * @param {Response} ctx.response
    * @param {View} ctx.view
    */
-  async show({ params, request, response, view }) {
-    return Place.query().where({illustration_id: params.illustration_id}).fetch()
+  async show({ params, auth, response }) {
+    const places = await Place.query().where({ illustration_id: params.illustration_id, user_id: auth.user.id }).fetch()
+
+    if (!places.toJSON()[0] && places.user_id != auth.user.id) {
+      return response.status(403).send({ message: 'You do not have permission to access this resource' })
+    }
+
+    return places
   }
 
   /**
@@ -29,7 +35,7 @@ class PlaceController {
    * @param {Response} ctx.response
    * @param {View} ctx.view
    */
-  async store({ params, request, response }) {
+  async store({ params, auth, request, response }) {
 
     const posted = request.post()
     const illustration_id = _.get(params, 'illustration_id', 0)
@@ -40,7 +46,11 @@ class PlaceController {
       return response.status(403).send({ message: 'Illustration does not exist' })
     }
 
-    const place = await Place.createPlace(illustration_id, posted)
+    if (!illustration.toJSON()[0] && illustration.user_id != auth.user.id) {
+      return response.status(403).send({ message: 'You do not have permission to access this resource' })
+    }
+
+    const place = await Place.createPlace(illustration_id, posted, auth.user.id)
 
     return response.send({message: 'Created successfully', id: place.id})
   }
@@ -53,7 +63,7 @@ class PlaceController {
    * @param {Request} ctx.request
    * @param {Response} ctx.response
    */
-  async update({ params, request, response }) {
+  async update({ params, auth, request, response }) {
 
     const post = request.post()
 
@@ -65,6 +75,10 @@ class PlaceController {
 
     if (post.illustration_id != place.illustration_id) {
       return response.status(403).send({message: 'Error: Mismatched illustration_id'})
+    }
+
+    if (place.user_id != auth.user.id) {
+      return response.status(403).send({message: 'You do not have permission to access this resource'})
     }
     await place.save()
 
@@ -80,9 +94,12 @@ class PlaceController {
    * @param {Request} ctx.request
    * @param {Response} ctx.response
    */
-  async destroy({ params, request, response }) {
+  async destroy({ params, auth, response }) {
 
     let place = await Place.find(params.id)
+    if (place.user_id != auth.user.id) {
+      return response.status(403).send({message: 'You do not have permission to access this resource'})
+    }
     await place.delete()
     return response.send({message: `Deleted place id: ${place.id}`})
   }

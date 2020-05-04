@@ -31,7 +31,6 @@ Route.group(() =>{
   Route.get('/illustrations/:id', 'IllustrationController.show')
   Route.put('/illustrations/:id', 'IllustrationController.update')
   Route.delete('/illustrations/:id', 'IllustrationController.destroy')
-}).middleware('auth')
 
   //tags
   //are created on new illustrations only
@@ -46,3 +45,4 @@ Route.group(() =>{
   Route.put('/places/:id', 'PlaceController.update')
   Route.delete('/places/:id', 'PlaceController.destroy')
 
+}).middleware('auth')

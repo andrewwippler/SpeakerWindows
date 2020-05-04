@@ -24,6 +24,7 @@ class Tag extends Model {
         'App/Models/Illustration'
       ).pivotTable('ill_tags')
   }
+
 }
 
 module.exports = Tag

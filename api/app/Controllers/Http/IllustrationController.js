@@ -58,14 +58,14 @@ class IllustrationController {
     const illustration = await Illustration.create({author, title, source, content, user_id})
     if (tags && tags.length > 0) {
       tags.map(async tag => {
-        const tg = await Tag.findOrCreate({ name: tag })
+        const tg = await Tag.findOrCreate({ name: tag, user_id: auth.user.id })
         await illustration.tags().attach(tg.id)
       })
     }
 
     if (places && places.length > 0) {
       places.map(async (place) => {
-        await Place.createPlace(illustration, place)
+        await Place.createPlace(illustration, place, auth.user.id)
       })
     }
 
@@ -102,7 +102,7 @@ class IllustrationController {
       await illustration.tags().detach()
 
       tags.map(async tag => {
-        const tg = await Tag.findOrCreate({ name: tag })
+        const tg = await Tag.findOrCreate({ name: tag, user_id: auth.user.id })
         await illustration.tags().attach(tg.id)
       })
     }
