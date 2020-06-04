@@ -18,6 +18,7 @@ const providers = [
   '@adonisjs/lucid/providers/LucidProvider',
   '@adonisjs/validator/providers/ValidatorProvider',
   'adonis-throttle/providers/ThrottleProvider',
+  '@adonisjs/drive/providers/DriveProvider',
 ]
 
 /*

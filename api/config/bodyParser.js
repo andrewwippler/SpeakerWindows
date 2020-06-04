@@ -20,7 +20,7 @@ module.exports = {
     | is over 1mb it will not be processed.
     |
     */
-    limit: '10mb',
+    limit: '5mb',
 
     /*
     |--------------------------------------------------------------------------
@@ -133,7 +133,7 @@ module.exports = {
     | is to true. Otherwise everything is processed manually.
     |
     */
-    processManually: []
+    processManually: ['/upload']
 
     /*
     |--------------------------------------------------------------------------

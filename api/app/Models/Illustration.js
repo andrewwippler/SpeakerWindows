@@ -30,6 +30,10 @@ class Illustration extends Model {
     return this.belongsTo('App/Models/User')
   }
 
+  uploads() {
+    return this.hasMany('App/Models/Upload')
+  }
+
   static get hidden () {
     return ['user_id']
   }

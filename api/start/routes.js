@@ -15,6 +15,9 @@
 
 /** @type {typeof import('@adonisjs/framework/src/Route/Manager')} */
 const Route = use('Route')
+const Drive = use('Drive')
+const Upload = use('App/Models/Upload')
+
 
 //auth
 Route.post('register', 'UserController.store').validator('User').middleware('guest')
@@ -44,5 +47,20 @@ Route.group(() =>{
   Route.post('/places/:illustration_id', 'PlaceController.store')
   Route.put('/places/:id', 'PlaceController.update')
   Route.delete('/places/:id', 'PlaceController.destroy')
+
+  // Images
+  Route.post('/upload', async ({ request }) => {
+
+    const { illustration_id } = request.post()
+    request.multipart.file('illustration_image', {}, async (file) => {
+      const imagePath = `${auth.user.uid}/${illustration_id}/${file.clientName}`
+      await Drive.disk('s3').put(imagePath, file.stream)
+
+      Upload.create({ illustration_id, name: imagePath, type: file.type })
+
+    })
+
+    await request.multipart.process()
+  })
 
 }).middleware('auth')
