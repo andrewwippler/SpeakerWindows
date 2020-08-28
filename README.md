@@ -32,9 +32,6 @@ Version 0.2.0
 Version 0.3.0
 
 - Multiuser Auth
-- Image uploads
-- Sharing roles (Owner, Creator, Editor, Read-Only)
-- Sharing ID
 
 Version 0.4.0
 
@@ -42,6 +39,12 @@ Version 0.4.0
 - User Preferences
 
 Version 0.5.0
+
+- Image uploads
+- Sharing roles (Owner, Creator, Editor, Read-Only)
+- Sharing ID
+
+Version 0.6.0
 
 - Browser Extension
 
