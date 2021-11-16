@@ -31,7 +31,7 @@
     "@adonisjs/validator": "^5.0.6",
     "@adonisjs/vow": "^1.0.17",
     "adonis-throttle": "^2.3.6",
-    "aws-sdk": "^2.689.0",
+    "aws-sdk": "^2.814.0",
     "lodash": "^4.17.15",
     "moment": "^2.25.1",
     "mysql": "^2.18.1",
