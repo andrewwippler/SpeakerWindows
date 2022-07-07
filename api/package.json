@@ -33,7 +33,7 @@
     "adonis-throttle": "^2.3.6",
     "aws-sdk": "^2.689.0",
     "lodash": "^4.17.15",
-    "moment": "^2.25.1",
+    "moment": "^2.29.4",
     "mysql": "^2.18.1",
     "sqlite3": "^4.1.1",
     "uuidv4": "^6.0.8"
