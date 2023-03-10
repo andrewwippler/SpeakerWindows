@@ -16,16 +16,20 @@ jobs:
 
     services:
       mariadb:
-        image: mariadb:10.1
+        image: mariadb:10
         ports:
           - 3306:3306
         env:
           MYSQL_DATABASE: testing
-          MYSQL_ROOT_PASSWORD: password
+          MYSQL_ROOT_PASSWORD: adonis
+      redis:
+        image: redis:5-alpine
+        ports:
+          - 6379:6379
 
     strategy:
       matrix:
-        node-version: [10.x, 12.x]
+        node-version: [18.x]
 
     steps:
     - uses: actions/checkout@v2
@@ -35,15 +39,15 @@ jobs:
         node-version: ${{ matrix.node-version }}
     - run: npm ci
       working-directory: ./api
-    - run: cp ./api/.env.example ./api/.env
-    - run: sleep 30
-    - run: npm run coverage
+    - run: cp ./api/.env.test ./api/.env
+    - run: sleep 10
+    - run: npm run test
       working-directory: ./api
       env:
         CI: true
-        PORT: ${{ job.services.mariadb.ports[3306] }}
-        DB_CONNECTION: mysql
-    - uses: actions/upload-artifact@v2
-      with:
-        name: Test-Coverage
-        path: api/test/coverage # or path/to/artifact
+        MYSQL_PORT: ${{ job.services.mariadb.ports[3306] }}
+        REDIS_PORT: ${{ job.services.redis.ports[6379] }}
+    # - uses: actions/upload-artifact@v2
+    #   with:
+    #     name: Test-Coverage
+    #     path: api/test/coverage # or path/to/artifact
