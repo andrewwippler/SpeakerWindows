@@ -11,7 +11,6 @@ export default class extends BaseSeeder {
     const places = await PlaceFactory.makeMany(3)
     const tags = await TagFactory.createMany(10)
 
-    //TODO: code is not attaching to the pivot table properly. the tag_id is
     // first; user 1; all tags; third place
     await illustrations[0].related('places').save(places[2])
     const allTags = tags.map(tag => tag.id);
@@ -31,7 +30,7 @@ export default class extends BaseSeeder {
     await illustrations[3].related('places').save(places[2])
 
     // fifth; user 3; last tag; first place
-    await illustrations[4].related('tags').attach(tags[9].id)
+    await illustrations[4].related('tags').attach([tags[9].id])
     await illustrations[4].related('places').save(places[0])
   }
 }
