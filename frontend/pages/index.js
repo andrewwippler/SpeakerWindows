@@ -28,10 +28,10 @@ export default function Home() {
             <>
               <ul className="navbar-nav mr-auto">
             <li>
-              <Link href="/"><a className="nav-link">All Tags</a></Link>
+              <Link href="/" className="nav-link">All Tags</Link>
             </li>
             <li>
-            <Link href="/"><a className="nav-link">New Illustration</a></Link>
+            <Link href="/" className="nav-link">New Illustration</Link>
             </li>
               </ul>
 {/*
@@ -45,7 +45,7 @@ export default function Home() {
           <>
             <ul className="navbar-nav mr-auto">
             <li>
-              <Link href="/"><a className="nav-link">Speaker Windows</a></Link>
+              <Link href="/" className="nav-link">Speaker Windows</Link>
             </li>
             </ul>
           </>
@@ -70,5 +70,5 @@ export default function Home() {
 </footer>
 
     </div>
-  )
+  );
 }
