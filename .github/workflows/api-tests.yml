@@ -41,13 +41,13 @@ jobs:
       working-directory: ./api
     - run: cp ./api/.env.test ./api/.env
     - run: sleep 10
-    - run: npm run test
+    - run: npm run test:coverage
       working-directory: ./api
       env:
         CI: true
         MYSQL_PORT: ${{ job.services.mariadb.ports[3306] }}
         REDIS_PORT: ${{ job.services.redis.ports[6379] }}
-    # - uses: actions/upload-artifact@v2
-    #   with:
-    #     name: Test-Coverage
-    #     path: api/test/coverage # or path/to/artifact
+    - uses: actions/upload-artifact@v2
+      with:
+        name: Test-Coverage
+        path: api/coverage # or path/to/artifact
