@@ -10,7 +10,7 @@ The project aims to have an testable API which allows the use of multiuser authe
 
 Need 3 terminals open to run:
 1. `docker-compose up`
-2. `cd api && yarn start`
+2. `cd api && yarn dev`
 3  `cd frontend && yarn dev`
 
 ## Upgrading

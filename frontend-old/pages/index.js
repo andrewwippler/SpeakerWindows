@@ -1,8 +1,8 @@
 import Head from 'next/head'
-// import { Form, Button } from 'react-bootstrap'
+import { Form, Button } from 'react-bootstrap'
 import { isLoggedIn } from '../library/helpers/isLoggedIn.js'
-// import Login from '../components/Login'
-// import TagList from '../components/TagList'
+import Login from '../components/Login'
+import TagList from '../components/TagList'
 import moment from 'moment'
 import Link from 'next/link'
 
@@ -34,11 +34,11 @@ export default function Home() {
             <Link href="/"><a className="nav-link">New Illustration</a></Link>
             </li>
               </ul>
-{/*
+
              <Form className="form-inline my-2 my-lg-0" action="/illustrations/search" method="GET">
         <Form.Control name="q" className="form-control mr-sm-2" type="text" placeholder="Search" aria-label="Search" />
         <Button className="btn btn-light my-2 my-sm-0" type="submit">Search</Button>
-              </Form> */}
+              </Form>
           </>
 
           :
@@ -57,10 +57,10 @@ export default function Home() {
         <div className="starter-template">
           {/* <%= flash_messages %> */}
 
-          {/* {!loggedIn
+          {!loggedIn
             ? <Login />
             : <TagList />
-          } */}
+          }
         </div>
       </div>
 <footer className="footer">
