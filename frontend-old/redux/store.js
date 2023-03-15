@@ -1,22 +1,24 @@
-import { createStore, applyMiddleware } from 'redux';
-import { createWrapper } from 'next-redux-wrapper';
-import rootReducer from './root-reducer';
-import middlewares from '../middlewares';
+import {
+  configureStore,
 
-const bindMiddleware = middleware => {
+} from '@reduxjs/toolkit';
+
+import { createStore, applyMiddleware, combineReducers } from 'redux'
+import {createWrapper, HYDRATE} from 'next-redux-wrapper';
+import thunkMiddleware from 'redux-thunk'
+
+import rootReducer from '../redux/root-reducer';
+
+const bindMiddleware = (middleware) => {
   if (process.env.NODE_ENV !== 'production') {
-    const { composeWithDevTools } = require('redux-devtools-extension');
-    return composeWithDevTools(applyMiddleware(...middleware));
+    const { composeWithDevTools } = require('redux-devtools-extension')
+    return composeWithDevTools(applyMiddleware(...middleware))
   }
-  return applyMiddleware(...middleware);
-};
-
-function makeStore(initialState = {}) {
-  return createStore(
-    rootReducer,
-    initialState,
-    bindMiddleware(middlewares)
-  );
+  return applyMiddleware(...middleware)
 }
 
-export const reduxWrapper = createWrapper(makeStore);
+// create a makeStore function
+const makeStore = context => createStore(rootReducer, bindMiddleware([thunkMiddleware]));
+
+// export an assembled wrapper
+export const wrapper = createWrapper(makeStore, {debug: true});

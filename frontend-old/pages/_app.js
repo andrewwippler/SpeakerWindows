@@ -1,16 +1,14 @@
-import React from 'react';
-import App from 'next/app';
+import React, {FC} from 'react';
+import {Provider} from 'react-redux';
+import {wrapper} from '../redux/store';
 
-import { reduxWrapper } from '../redux/store';
-import '../styles/app.scss'
+const MyApp = ({Component, ...rest}) => {
+  const {store, props} = wrapper.useWrappedStore(rest);
+  return (
+    <Provider store={store}>
+      <Component {...props.pageProps} />
+    </Provider>
+  );
+};
 
-class CustomApp extends App {
-  render() {
-    const { Component, pageProps } = this.props;
-    return (
-      <Component {...pageProps} />
-    );
-  }
-}
-
-export default reduxWrapper.withRedux(CustomApp);
+export default MyApp;

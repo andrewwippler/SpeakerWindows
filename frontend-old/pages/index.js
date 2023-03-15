@@ -1,13 +1,14 @@
 import Head from 'next/head'
-import { Form, Button } from 'react-bootstrap'
+// import { Form, Button } from 'react-bootstrap'
 import { isLoggedIn } from '../library/helpers/isLoggedIn.js'
-import Login from '../components/Login'
+// import Login from '../components/Login'
 import TagList from '../components/TagList'
 import moment from 'moment'
 import Link from 'next/link'
+import { connect } from 'react-redux';
+import { wrapper } from '../redux/store';
 
-
-export default function Home() {
+const Index = () => {
 
   const loggedIn = isLoggedIn();
 
@@ -28,24 +29,24 @@ export default function Home() {
             <>
               <ul className="navbar-nav mr-auto">
             <li>
-              <Link href="/"><a className="nav-link">All Tags</a></Link>
+              <Link href="/" className="nav-link">All Tags</Link>
             </li>
             <li>
-            <Link href="/"><a className="nav-link">New Illustration</a></Link>
+            <Link href="/" className="nav-link">New Illustration</Link>
             </li>
               </ul>
-
+{/*
              <Form className="form-inline my-2 my-lg-0" action="/illustrations/search" method="GET">
         <Form.Control name="q" className="form-control mr-sm-2" type="text" placeholder="Search" aria-label="Search" />
         <Button className="btn btn-light my-2 my-sm-0" type="submit">Search</Button>
-              </Form>
+              </Form> */}
           </>
 
           :
           <>
             <ul className="navbar-nav mr-auto">
             <li>
-              <Link href="/"><a className="nav-link">Speaker Windows</a></Link>
+              <Link href="/" className="nav-link">Speaker Windows</Link>
             </li>
             </ul>
           </>
@@ -57,10 +58,11 @@ export default function Home() {
         <div className="starter-template">
           {/* <%= flash_messages %> */}
 
-          {!loggedIn
+          {/* {!loggedIn
             ? <Login />
             : <TagList />
-          }
+          } */}
+          <TagList />
         </div>
       </div>
 <footer className="footer">
@@ -70,5 +72,13 @@ export default function Home() {
 </footer>
 
     </div>
-  )
+  );
 }
+
+
+
+export const getStaticProps = wrapper.getStaticProps((store) => () => {
+  console.log('2. Page.getStaticProps uses the store to dispatch things');
+})
+
+export default connect(state => state)(Index);

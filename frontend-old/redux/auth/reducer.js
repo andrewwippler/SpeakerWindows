@@ -1,4 +1,3 @@
-import {combineReducers} from 'redux';
 import types from './types';
 import Router from 'next/router';
 import { setCookie, removeCookie } from '../../library/helpers/session';
@@ -40,6 +39,5 @@ const authReducer = (state = initState, action) => {
   }
 }
 
-export default combineReducers({
-  authReducer,
-});
+export default authReducer;
+

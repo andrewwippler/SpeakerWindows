@@ -1,4 +1,3 @@
-import fetch from 'node-fetch';
 import { getCookie } from './helpers/session';
 
 const defaultHeaders = {
