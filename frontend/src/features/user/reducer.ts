@@ -41,7 +41,7 @@ export const loginAsync = createAsyncThunk(
   async (credentials: LoginMap) => {
     const response = await fetchToken(credentials)
     // The value we return becomes the `fulfilled` action payload
-    return response.data
+    return response
   }
 )
 
@@ -66,7 +66,7 @@ export const userReducer = createSlice({
       })
       .addCase(loginAsync.fulfilled, (state, action) => {
         state.loginStatus = 'in'
-        state.apitoken += action.payload
+        state.apitoken = action.payload
       })
   },
 })

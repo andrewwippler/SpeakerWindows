@@ -1,21 +1,34 @@
 import { useRouter } from 'next/router'
-import { getIllustrations } from '../../library/api'
+import * as _ from "lodash";
+import api from '@/library/api';
 import { useAppSelector, useAppDispatch } from '../../hooks'
-
-import { loginAsync, selectLoginStatus } from '@/features/user/reducer';
+import { useState, useEffect } from 'react'
 
 export default function Tag() {
   const router = useRouter()
-  const name = router.query.name
-  let { illustrations, isLoading, isError } = getIllustrations(name)
+  const name = _.get(router.query, 'name', '')
 
-  if (isError) return <div>Failed to load</div>
-  if (!isLoading) return <div>Loading...</div>
+  // console.log(router.query, name)
+  const [data, setData] = useState([])
+  const [isLoading, setLoading] = useState(false)
+
+  useEffect(() => {
+    setLoading(true)
+    api.get(`/tag/${router.query.name}`, '')
+      .then(data => {
+      // console.log(data);
+        // todo fix validation if state is not there
+      setData(data);
+      setLoading(false)
+    });
+  },[])
+
+  if (isLoading) return <div>Loading...</div>
 
   return (
     <div>
-      { illustrations.map((d) => (
-        <div>{d.name}</div>
+      { data.map((d) => (
+        <div key={d.id}>{d.title}</div>
       ))}
     </div>
   )
