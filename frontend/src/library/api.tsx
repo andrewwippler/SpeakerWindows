@@ -1,26 +1,35 @@
 import useSWR from 'swr'
-import { useState } from 'react';
-const fetcher = (url,apioptions) => fetch(url,apioptions).then(res => res.json())
+
+import { useAppSelector, useAppDispatch } from '@/hooks'
+
+import { getToken, selectToken } from '@/features/user/reducer';
+
+const fetcher = (url: string, apioptions: {}) => fetch(url,apioptions).then(res => res.json())
 const options = { errorRetryCount: 3 }
 
-export function getIllustrations(tag) {
-  const apitoken = useState();
-  const apioptions = {
-    headers: new Headers({
-        'Authorization': 'Basic ' + apitoken,
-        'Content-Type': 'application/x-www-form-urlencoded'
-    }),
-}
-  const { data, mutate, error, isLoading } = useSWR([`${process.env.NEXT_PUBLIC_HOST_URL}/tags/${tag}`, apioptions], ([url, apioptions]) => fetcher(url, apioptions), options)
 
+export function getIllustrations(tag: string) {
+
+  const apiheaders = {
+    headers: {
+        'Authorization': 'Basic ' + useAppSelector(selectToken),
+        'Content-Type': 'application/x-www-form-urlencoded'
+    },
+  }
+  console.log(apiheaders,useAppSelector(selectToken))
+  // const { data, error, isLoading } = useSWR([`${process.env.NEXT_PUBLIC_HOST_URL}/tags/${tag}`, apiheaders], ([url, apioptions]) => fetcher(url, apioptions), options)
+
+  // return {
+  //   illustrations: data,
+  //   isLoading,
+  //   isError: error,
+  // }
   return {
-    illustrations: data,
-    isLoading,
-    isError: error,
-    mutate
+    illustrations: [{ id: 9, name: 'Adonis 101' },
+    { id: 12, name: 'Adonis Is Cool' },
+      { id: 11, name: 'Cooking' },
+      { id: 13, name: 'Cookings' },
+      { id: 10, name: 'Cool Is Andrew' }], isLoading: true, isError: false
   }
 }
 
-export function getUser(username, password) {
-
-}

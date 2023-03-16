@@ -44,6 +44,7 @@ Route.group(() =>{
   //are created on new illustrations only
   Route.get('/tags', 'TagsController.index')
   Route.get('/tags/:name', 'TagsController.search')
+  Route.get('/tag/:name', 'TagsController.illustrations')
   Route.put('/tags/:id', 'TagsController.update')
   Route.delete('/tags/:id', 'TagsController.destroy')
 

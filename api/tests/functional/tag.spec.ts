@@ -2,6 +2,7 @@ import { test } from '@japa/runner'
 import UserFactory from 'Database/factories/UserFactory'
 import Tag from 'App/Models/Tag'
 import TagFactory from 'Database/factories/TagFactory'
+import IllustrationFactory from 'Database/factories/IllustrationFactory'
 import Database from '@ioc:Adonis/Lucid/Database'
 let goodUser, badUser
 
@@ -55,6 +56,23 @@ test.group('Tag', (group) => {
     // { id: 12, name: 'Adonis Is Cool' },
     // { id: 11, name: 'Cooking' },
     // { id: 10, name: 'Cool Is Andrew' }
+  })
+
+  test('Can get list of my illustrations (i.e. tag index page)', async ({ client, assert }) => {
+
+    const loggedInUser = await client.post('/login').json({ email: goodUser.email, password: 'oasssadfasdf' })
+
+    const illustration = await IllustrationFactory.merge({ title: 'Testing tag selection', user_id: goodUser.id }).create()
+    const illustration2 = await IllustrationFactory.merge({title: 'Testing tag selection2', user_id: goodUser.id}).create()
+    const tags = await TagFactory.merge({ name: 'Searching' }).create()
+    const tags2 = await TagFactory.merge({ name: 'Searching2' }).create()
+    await illustration.related('tags').attach([tags.id])
+    await illustration2.related('tags').attach([tags2.id])
+
+    const response = await client.get('/tag/Searching').bearerToken(loggedInUser.body().token)
+
+    response.assertStatus(200)
+    assert.isTrue(response.body().length == 1)
   })
 
   test('Cannot get list of your tags', async ({ client }) => {

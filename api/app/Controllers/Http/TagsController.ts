@@ -1,6 +1,7 @@
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import _ from 'lodash'
 import Tag from 'App/Models/Tag'
+import Illustration from 'App/Models/Illustration'
 
 export default class TagsController {
 
@@ -38,6 +39,31 @@ export default class TagsController {
     if (tagQuery.length < 1) {
       return response.status(204).send({ message: 'no results found' })
     }
+
+    return tagQuery
+  }
+
+   /**
+   * Illustrations for tag.
+   * GET tag/:name
+   *
+   * @param {object} ctx
+   * @param {Request} ctx.request
+   * @param {Response} ctx.response
+   * @param {View} ctx.view
+   */
+   public async illustrations({ params, auth, response }: HttpContextContract) {
+
+    const thetag = _.get(params, 'name', '')
+
+     //@tag.illustrations
+    const tag = await Tag.findByOrFail('name', thetag);
+    const tagQuery = await tag.related('illustrations').query().where('user_id', `${auth.user.id}`)
+
+    if (tagQuery.length < 1) {
+      return response.status(204).send({ message: 'no results found' })
+    }
+
 
     return tagQuery
   }

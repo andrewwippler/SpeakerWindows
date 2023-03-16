@@ -1,17 +1,15 @@
 import Head from 'next/head'
 import Router from "next/router";
 import moment from 'moment'
-import { useState, useEffect } from 'react';
+import { useAppSelector, useAppDispatch } from '../hooks'
+
+import { loginAsync, selectLoginStatus } from '@/features/user/reducer';
+import Tags from '@/components/tags';
 
 export default function Home() {
-  const [apitoken,loggedOut] = useState();
-  const loggedIn = () => { return false; };
 
-  useEffect(() => {
-    if (apitoken && !loggedOut) {
-      Router.replace("/tags");
-    }
-  }, [apitoken, loggedOut]);
+  const loggedIn = useAppSelector(selectLoginStatus);
+  const dispatch = useAppDispatch()
 
   return (
 <>
@@ -20,13 +18,15 @@ export default function Home() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <div>
-
-        <button
-          onClick={() => {
-            login();
-            mutate(); // after logging in, we revalidate the SWR
-          }}
-        >You Need to Log In!</button>
+        {loggedIn == 'out' ?
+          <button
+            onClick={() => {
+              dispatch(loginAsync({ email: 'test@test.com', password: 'Test1234' }));
+            }}
+          >You Need to Log In!</button>
+          :
+            <Tags />
+        }
       </div>
       <footer className="footer">
       <div className="container">
