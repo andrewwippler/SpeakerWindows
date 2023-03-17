@@ -1,6 +1,6 @@
-import * as _ from "lodash";
+import * as _ from "lodash"
 import Link from 'next/link'
-import api from '@/library/api';
+import api from '@/library/api'
 import { useState, useEffect } from 'react'
 
 function Tags() {
@@ -17,8 +17,6 @@ function Tags() {
       setLoading(false)
     });
   },[])
-
-  // get tags data Api.get(/tags)
 
 
   if (isLoading) return <p>Loading...</p>

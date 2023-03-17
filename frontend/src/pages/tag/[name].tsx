@@ -1,8 +1,8 @@
 import { useRouter } from 'next/router'
 import * as _ from "lodash";
 import api from '@/library/api';
-import { useAppSelector, useAppDispatch } from '../../hooks'
 import { useState, useEffect } from 'react'
+import Link from 'next/link'
 
 export default function Tag() {
   const router = useRouter()
@@ -28,8 +28,9 @@ export default function Tag() {
   return (
     <div>
       { data.map((d) => (
-        <div key={d.id}>{d.title}</div>
+         <Link href={`/illustration/${d.id}`}>{d.title}</Link>
       ))}
+      <Link href={`/illustrations/123`}>123 Illus</Link>
     </div>
   )
 }
