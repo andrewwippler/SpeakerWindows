@@ -1,5 +1,3 @@
-import { selectToken } from '@/features/user/reducer';
-import { useAppSelector, useAppDispatch } from '@/hooks'
 import store from '@/store';
 
 const defaultHeaders = {
@@ -7,12 +5,16 @@ const defaultHeaders = {
   'Content-Type': 'application/x-www-form-urlencoded',
 };
 
-
-
 class Api {
   headers() {
     return Object.assign({}, defaultHeaders,
-        ({'Authorization': 'Bearer ' + store.getState().user.apitoken}));
+      (
+        {
+          'Authorization': 'Bearer ' + store.getState().user.apitoken,
+          'X-Authorization': 'Bearer ' + store.getState().user.apitoken,
+        }
+      ));
+
   }
 
   get(route: string, params: any) {
@@ -42,9 +44,7 @@ class Api {
   async xhrMulti(route: string, params: any) {
     let options = {
       method: 'POST',
-      headers: {
-        'X-Authorization': await this.getAuthorizationHeader()
-      }
+      headers: this.headers()
     }
 
     options.body = new FormData();
@@ -81,7 +81,6 @@ class Api {
   async xhr(route: string, params: any, verb: string) {
     let options = Object.assign({ method: verb });
     options.headers = this.headers();
-    options.headers['X-Authorization'] = await this.getAuthorizationHeader();
     params = params ? params : {};
 
     let query, url;
@@ -113,9 +112,6 @@ class Api {
       .join('&');
   }
 
-  async getAuthorizationHeader() {
-    return `Bearer ${store.getState().user.apitoken}`;
-  }
 }
 
 export default new Api();

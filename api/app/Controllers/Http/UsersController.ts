@@ -7,6 +7,7 @@ export default class UsersController {
 
   public async login({ auth, request, response }: HttpContextContract) {
     const { email, password } = request.all()
+    // console.log(email,password)
 
     const throttleKey = `login_${email}_${request.ip()}`
 

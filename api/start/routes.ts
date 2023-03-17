@@ -19,10 +19,6 @@
 */
 
 import Route from '@ioc:Adonis/Core/Route'
-import UsersController from 'App/Controllers/Http/UsersController'
-import IllustrationsController from 'App/Controllers/Http/IllustrationsController'
-import TagsController from 'App/Controllers/Http/TagsController'
-import PlacesController from 'App/Controllers/Http/PlacesController'
 
 //auth
 Route.post('register', 'UsersController.store')
