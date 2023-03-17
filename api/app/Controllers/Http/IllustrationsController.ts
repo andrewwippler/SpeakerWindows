@@ -9,7 +9,7 @@ export default class IllustrationsController {
 
   /**
    * Displays places associated to an illustration.
-   * GET illustrations/:illustration_id
+   * GET illustration/:illustration_id
    *
    * @param {object} ctx
    * @param {Request} ctx.request
@@ -39,8 +39,40 @@ export default class IllustrationsController {
   }
 
     /**
+   * Displays illustration associated with the old system.
+   * (Backwards compatibility)
+   * GET illustrations/:illustration_id
+   *
+   * @param {object} ctx
+   * @param {Request} ctx.request
+   * @param {Response} ctx.response
+   * @param {View} ctx.view
+   */
+    public async showOld({ params, auth, response }: HttpContextContract) {
+
+      const illustrationQuery = await Illustration.query()
+        .where('legacy_id', _.get(params, 'id', 0))
+        .andWhere('user_id', `${auth.user.id}`)
+        .preload('tags', (builder) => {
+          builder.orderBy('name', 'asc')
+        })
+        .preload('places', (builder) => {
+          builder.orderBy('used', 'asc')
+        })
+
+        // console.log(_.get(params, 'id', 0),auth.user.id,!!illustrationQuery[0],!illustrationQuery[0])
+        if (!!illustrationQuery[0]) {
+          const illustration = illustrationQuery[0].toJSON();
+          return illustration
+        }
+        return response.status(403).send({ message: 'You do not have permission to access this resource' })
+
+
+    }
+
+    /**
    * Create/save a new illustration.
-   * POST illustrations
+   * POST /illustration
    *
    * @param {object} ctx
    * @param {Request} ctx.request
@@ -49,9 +81,15 @@ export default class IllustrationsController {
    */
   public async store({ request, auth, response }: HttpContextContract) {
 
-    const { author, title, source, content, tags, places } = request.all()
+    const { author, title, source, content, tags, places, legacy_id } = request.all()
     const user_id = auth.user.id
-    const illustration = await Illustration.create({author, title, source, content, user_id})
+
+    let create_data = {author, title, source, content, user_id}
+    if (!!legacy_id) {
+      create_data = {author, title, source, content, user_id, legacy_id}
+    }
+
+    const illustration = await Illustration.create(create_data)
     if (tags && tags.length > 0) {
       tags.map(async tag => {
         const tg = await Tag.firstOrCreate({ name: tag, user_id: auth.user.id })
@@ -70,7 +108,7 @@ export default class IllustrationsController {
 
     /**
    * Update illustration details.
-   * PUT or PATCH illustrations/:id
+   * PUT or PATCH illustration/:id
    *
    * @param {object} ctx
    * @param {Request} ctx.request
@@ -113,7 +151,7 @@ export default class IllustrationsController {
 
     /**
    * Delete a illustration with id.
-   * DELETE illustrations/:id
+   * DELETE illustration/:id
    *
    * @param {object} ctx
    * @param {Request} ctx.request
