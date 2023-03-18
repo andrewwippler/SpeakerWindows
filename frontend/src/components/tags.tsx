@@ -17,7 +17,7 @@ function Tags() {
   },[])
 
   if (isLoading) return <p>Loading...</p>
-  if (!data) return <p>No profile data</p>
+  if (!data) return <p>No Tags Found</p>
 
   let rows_per_column = Math.ceil(data.length / 3);
   let columnOneData = _.take(data, rows_per_column);
@@ -26,27 +26,27 @@ function Tags() {
   // console.log(rows_per_column, data, columnOneData, columnTwoData,columnThreeData)
     return (
     <>
-        <div className="text-xl font-bold pb-4">Tags</div>
+        <div className="text-xl font-bold text-sky-900 pb-4">Tags</div>
 
         <div className="grid grid-cols-1 sm:grid-cols-3">
         <div>
           {
             columnOneData.map((tag) => (
-                <Link className="block pb-2" href={`/tag/${tag.name.replace(/ /g, "-")}`}>{tag.name}</Link>
+                <Link className="block pb-2" href={`/tag/${tag.name}`}>{tag.name.replace(/-/g, " ")}</Link>
             ))
           }
         </div>
         <div>
                 {
                   columnTwoData.map((tag) => (
-                <Link className="block pb-2" href={`/tag/${tag.name.replace(/ /g, "-")}`}>{tag.name}</Link>
+                <Link className="block pb-2" href={`/tag/${tag.name}`}>{tag.name.replace(/-/g, " ")}</Link>
             ))
           }
           </div>
         <div>
                   {
                     columnThreeData.map((tag) => (
-                <Link className="block pb-2" href={`/tag/${tag.name.replace(/ /g, "-")}`}>{tag.name}</Link>
+                <Link className="block pb-2" href={`/tag/${tag.name}`}>{tag.name.replace(/-/g, " ")}</Link>
             ))
           }
           </div>

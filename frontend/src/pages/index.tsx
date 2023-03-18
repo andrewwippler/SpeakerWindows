@@ -1,7 +1,4 @@
 import Layout from '@/components/Layout'
-import Image from 'next/image'
-
-
 import Tags from '@/components/tags';
 import useUser from '@/library/useUser';
 

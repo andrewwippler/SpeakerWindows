@@ -7,9 +7,13 @@ import Link from 'next/link';
 import Layout from '@/components/Layout';
 import useUser from '@/library/useUser';
 import { ClipboardDocumentListIcon, ArrowLeftIcon, PencilSquareIcon, TrashIcon } from '@heroicons/react/24/solid'
+import ConfirmDialog from '@/components/ConfirmDialog';
+import { useAppSelector, useAppDispatch } from '@/hooks'
+import { selectModal, setModal } from '@/features/modal/reducer'
 
 export default function IllustrationWrapper() {
   const router = useRouter()
+  const dispatch = useAppDispatch()
   const { user } = useUser({
     redirectTo: '/login',
   })
@@ -17,6 +21,7 @@ export default function IllustrationWrapper() {
   // console.log(router.query, name)
   const [illustration, setData] = useState([])
   const [isLoading, setLoading] = useState(false)
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false)
 
   useEffect(() => {
     setLoading(true)
@@ -44,6 +49,19 @@ export default function IllustrationWrapper() {
     return url.protocol === "http:" || url.protocol === "https:";
   }
 
+  const handleDelete = () => {
+    console.log('handle delete')
+    // delete illustration
+    api.delete(`/illustration/${illustration.id}`, '')
+    .then(data => {
+      dispatch(setModal(false))
+      // dispatch(setFlash({message: 'something', type: 'good, bad, etc'}))
+      router.back()
+      // setData(data);
+
+  });
+  };
+
   return (
   <Layout>
       <div className="p-4 bg-gray-50 columns-1 md:columns-2">
@@ -64,7 +82,7 @@ export default function IllustrationWrapper() {
         <div>
           <span className="font-bold pr-2">Tags:</span>
           {illustration.tags ? illustration.tags.map((tag, index, arr) => (
-            <Link className="inline-block mr-2 text-sky-500" href={`/tag/${tag.name.replace(/ /g, "-")}`}>{tag.name}{index != (arr.length-1) ? ', ' : ''}</Link>
+            <Link key={index} className="inline-block mr-2 text-sky-500" href={`/tag/${tag.name.replace(/ /g, "-")}`}>{tag.name}{index != (arr.length-1) ? ', ' : ''}</Link>
           ))
           : 'no tags'}
     </div>
@@ -83,8 +101,11 @@ export default function IllustrationWrapper() {
         onClick={() => router.back()}>
           <ArrowLeftIcon className="h-4 w-4 mr-2" />Back
       </button>
-        <Link className='px-4 py-2 mr-4 mt-2 font-semibold text-sm bg-green-300 hover:bg-green-500 text-white rounded-full shadow-sm inline-flex items-center' href={`/illustration/${illustration.id}/edit`}> <PencilSquareIcon className="h-4 w-4 mr-2" />Edit Illustration</Link>
-        <Link className='px-4 py-2 mr-4 mt-2 font-semibold text-sm bg-red-300 hover:bg-red-500 text-white rounded-full shadow-sm inline-flex items-center' href={`/illustration/${illustration.id}/delete`}> <TrashIcon className="h-4 w-4 mr-2" />Delete Illustration</Link>
+          <button onClick={() => router.back()} className='px-4 py-2 mr-4 mt-2 font-semibold text-sm bg-green-300 hover:bg-green-500 text-white rounded-full shadow-sm inline-flex items-center' >
+            <PencilSquareIcon className="h-4 w-4 mr-2" />Edit Illustration</button>
+          <ConfirmDialog handleAgree={handleDelete} title={illustration.title} deleteName="Illustration" />
+          <button onClick={() => dispatch(setModal(true))} className='px-4 py-2 mr-4 mt-2 font-semibold text-sm bg-red-300 hover:bg-red-500 text-white rounded-full shadow-sm inline-flex items-center'>
+            <TrashIcon className="h-4 w-4 mr-2" />Delete Illustration</button>
         </div>
     </div>
  {/*
