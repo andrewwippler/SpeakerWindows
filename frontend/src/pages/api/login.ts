@@ -7,8 +7,6 @@ async function loginRoute(req: NextApiRequest, res: NextApiResponse) {
   const { email, password } = await req.body
 
   try {
-    // console.log({ email, password })
-
     const response = await fetch(`${process.env.NEXT_PUBLIC_HOST_URL}/login`, {
       method: 'POST',
       headers: {
@@ -17,6 +15,9 @@ async function loginRoute(req: NextApiRequest, res: NextApiResponse) {
       body: JSON.stringify({ email, password }),
     })
     const result = await response.json()
+    if (result.message) {
+      res.status(500).json(result)
+    }
 
     const user = { isLoggedIn: true, token: result.token } as User
     req.session.user = user

@@ -37,13 +37,13 @@ export default function Tag() {
 
   return (
     <Layout>
-      <div className="text-xl font-bold pb-4">{name}</div>
+      <div className="text-xl font-bold pb-4 text-sky-900">{name}</div>
       <ul role="list">
 
         {data && data.map((d) => (
 
         <li className="group/item hover:bg-slate-200">
-          <Link className="block pb-1" href={`/illustration/${d.id}`}>{d.title}</Link>
+          <Link className="block pb-1 group-hover/item:underline" href={`/illustration/${d.id}`}>{d.title}</Link>
           <div className='invisible h-0 group-hover/item:h-auto group-hover/item:visible'>
             {d.content.substr(0,256)}...
           </div>

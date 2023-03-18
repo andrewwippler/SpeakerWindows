@@ -6,6 +6,7 @@ import Link from 'next/link';
 // import Illustration from '@/components/illustration';
 import Layout from '@/components/Layout';
 import useUser from '@/library/useUser';
+import { ClipboardDocumentListIcon, ArrowLeftIcon, PencilSquareIcon, TrashIcon } from '@heroicons/react/24/solid'
 
 export default function IllustrationWrapper() {
   const router = useRouter()
@@ -24,14 +25,24 @@ export default function IllustrationWrapper() {
     }
     api.get(`/illustration/${router.query.id}`, '')
       .then(data => {
-      console.log(data);
         // todo fix validation if state is not there
       setData(data);
       setLoading(false)
     });
   },[router.query.id])
 
-  if (isLoading) return <div>Loading...</div>
+  if (isLoading) return <Layout>Loading...</Layout>
+
+// https://stackoverflow.com/a/43467144
+  function isValidHttpUrl(string: string) {
+    let url;
+    try {
+      url = new URL(string);
+    } catch (_) {
+      return false;
+    }
+    return url.protocol === "http:" || url.protocol === "https:";
+  }
 
   return (
   <Layout>
@@ -46,33 +57,34 @@ export default function IllustrationWrapper() {
         </div>
         <div>
           <span className="font-bold pr-2">Source:</span>
-          {illustration.source ? illustration.source : 'Default Title'}
+          {illustration.source ?
+            isValidHttpUrl(illustration.source) ? <Link href={illustration.source}>{illustration.source}</Link> : illustration.source
+           : 'Default Title'}
         </div>
         <div>
           <span className="font-bold pr-2">Tags:</span>
-          {illustration.tags ? illustration.tags.map((tag) => (
-                <Link className="inline-block pr-2" href={`/tag/${tag.name.replace(/ /g, "-")}`}>{tag.name}, </Link>
+          {illustration.tags ? illustration.tags.map((tag, index, arr) => (
+            <Link className="inline-block mr-2 text-sky-500" href={`/tag/${tag.name.replace(/ /g, "-")}`}>{tag.name}{index != (arr.length-1) ? ', ' : ''}</Link>
           ))
           : 'no tags'}
     </div>
       </div>
-      <div className="row">
+      <div className="columns-1">
+    {illustration.content && <button type="button" data-toggle="tooltip" data-placement="bottom" title="Copy to clipboard"
+      className="group relative flex w-full justify-center px-4 py-2 my-2 font-semibold text-sm bg-gray-300 hover:bg-gray-500 text-white rounded-md shadow-sm"
+      onClick={() => { navigator.clipboard.writeText(illustration.content) }}><ClipboardDocumentListIcon className="h-4 w-4 mr-2" /> <span>Copy</span></button>}
     <div className="columns-1">
-    {/* <button type="button" data-toggle="tooltip" data-placement="bottom" title="Copy to clipboard"
-      className="btn btn-lg btn-secondary btn-block js-copy"><i className="fa fa-copy"></i> Copy</button> */}
-    </div>
-    <div className="columns-1" id="illustrationContent">
     {illustration.content ? illustration.content : 'Default Title'}
     </div>
 
         <div className="columns-1 pt-2">
         <button
-        className="px-4 py-2 mr-4 mt-2 font-semibold text-sm bg-cyan-500 text-white rounded-full shadow-sm"
+        className="px-4 py-2 mr-4 mt-2 font-semibold text-sm bg-cyan-300 hover:bg-cyan-500 text-white rounded-full inline-flex items-center shadow-sm"
         onClick={() => router.back()}>
-          Back
+          <ArrowLeftIcon className="h-4 w-4 mr-2" />Back
       </button>
-        <Link className='px-4 py-2 mr-4 mt-2 font-semibold text-sm bg-green-500 text-white rounded-full shadow-sm' href={`/illustration/${illustration.id}/edit`}>Edit Illustration</Link>
-        <Link className='px-4 py-2 mr-4 mt-2 font-semibold text-sm bg-red-500 text-white rounded-full shadow-sm' href={`/illustration/${illustration.id}/delete`}>Delete Illustration</Link>
+        <Link className='px-4 py-2 mr-4 mt-2 font-semibold text-sm bg-green-300 hover:bg-green-500 text-white rounded-full shadow-sm inline-flex items-center' href={`/illustration/${illustration.id}/edit`}> <PencilSquareIcon className="h-4 w-4 mr-2" />Edit Illustration</Link>
+        <Link className='px-4 py-2 mr-4 mt-2 font-semibold text-sm bg-red-300 hover:bg-red-500 text-white rounded-full shadow-sm inline-flex items-center' href={`/illustration/${illustration.id}/delete`}> <TrashIcon className="h-4 w-4 mr-2" />Delete Illustration</Link>
         </div>
     </div>
  {/*

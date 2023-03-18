@@ -43,10 +43,15 @@ export default function Header() {
         </button>
       </div>
       <div className="hidden lg:flex lg:gap-x-12">
-          <Link href="/" className="text-sm font-semibold leading-6 text-sky-100">
+          <Link href="/" className="text-sm font-semibold leading-6 text-sky-100 hover:text-sky-900">
           Home
           </Link>
-
+          <Link href="/new-illustration" className="text-sm font-semibold leading-6 text-sky-100 hover:text-sky-900">
+          New illustration
+          </Link>
+          <Link href="/search" className="text-sm font-semibold leading-6 text-sky-100 hover:text-sky-900">
+          Search
+          </Link>
       </div>
       <div className="hidden lg:flex lg:flex-1 lg:justify-end">
           {user?.isLoggedIn === false && (
@@ -103,6 +108,8 @@ export default function Header() {
             <div className="space-y-2 py-6">
 
             <Link href="/" className="-mx-3 block rounded-lg py-2 px-3 text-base font-semibold leading-7 text-sky-300 hover:bg-sky-900">Home</Link>
+            <Link href="/new-illustration" className="-mx-3 block rounded-lg py-2 px-3 text-base font-semibold leading-7 text-sky-300 hover:bg-sky-900">New Illustration</Link>
+            <Link href="/search" className="-mx-3 block rounded-lg py-2 px-3 text-base font-semibold leading-7 text-sky-300 hover:bg-sky-900">Search</Link>
             </div>
             <div className="py-6">
             {user?.isLoggedIn === false && (
