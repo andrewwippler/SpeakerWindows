@@ -3,8 +3,11 @@ import Link from 'next/link'
 import api from '@/library/api'
 import { useState, useEffect } from 'react'
 
-function Tags() {
+import { useAppSelector, useAppDispatch } from '@/hooks'
+import { getTags, setTags } from '@/features/tags/reducer'
 
+function Tags() {
+  const dispatch = useAppDispatch()
   const [data, setData] = useState([])
   const [isLoading, setLoading] = useState(false)
 
@@ -12,6 +15,7 @@ function Tags() {
     setLoading(true)
     api.get('/tags', '').then(tags => {
       setData(tags);
+      // dispatch(setTags(tags)) // do we need?
       setLoading(false)
     });
   },[])
@@ -31,22 +35,22 @@ function Tags() {
         <div className="grid grid-cols-1 sm:grid-cols-3">
         <div>
           {
-            columnOneData.map((tag) => (
-                <Link className="block pb-2" href={`/tag/${tag.name}`}>{tag.name.replace(/-/g, " ")}</Link>
+            columnOneData.map((tag, i) => (
+                <Link key={`one-${i}`} className="block pb-2" href={`/tag/${tag.name}`}>{tag.name.replace(/-/g, " ")}</Link>
             ))
           }
         </div>
         <div>
                 {
-                  columnTwoData.map((tag) => (
-                <Link className="block pb-2" href={`/tag/${tag.name}`}>{tag.name.replace(/-/g, " ")}</Link>
+                  columnTwoData.map((tag, i) => (
+                <Link key={`two-${i}`} className="block pb-2" href={`/tag/${tag.name}`}>{tag.name.replace(/-/g, " ")}</Link>
             ))
           }
           </div>
         <div>
                   {
-                    columnThreeData.map((tag) => (
-                <Link className="block pb-2" href={`/tag/${tag.name}`}>{tag.name.replace(/-/g, " ")}</Link>
+                    columnThreeData.map((tag, i) => (
+                <Link key={`three-${i}`} className="block pb-2" href={`/tag/${tag.name}`}>{tag.name.replace(/-/g, " ")}</Link>
             ))
           }
           </div>

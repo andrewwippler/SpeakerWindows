@@ -1,9 +1,6 @@
-import { createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit'
+import { createSlice } from '@reduxjs/toolkit'
 
-import type { AppState, AppThunk } from '@/store'
-import { useAppSelector, useAppDispatch } from '@/hooks'
-import { selectToken } from '../user/reducer'
-import { HYDRATE } from "next-redux-wrapper";
+import type { AppState } from '@/store'
 
 export interface TagState {
   tags: Array<object>
@@ -13,41 +10,19 @@ const initialState: TagState = {
   tags: [],
 }
 
-
-async function fetchTags(): Promise<{ data: Array<object> }> {
-  const response = await fetch(`${process.env.NEXT_PUBLIC_HOST_URL}/tags`, {
-    method: 'GET',
-    headers: {
-      'Authorization': 'Basic ' + useAppSelector(selectToken),
-      'Content-Type': 'application/json',
-    },
-  })
-  const result = await response.json()
-
-  return result
-}
-
 export const tagReducer = createSlice({
   name: 'tag',
   initialState,
   // The `reducers` field lets us define reducers and generate associated actions
   reducers: {
-    getTags: (state) => {
-      state.tags = fetchTags()
-    },
-  },
-  extraReducers: {
-    [HYDRATE]: (state, action) => {
-      return {
-        ...state,
-        ...action.payload.auth,
-      };
+    setTags: (state, actions) => {
+      state.tags = actions.payload
     },
   },
 
 })
+export const getTags = (state: AppState) => state.tags
 
-
-export const { getTags } = tagReducer.actions
+export const { setTags } = tagReducer.actions
 
 export default tagReducer.reducer

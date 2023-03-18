@@ -6,9 +6,13 @@ import useUser from '@/library/useUser';
 import Layout from '@/components/Layout';
 import Link from 'next/link';
 
+import { useAppDispatch } from '@/hooks'
+import { setFlashMessage } from '@/features/flash/reducer'
+
 // Note: Function to redirect old URLs to the new format.
 export default function LegacyIllustration() {
   const router = useRouter()
+  const dispatch = useAppDispatch()
   const [isLoading, setLoading] = useState(false)
   const [data, setData] = useState([])
   const { user } = useUser({
@@ -19,7 +23,6 @@ export default function LegacyIllustration() {
 
   useEffect(() => {
 
-    console.log(router.query, id, !id)
     if (!id) {
       setLoading(true)
       return
@@ -28,6 +31,7 @@ export default function LegacyIllustration() {
     api.get(`/illustrations/${id}`, '')
       .then(data => {
         setData(data);
+        dispatch(setFlashMessage({severity: 'info', message: 'You were rediected from an old link. Be sure to update your bookmark.'}))
         router.replace(`/illustration/${data.id}`)
         setLoading(false)
     });

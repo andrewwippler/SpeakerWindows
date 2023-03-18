@@ -10,6 +10,7 @@ import { ClipboardDocumentListIcon, ArrowLeftIcon, PencilSquareIcon, TrashIcon }
 import ConfirmDialog from '@/components/ConfirmDialog';
 import { useAppSelector, useAppDispatch } from '@/hooks'
 import { selectModal, setModal } from '@/features/modal/reducer'
+import { setFlashMessage } from '@/features/flash/reducer'
 
 export default function IllustrationWrapper() {
   const router = useRouter()
@@ -56,6 +57,7 @@ export default function IllustrationWrapper() {
     .then(data => {
       dispatch(setModal(false))
       // dispatch(setFlash({message: 'something', type: 'good, bad, etc'}))
+      dispatch(setFlashMessage({severity: 'danger', message: `Illustration: "${illustration.title}" was deleted.`}))
       router.back()
       // setData(data);
 
