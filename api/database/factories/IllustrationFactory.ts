@@ -8,6 +8,6 @@ export default Factory.define(Illustration, ({ faker }) => {
     author: faker.name.fullName(),
     source: faker.internet.url(),
     content: faker.lorem.paragraph(),
-    user_id: faker.datatype.number({ min: 1, max: 22 }),
+    user_id: faker.datatype.number({ min: 1, max: 2 }),
   }
 }).build()

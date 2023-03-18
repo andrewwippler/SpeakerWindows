@@ -64,8 +64,14 @@ export default class TagsController {
       return response.status(204).send({ message: 'no results found' })
     }
 
+     const returnTags = {
+       id: tag.id,
+       name: tag.name,
+       illustrations: tagQuery,
+    }
 
-    return tagQuery
+
+    return returnTags
   }
 
   /**
