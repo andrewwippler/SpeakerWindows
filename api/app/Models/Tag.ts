@@ -3,6 +3,11 @@ import { BaseModel, column, manyToMany, ManyToMany } from '@ioc:Adonis/Lucid/Orm
 import Illustration from './Illustration'
 import { _ } from 'lodash'
 
+function fixName(name) {
+  let first = _.startCase(name)
+  return first.replace(' ', '-')
+}
+
 export default class Tag extends BaseModel {
   @column({ isPrimary: true })
   public id: number
@@ -11,7 +16,7 @@ export default class Tag extends BaseModel {
   public user_id: number
 
   @column({
-    prepare: (value: string) => _.startCase(value), // uppercase the Title.
+    prepare: (value: string) => fixName(value), // uppercase the Title.
   })
   public name: string
 

@@ -2,12 +2,28 @@ import store from '@/store';
 
 const defaultHeaders = {
   'Accept': 'application/json',
+  'Content-Type': 'application/json',
+};
+
+const defaultMultiHeaders = {
+  'Accept': 'application/json',
   'Content-Type': 'application/x-www-form-urlencoded',
 };
 
 class Api {
   headers() {
     return Object.assign({}, defaultHeaders,
+      (
+        {
+          'Authorization': 'Bearer ' + store.getState().user.apitoken,
+          'X-Authorization': 'Bearer ' + store.getState().user.apitoken,
+        }
+      ));
+
+  }
+
+  multiHeaders() {
+    return Object.assign({}, defaultMultiHeaders,
       (
         {
           'Authorization': 'Bearer ' + store.getState().user.apitoken,
@@ -44,7 +60,7 @@ class Api {
   async xhrMulti(route: string, params: any) {
     let options = {
       method: 'POST',
-      headers: this.headers()
+      headers: this.multiHeaders()
     }
 
     options.body = new FormData();
@@ -89,6 +105,7 @@ class Api {
       (!query) ? url = `${process.env.NEXT_PUBLIC_HOST_URL}${route}` : url = `${process.env.NEXT_PUBLIC_HOST_URL}${route}?${query}`;
     } else {
       options.body = JSON.stringify(params);
+      // console.log("options body", options)
       url = `${process.env.NEXT_PUBLIC_HOST_URL}${route}`;
     }
     return fetch(url, options)
