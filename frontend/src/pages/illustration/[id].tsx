@@ -3,7 +3,6 @@ import * as _ from "lodash";
 import api from '@/library/api';
 import { useState, useEffect } from 'react'
 import Link from 'next/link';
-// import Illustration from '@/components/illustration';
 import Layout from '@/components/Layout';
 import useUser from '@/library/useUser';
 import { ClipboardDocumentListIcon, ArrowLeftIcon, PencilSquareIcon, TrashIcon } from '@heroicons/react/24/solid'
@@ -11,6 +10,7 @@ import ConfirmDialog from '@/components/ConfirmDialog';
 import { useAppSelector, useAppDispatch } from '@/hooks'
 import { selectModal, setModal } from '@/features/modal/reducer'
 import { setFlashMessage } from '@/features/flash/reducer'
+import IllustrationForm from '@/components/IllustrationForm';
 
 export default function IllustrationWrapper() {
   const router = useRouter()
@@ -22,7 +22,7 @@ export default function IllustrationWrapper() {
   // console.log(router.query, name)
   const [illustration, setData] = useState([])
   const [isLoading, setLoading] = useState(false)
-  const [showDeleteDialog, setShowDeleteDialog] = useState(false)
+  const [editIllustration, setEditIllustration] = useState(false)
 
   useEffect(() => {
     setLoading(true)
@@ -31,7 +31,6 @@ export default function IllustrationWrapper() {
     }
     api.get(`/illustration/${router.query.id}`, '')
       .then(data => {
-        // todo fix validation if state is not there
       setData(data);
       setLoading(false)
     });
@@ -65,7 +64,11 @@ export default function IllustrationWrapper() {
   };
 
   return (
-  <Layout>
+    <Layout>
+      {editIllustration ?
+        <IllustrationForm illustration={illustration} />
+        :
+        <>
       <div className="p-4 bg-gray-50 columns-1 md:columns-2">
         <div>
           <span className="font-bold pr-2">Title:</span>
@@ -79,14 +82,14 @@ export default function IllustrationWrapper() {
           <span className="font-bold pr-2">Source:</span>
           {illustration.source ?
             isValidHttpUrl(illustration.source) ? <Link href={illustration.source}>{illustration.source}</Link> : illustration.source
-           : 'Default Title'}
+            : 'Default Title'}
         </div>
         <div>
           <span className="font-bold pr-2">Tags:</span>
           {illustration.tags ? illustration.tags.map((tag, index, arr) => (
             <Link key={index} className="inline-block mr-2 text-sky-500" href={`/tag/${tag.name.replace(/ /g, "-")}`}>{tag.name}{index != (arr.length-1) ? ', ' : ''}</Link>
-          ))
-          : 'no tags'}
+            ))
+            : 'no tags'}
     </div>
       </div>
       <div className="columns-1">
@@ -112,17 +115,17 @@ export default function IllustrationWrapper() {
     </div>
  {/*
     <div className="row">
-      <div className="col-sm-12" id="illustrationPlaces">
-        <h3>Illustration Usage:</h3>
-        {/* <% unless @places.empty? %>
-          <% @places.each do |p| %>
-            <% unless p.place.blank? %><%= p.place %>, <% end %><% unless p.location.blank? %><%= p.location %> - <% end %><% unless p.used.blank? %><%= p.used.strftime("%m/%d/%Y") %><% end %>
-          <% end %>
-        <% end %> */}
+    <div className="col-sm-12" id="illustrationPlaces">
+    <h3>Illustration Usage:</h3>
+    {/* <% unless @places.empty? %>
+    <% @places.each do |p| %>
+    <% unless p.place.blank? %><%= p.place %>, <% end %><% unless p.location.blank? %><%= p.location %> - <% end %><% unless p.used.blank? %><%= p.used.strftime("%m/%d/%Y") %><% end %>
+    <% end %>
+  <% end %> */}
        {/* </div>
 
-          <div className="col-sm-4">
-          {/* <%= form_with(model: Place, id: :places_form) do |form| %> */}
+<div className="col-sm-4">
+{/* <%= form_with(model: Place, id: :places_form) do |form| %> */}
          {/*     <input type="hidden" value="<%= @illustration.id %>" name="place[illustration_id]">
             <div className="form-group">
               {/* <%= form.text_field :place, id: :place_place, class: "form-control", placeholder: "Place" %> */}
@@ -130,22 +133,24 @@ export default function IllustrationWrapper() {
           </div>
           <div className="col-sm-4">
             <div className="form-group">
-              {/* <%= form.text_field :location, id: :place_location, class: "form-control", placeholder: "Location" %> */}
+            {/* <%= form.text_field :location, id: :place_location, class: "form-control", placeholder: "Location" %> */}
        {/*       </div>
           </div>
           <div className="col-sm-4">
-            <div className="form-group">
-              {/* <%= form.text_field :used, id: :place_used, class: "form-control", value: Time.now.strftime("%m/%d/%Y")  %> */}
+          <div className="form-group">
+          {/* <%= form.text_field :used, id: :place_used, class: "form-control", value: Time.now.strftime("%m/%d/%Y")  %> */}
        {/*       </div>
           </div>
           <div className="col-sm-12">
-            <div className="form-group">
-              <button id="add_place" className="btn btn-success"><i className="fa fa-plus"></i> Add Place</button>
-            </div>
+          <div className="form-group">
+          <button id="add_place" className="btn btn-success"><i className="fa fa-plus"></i> Add Place</button>
+          </div>
           </div>
           {/* <% end %>
 
-    </div>*/}
+        </div>*/}
+        </>
+    }
   </Layout>
   )
 }
