@@ -20,7 +20,7 @@ export default class IllustrationsController {
 
     const illustrationQuery = await Illustration.query()
       .where('id', _.get(params, 'id', 0))
-      .andWhere('user_id', `${auth.user.id}`)
+      .andWhere('user_id', `${auth.user?.id}`)
       .preload('tags', (builder) => {
         builder.orderBy('name', 'asc')
       })
@@ -28,7 +28,7 @@ export default class IllustrationsController {
         builder.orderBy('used', 'asc')
       })
 
-      // console.log(_.get(params, 'id', 0),auth.user.id,!!illustrationQuery[0],!illustrationQuery[0])
+      // console.log(_.get(params, 'id', 0),auth.user?.id,!!illustrationQuery[0],!illustrationQuery[0])
       if (!!illustrationQuery[0]) {
         const illustration = illustrationQuery[0].toJSON();
         return illustration
@@ -52,7 +52,7 @@ export default class IllustrationsController {
 
       const illustrationQuery = await Illustration.query()
         .where('legacy_id', _.get(params, 'id', 0))
-        .andWhere('user_id', `${auth.user.id}`)
+        .andWhere('user_id', `${auth.user?.id}`)
         .preload('tags', (builder) => {
           builder.orderBy('name', 'asc')
         })
@@ -60,7 +60,7 @@ export default class IllustrationsController {
           builder.orderBy('used', 'asc')
         })
 
-        // console.log(_.get(params, 'id', 0),auth.user.id,!!illustrationQuery[0],!illustrationQuery[0])
+        // console.log(_.get(params, 'id', 0),auth.user?.id,!!illustrationQuery[0],!illustrationQuery[0])
         if (!!illustrationQuery[0]) {
           const illustration = illustrationQuery[0].toJSON();
           return illustration
@@ -82,17 +82,18 @@ export default class IllustrationsController {
   public async store({ request, auth, response }: HttpContextContract) {
 
     const { author, title, source, content, tags, places, legacy_id } = request.all()
-    const user_id = auth.user.id
+    const user_id = auth.user?.id
 
     let create_data = {author, title, source, content, user_id}
     if (!!legacy_id) {
+      // @ts-ignore
       create_data = {author, title, source, content, user_id, legacy_id}
     }
 
     const illustration = await Illustration.create(create_data)
     if (tags && tags.length > 0) {
       tags.map(async tag => {
-        const tg = await Tag.firstOrCreate({ name: tag, user_id: auth.user.id })
+        const tg = await Tag.firstOrCreate({ name: tag, user_id: auth.user?.id })
         await illustration.related('tags').attach([tg.id])
       })
     }
@@ -118,9 +119,9 @@ export default class IllustrationsController {
     const { author, title, source, content, tags } = request.all()
     // places are on their own URI. Tags can be in the illustration post
 
-    let illustration = await Illustration.findBy('id', _.get(params, 'id', 0))
+    let illustration = await Illustration.findByOrFail('id', _.get(params, 'id', 0))
 
-    if (illustration.user_id != auth.user.id) {
+    if (illustration.user_id != auth.user?.id) {
       return response.status(403).send({ message: 'You do not have permission to access this resource' })
     }
 
@@ -136,7 +137,8 @@ export default class IllustrationsController {
       await illustration.related('tags').detach()
       let newTags = []
       tags.map(async tag => {
-        const tg = await Tag.firstOrNew({ name: tag, user_id: auth.user.id })
+        const tg = await Tag.firstOrNew({ name: tag, user_id: auth.user?.id })
+        // @ts-ignore
         newTags.push(tg.id)
       })
 
@@ -162,7 +164,7 @@ export default class IllustrationsController {
     let id = _.get(params, 'id', 0)
     let illustration = await Illustration.query().where('id',id)
 
-    if (illustration[0].user_id != auth.user.id) {
+    if (illustration[0].user_id != auth.user?.id) {
       return response.status(403).send({ message: 'You do not have permission to access this resource' })
     }
 

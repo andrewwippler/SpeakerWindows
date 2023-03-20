@@ -1,7 +1,6 @@
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import _ from 'lodash'
 import Tag from 'App/Models/Tag'
-import Illustration from 'App/Models/Illustration'
 
 export default class TagsController {
 
@@ -15,7 +14,7 @@ export default class TagsController {
    * @param {View} ctx.view
    */
   public async index({ auth }: HttpContextContract) {
-    return await Tag.query().where('user_id', `${auth.user.id}`).orderBy('name')
+    return await Tag.query().where('user_id', `${auth.user?.id}`).orderBy('name')
   }
 
     /**
@@ -33,7 +32,8 @@ export default class TagsController {
 
     // assuming bad data can be sent here. Raw should parameterize input
     // https://security.stackexchange.com/q/172297/35582
-    const tagQuery = await Tag.query().whereRaw('name LIKE ?', `${tag}%`).andWhere('user_id', `${auth.user.id}`).orderBy('name')
+    // @ts-ignore
+    const tagQuery = await Tag.query().whereRaw('name LIKE ?', `${tag}%`).andWhere('user_id', `${auth.user?.id}`).orderBy('name')
 
 
     if (tagQuery.length < 1) {
@@ -58,7 +58,7 @@ export default class TagsController {
 
      //@tag.illustrations
     const tag = await Tag.findByOrFail('name', thetag);
-    const tagQuery = await tag.related('illustrations').query().where('user_id', `${auth.user.id}`)
+    const tagQuery = await tag.related('illustrations').query().where('user_id', `${auth.user?.id}`)
 
     if (tagQuery.length < 1) {
       return response.status(204).send({ message: 'no results found' })
@@ -82,7 +82,7 @@ export default class TagsController {
    * @param {Request} ctx.request
    * @param {Response} ctx.response
    */
-  public async update({ bouncer, params, auth, request, response }: HttpContextContract) {
+  public async update({ bouncer, params, request, response }: HttpContextContract) {
 
     const { name } = request.all()
     // places are on their own URI. Tags can be in the illustration post
@@ -109,9 +109,9 @@ export default class TagsController {
    */
   public async destroy({ params, auth, response }: HttpContextContract) {
 
-    let tag = await Tag.find(params.id)
+    let tag = await Tag.findOrFail(params.id)
 
-    if (!tag.toJSON()[0] && tag.user_id != auth.user.id) {
+    if (!tag.toJSON()[0] && tag.user_id != auth.user?.id) {
       return response.status(403).send({ message: 'You do not have permission to access this resource' })
     }
 

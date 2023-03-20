@@ -19,6 +19,7 @@
 */
 
 import Route from '@ioc:Adonis/Core/Route'
+// import Upload from 'App/Models/Upload'
 
 //auth
 Route.post('register', 'UsersController.store')
@@ -52,18 +53,18 @@ Route.group(() =>{
   Route.delete('/places/:id', 'PlacesController.destroy')
 
   // Images
-  Route.post('/upload', async ({ request }) => {
+//   Route.post('/upload', async ({ request }: ) => {
+// // to read: https://docs.adonisjs.com/guides/file-uploads
+//     const { illustration_id } = request.all()
+//     request.multipart.file('illustration_image', {}, async (file) => {
+//       const imagePath = `${auth.user.uid}/${illustration_id}/${file.clientName}`
+//       await Drive.disk('s3').put(imagePath, file.stream)
 
-    const { illustration_id } = request.all()
-    request.multipart.file('illustration_image', {}, async (file) => {
-      const imagePath = `${auth.user.uid}/${illustration_id}/${file.clientName}`
-      await Drive.disk('s3').put(imagePath, file.stream)
+//       Upload.create({ illustration_id, name: imagePath, type: file.type })
 
-      Upload.create({ illustration_id, name: imagePath, type: file.type })
+//     })
 
-    })
-
-    await request.multipart.process()
-  })
+//     await request.multipart.process()
+//   })
 
 }).middleware('auth')

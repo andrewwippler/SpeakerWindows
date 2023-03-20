@@ -3,7 +3,7 @@ import { BaseModel, column, hasMany, HasMany, manyToMany, ManyToMany, belongsTo,
 import { _ } from 'lodash'
 import Place from './Place'
 import Tag from './Tag'
-import User from './User.ts'
+import User from './User'
 import Upload from './Upload'
 
 export default class Illustration extends BaseModel {

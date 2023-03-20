@@ -24,7 +24,7 @@ export default class UsersController {
     try {
       const token = await auth.use('api').attempt(email, password)
       await limiter.delete(throttleKey)
-      const user = await User.findBy('email', email)
+      // const user = await User.findBy('email', email)
       // console.log("USER D",user.id)
       return token
     } catch (error) {
@@ -37,7 +37,7 @@ export default class UsersController {
   }
 
   public show({ auth, params }: HttpContextContract) {
-    if (auth.user.uid !== params.uid) {
+    if (auth.user?.uid !== params.uid) {
       return "You cannot see someone else's profile"
     }
     return auth.user
@@ -45,7 +45,7 @@ export default class UsersController {
 
   public async store({ response, request }: HttpContextContract) {
     try {
-       const payload = await request.validate(CreateUserValidator)
+       await request.validate(CreateUserValidator)
     } catch (error) {
       return response.status(400).send(error.messages)
     }

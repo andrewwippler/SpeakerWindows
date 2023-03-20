@@ -12,6 +12,6 @@ export default class extends BaseSchema {
   public async down() {
     this.schema.table(this.tableName, (table) => {
       table.dropColumn('legacy_id')
-    }
+    })
   }
 }

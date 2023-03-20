@@ -1,3 +1,5 @@
+//@ts-nocheck
+
 import BaseSeeder from '@ioc:Adonis/Lucid/Seeder'
 import User from 'App/Models/User'
 import IllustrationFactory from 'Database/factories/IllustrationFactory'

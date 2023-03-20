@@ -1,3 +1,4 @@
+//@ts-nocheck
 import { processCliArgs, test } from '@japa/runner'
 import UserFactory from 'Database/factories/UserFactory'
 import User from 'App/Models/User'

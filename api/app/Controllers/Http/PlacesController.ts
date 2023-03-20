@@ -13,8 +13,8 @@ export default class PlacesController {
    * @param {Response} ctx.response
    * @param {View} ctx.view
    */
-  public async show({ bouncer, params, auth, response }: HttpContextContract) {
-    const places = await Place.findBy('illustration_id', params.illustration_id)
+  public async show({ bouncer, params,  }: HttpContextContract) {
+    const places = await Place.findByOrFail('illustration_id', params.illustration_id)
 
     await bouncer.authorize('viewPlace', places)
 
@@ -41,7 +41,7 @@ export default class PlacesController {
       return response.status(403).send({ message: 'Illustration does not exist' })
     }
 
-    if (!illustration.toJSON()[0] && illustration.user_id != auth.user.id) {
+    if (!illustration.toJSON()[0] && illustration.user_id != auth.user?.id) {
       return response.status(403).send({ message: 'You do not have permission to access this resource' })
     }
 
@@ -62,7 +62,7 @@ export default class PlacesController {
 
     const post = request.post()
 
-    let place = await Place.find(params.id)
+    let place = await Place.findOrFail(params.id)
 
     place.place = _.get(post, 'place', place.place)
     place.location = _.get(post, 'location', place.location)
@@ -72,7 +72,7 @@ export default class PlacesController {
       return response.status(403).send({message: 'Error: Mismatched illustration_id'})
     }
 
-    if (place.user_id != auth.user.id) {
+    if (place.user_id != auth.user?.id) {
       return response.status(403).send({message: 'You do not have permission to access this resource'})
     }
     await place.save()
@@ -93,7 +93,7 @@ export default class PlacesController {
 
     let place = await Place.findOrFail(params.id)
 
-    if (place.user_id != auth.user.id) {
+    if (place.user_id != auth.user?.id) {
       return response.status(403).send({message: 'You do not have permission to access this resource'})
     }
     await place.delete()

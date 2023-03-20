@@ -5,9 +5,11 @@
   ],
   "exclude": [
     "node_modules",
-    "build"
+    "build",
+    "tests/functional"
   ],
   "compilerOptions": {
+    "strictNullChecks": true,
     "outDir": "build",
     "rootDir": "./",
     "sourceMap": true,
