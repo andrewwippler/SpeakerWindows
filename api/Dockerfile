@@ -17,6 +17,7 @@ FROM dependencies AS build
 RUN node ace build --production
 
 FROM base AS production
+ENV HOST=0.0.0.0
 ENV PORT=3333
 COPY --chown=node:node ./package*.json ./
 RUN npm ci --omit=dev
