@@ -41,6 +41,7 @@ export default redisConfig({
       password: Env.get('REDIS_PASSWORD', ''),
       db: 0,
       keyPrefix: 'speakerwindows',
+      healthCheck: true,
     },
   },
 })
