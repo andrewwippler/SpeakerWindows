@@ -5,7 +5,7 @@ import { _ } from 'lodash'
 
 function fixName(name) {
   let first = _.startCase(name)
-  return first.replace(' ', '-')
+  return first.replaceAll(' ', '-')
 }
 
 export default class Tag extends BaseModel {

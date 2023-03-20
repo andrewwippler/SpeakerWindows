@@ -22,6 +22,9 @@ test.group('Tag', (group) => {
     name: 'adonis 101',
     user_id: goodUser.id
   },{
+    name: 'adonis update me',
+    user_id: goodUser.id
+  },{
     name: 'cool is andrew',
     user_id: goodUser.id
   },{
@@ -78,7 +81,7 @@ test.group('Tag', (group) => {
     assert.isTrue(response.body().illustrations.length == 1)
   })
 
-  test('Cannot get list of your tags', async ({ client }) => {
+  test('Cannot get list of your tags', async ({ client, assert }) => {
     const loggedInUser = await client.post('/login').json({ email: badUser.email, password: 'oasssadfasdf' })
 
     const response = await client.get('/tags').bearerToken(loggedInUser.body().token)
@@ -86,7 +89,7 @@ test.group('Tag', (group) => {
     response.assertStatus(200)
     // console.log(response.body())
     // response.assert?.equal(response.body().length,1)
-    response.assertBodyContains([{name: 'Adonis Is Not Cool'}])
+    assert.equal(response.body()[0].name, 'Adonis-Is-Not-Cool')
 
   })
 
@@ -97,10 +100,10 @@ test.group('Tag', (group) => {
 
     response.assertStatus(200)
     response.assertBodyContains([{
-      name: 'Adonis 101',
+      name: 'Adonis-101',
     }])
     response.assertBodyContains([{
-      name: 'Adonis Is Cool',
+      name: 'Adonis-Is-Cool',
     }])
 
   })
@@ -124,7 +127,7 @@ test.group('Tag', (group) => {
 
     response.assertStatus(200)
     assert.isTrue(response.body().length == 1)
-    assert.equal(response.body()[0].name, 'Adonis Is Not Cool')
+    assert.equal(response.body()[0].name, 'Adonis-Is-Not-Cool')
 
   })
 
@@ -141,7 +144,7 @@ test.group('Tag', (group) => {
   })
 
   test('Can update tag', async ({ client, assert }) => {
-    const tag = await Tag.findBy('name', 'Adonis 101')
+    const tag = await Tag.findByOrFail('name', 'Adonis-Update-Me')
 
     const updatedTag = {name: 'Adonis 102'}
     const loggedInUser = await client.post('/login').json({ email: goodUser.email, password: 'oasssadfasdf' })
@@ -151,7 +154,7 @@ test.group('Tag', (group) => {
     assert.equal(response.body().message, 'Updated successfully')
 
     const findTag = await Tag.findOrFail(tag.id)
-    assert.equal(findTag.name, 'Adonis 102')
+    assert.equal(findTag.name, 'Adonis-102')
 
   })
 
