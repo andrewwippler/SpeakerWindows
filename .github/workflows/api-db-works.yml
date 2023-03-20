@@ -13,10 +13,21 @@ jobs:
   build:
 
     runs-on: ubuntu-latest
-
+    services:
+      mariadb:
+        image: mariadb:10
+        ports:
+          - 3306:3306
+        env:
+          MYSQL_DATABASE: testing
+          MYSQL_ROOT_PASSWORD: adonis
+      redis:
+        image: redis:5-alpine
+        ports:
+          - 6379:6379
     strategy:
       matrix:
-        node-version: [10.x, 12.x]
+        node-version: [16.x, 18.x]
 
     steps:
     - uses: actions/checkout@v2
@@ -24,11 +35,12 @@ jobs:
       uses: actions/setup-node@v1
       with:
         node-version: ${{ matrix.node-version }}
-    - name: Install adonis cli
-      run: npm i -g @adonisjs/cli
-    - run: cp ./api/.env.example ./api/.env
+    - run: cp ./api/.env.test ./api/.env
     - run: npm ci
       working-directory: ./api
-    - run: adonis migration:run
+    - run: node ace migration:run
       working-directory: ./api
-
+      env:
+        CI: true
+        MYSQL_PORT: ${{ job.services.mariadb.ports[3306] }}
+        REDIS_PORT: ${{ job.services.redis.ports[6379] }}

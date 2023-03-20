@@ -1,0 +1,32 @@
+{
+  "all": true,
+  "include": [
+    "app/**",
+    "providers/**"
+  ],
+  "exclude": [
+    "node_modules/**",
+    "build/**",
+    "commands/**",
+    "config/**",
+    "contracts/**",
+    "coverage/**",
+    "docs/**",
+    "start/**",
+    "tests/**",
+    "**/*.spec.ts",
+    "test.ts",
+    "env.ts",
+    "server.ts",
+    "app/**/Handler.ts"
+  ],
+  "reporter": [
+    "html",
+    "text",
+    "text-summary"
+  ],
+  "lines": 95,
+  "branches": 65,
+  "statements": 95,
+  "check-coverage": true
+}

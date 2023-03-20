@@ -6,6 +6,13 @@ Speaker Windows is a personal, searchable repository of illustrations which are 
 
 The project aims to have an testable API which allows the use of multiuser authentication, sharing of illustrations, and browser extension to easily add illustrations.
 
+## Development
+
+Need 3 terminals open to run:
+1. `docker-compose up`
+2. `cd api && yarn dev`
+3  `cd frontend && yarn dev`
+
 ## Upgrading
 
 1. Clone this repository
