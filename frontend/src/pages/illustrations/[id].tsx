@@ -8,13 +8,14 @@ import Link from 'next/link';
 
 import { useAppDispatch } from '@/hooks'
 import { setFlashMessage } from '@/features/flash/reducer'
+import { illustrationType } from '@/library/illustrationType';
 
 // Note: Function to redirect old URLs to the new format.
 export default function LegacyIllustration() {
   const router = useRouter()
   const dispatch = useAppDispatch()
   const [isLoading, setLoading] = useState(false)
-  const [data, setData] = useState([])
+  const [data, setData] = useState<illustrationType>()
   const { user } = useUser({
     redirectTo: '/login',
   })

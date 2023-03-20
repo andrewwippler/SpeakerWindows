@@ -1,10 +1,10 @@
+// @ts-nocheck
 import * as _ from "lodash"
 import Link from 'next/link'
 import api from '@/library/api'
 import { useState, useEffect } from 'react'
 
-import { useAppSelector, useAppDispatch } from '@/hooks'
-import { getTags, setTags } from '@/features/tags/reducer'
+import { useAppDispatch } from '@/hooks'
 
 function Tags() {
   const dispatch = useAppDispatch()

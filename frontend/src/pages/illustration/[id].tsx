@@ -11,6 +11,7 @@ import { useAppSelector, useAppDispatch } from '@/hooks'
 import { selectModal, setModal } from '@/features/modal/reducer'
 import { setFlashMessage } from '@/features/flash/reducer'
 import IllustrationForm from '@/components/IllustrationForm';
+import { illustrationType } from '@/library/illustrationType';
 
 export default function IllustrationWrapper() {
   const router = useRouter()
@@ -20,7 +21,7 @@ export default function IllustrationWrapper() {
   })
 
   // console.log(router.query, name)
-  const [illustration, setData] = useState([])
+  const [illustration, setData] = useState<illustrationType>()
   const [isLoading, setLoading] = useState(false)
   const [editIllustration, setEditIllustration] = useState(false)
 
@@ -52,11 +53,11 @@ export default function IllustrationWrapper() {
   const handleDelete = () => {
     console.log('handle delete')
     // delete illustration
-    api.delete(`/illustration/${illustration.id}`, '')
+    api.delete(`/illustration/${illustration?.id}`, '')
     .then(data => {
       dispatch(setModal(false))
       // dispatch(setFlash({message: 'something', type: 'good, bad, etc'}))
-      dispatch(setFlashMessage({severity: 'danger', message: `Illustration: "${illustration.title}" was deleted.`}))
+      dispatch(setFlashMessage({severity: 'danger', message: `Illustration: "${illustration?.title}" was deleted.`}))
       router.back()
       // setData(data);
 
@@ -72,32 +73,32 @@ export default function IllustrationWrapper() {
       <div className="p-4 bg-gray-50 columns-1 md:columns-2">
         <div>
           <span className="font-bold pr-2">Title:</span>
-          {illustration.title ? illustration.title : 'Default Title'}
+          {illustration?.title ? illustration.title : 'Default Title'}
         </div>
         <div>
           <span className="font-bold pr-2">Author:</span>
-          {illustration.author ? illustration.author : 'Default Title'}
+          {illustration?.author ? illustration.author : 'Default Title'}
         </div>
         <div>
           <span className="font-bold pr-2">Source:</span>
-          {illustration.source ?
+          {illustration?.source ?
             isValidHttpUrl(illustration.source) ? <Link href={illustration.source}>{illustration.source}</Link> : illustration.source
             : 'Default Title'}
         </div>
         <div>
           <span className="font-bold pr-2">Tags:</span>
-          {illustration.tags ? illustration.tags.map((tag, index, arr) => (
+          {illustration?.tags ? illustration.tags.map((tag, index, arr) => (
             <Link key={index} className="inline-block mr-2 text-sky-500" href={`/tag/${tag.name.replace(/ /g, "-")}`}>{tag.name}{index != (arr.length-1) ? ', ' : ''}</Link>
             ))
             : 'no tags'}
     </div>
       </div>
       <div className="columns-1">
-    {illustration.content && <button type="button" data-toggle="tooltip" data-placement="bottom" title="Copy to clipboard"
+    {illustration?.content && <button type="button" data-toggle="tooltip" data-placement="bottom" title="Copy to clipboard"
       className="group relative flex w-full justify-center px-4 py-2 my-2 font-semibold text-sm bg-gray-300 hover:bg-gray-500 text-white rounded-md shadow-sm"
       onClick={() => { navigator.clipboard.writeText(illustration.content) }}><ClipboardDocumentListIcon className="h-4 w-4 mr-2" /> <span>Copy</span></button>}
     <div className="columns-1">
-    {illustration.content ? illustration.content : 'Default Title'}
+    {illustration?.content ? illustration.content : 'Default Title'}
     </div>
 
         <div className="columns-1 pt-2">
@@ -108,7 +109,7 @@ export default function IllustrationWrapper() {
       </button>
           <button onClick={() => router.back()} className='px-4 py-2 mr-4 mt-2 font-semibold text-sm bg-green-300 hover:bg-green-500 text-white rounded-full shadow-sm inline-flex items-center' >
             <PencilSquareIcon className="h-4 w-4 mr-2" />Edit Illustration</button>
-          <ConfirmDialog handleAgree={handleDelete} title={illustration.title} deleteName="Illustration" />
+          <ConfirmDialog handleAgree={handleDelete} title={illustration?.title} deleteName="Illustration" />
           <button onClick={() => dispatch(setModal(true))} className='px-4 py-2 mr-4 mt-2 font-semibold text-sm bg-red-300 hover:bg-red-500 text-white rounded-full shadow-sm inline-flex items-center'>
             <TrashIcon className="h-4 w-4 mr-2" />Delete Illustration</button>
         </div>

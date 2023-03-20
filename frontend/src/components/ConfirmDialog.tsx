@@ -1,11 +1,12 @@
-import { Fragment, useRef, useState } from 'react'
+// @ts-nocheck
+import { Fragment, useRef } from 'react'
 import { Dialog, Transition } from '@headlessui/react'
 import { ExclamationTriangleIcon } from '@heroicons/react/24/outline'
 import { useAppSelector, useAppDispatch } from '@/hooks'
 import { selectModal, setModal } from '@/features/modal/reducer'
 import { AppProps } from 'next/app'
 
-export default function ConfirmDialog({handleAgree, title, deleteName, ...props}: AppProps) {
+export default function ConfirmDialog({ handleAgree, title, deleteName }: {handleAgree: () => void, title: string | undefined, deleteName: string}) {
 
   const dispatch = useAppDispatch()
   const open = useAppSelector(selectModal)

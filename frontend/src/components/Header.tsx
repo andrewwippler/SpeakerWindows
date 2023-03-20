@@ -7,13 +7,6 @@ import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline'
 import { Dialog } from '@headlessui/react'
 import fetchJson from '@/library/fetchJson'
 
-const navigation = [
-  { name: 'Home', href: '#' },
-  { name: 'g', href: '#' },
-  { name: 'Marketplace', href: '#' },
-  { name: 'Company', href: '#' },
-]
-
 export default function Header() {
   const { user, mutateUser } = useUser()
   const router = useRouter()
@@ -23,9 +16,9 @@ export default function Header() {
   <header className="inset-x-0 top-0 z-50">
     <nav className="bg-sky-300 flex items-center justify-between p-6 lg:px-8" aria-label="Global">
       <div className="flex lg:flex-1">
-        <a href="/" className="text-sky-100 italic -m-1.5 p-1.5">
+        <Link href="/" className="text-sky-100 italic -m-1.5 p-1.5">
           <span>Speaker Windows</span>
-        </a>
+        </Link>
       </div>
       <div className="flex lg:hidden">
         <button
@@ -63,7 +56,7 @@ export default function Header() {
           {user?.isLoggedIn === true && (
             <>
               <div className='-mx-3 block rounded-lg py-2.5 px-3 text-base font-semibold leading-7 text-sky-100 hover:bg-sky-900'>
-                <a
+                <Link
                   href="/api/logout"
                   onClick={async (e) => {
                     e.preventDefault()
@@ -75,7 +68,7 @@ export default function Header() {
                     }}
                 >
                   Logout
-                </a>
+                </Link>
               </div>
             </>
           )}
@@ -85,10 +78,10 @@ export default function Header() {
       <div className="fixed inset-0 z-50" />
       <Dialog.Panel className="fixed inset-y-0 right-0 z-50 w-full overflow-y-auto bg-white px-6 py-6 sm:max-w-sm sm:ring-1 sm:ring-gray-900/10">
         <div className="flex items-center justify-between">
-          <a href="/" className="text-sky-300 italic -m-1.5 p-1.5">
+          <Link href="/" className="text-sky-300 italic -m-1.5 p-1.5">
             <span>Speaker Windows</span>
 
-          </a>
+          </Link>
           <button
             type="button"
             className="-m-2.5 rounded-md p-2.5 text-sky-300"
@@ -120,7 +113,7 @@ export default function Header() {
           {user?.isLoggedIn === true && (
             <>
               <div className='-mx-3 block rounded-lg py-2.5 px-3 text-base font-semibold leading-7 text-sky-300 hover:bg-sky-900'>
-                <a
+                <Link
                   href="/api/logout"
                   onClick={async (e) => {
                     e.preventDefault()
@@ -132,7 +125,7 @@ export default function Header() {
                     }}
                 >
                   Logout
-                </a>
+                </Link>
               </div>
             </>
           )}

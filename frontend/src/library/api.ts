@@ -63,17 +63,21 @@ class Api {
       headers: this.multiHeaders()
     }
 
+    // @ts-ignore
     options.body = new FormData();
 
     for (let key in params) {
 
       // for file uploads
       if (key === 'files') {
+        // @ts-ignore
         params[key].forEach((file, i) => {
+          // @ts-ignore
           options.body.append(`file[${i}]`, file);
 
         });
       } else {
+        // @ts-ignore
         options.body.append(key, params[key]);
       }
     }
@@ -131,4 +135,5 @@ class Api {
 
 }
 
+// @ts-ignore
 export default new Api();

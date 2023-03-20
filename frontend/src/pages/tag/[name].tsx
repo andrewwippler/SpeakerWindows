@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { useRouter } from 'next/router'
 import * as _ from "lodash";
 import api from '@/library/api';

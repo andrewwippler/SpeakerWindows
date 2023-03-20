@@ -8,8 +8,13 @@ import { setFlashMessage } from '@/features/flash/reducer'
 import useUser from '@/library/useUser';
 import { useRouter } from 'next/router'
 
+type illustration = {
+  id: number,
+  title: string,
+}
+
 export default function IllustrationForm({ illustration }: {
-  illustration?: AppProps<object>
+  illustration?: illustration
   }) {
     const router = useRouter()
     const dispatch = useAppDispatch()
@@ -32,17 +37,17 @@ export default function IllustrationForm({ illustration }: {
     const handleEditSave = (event: FormEvent<HTMLFormElement>) => {
       //todo: get all form objects and paste into object
       // maybe send it to re-usable function?
-      const title = event.currentTarget.title.value.trim();
+      const title = event.currentTarget.title.valueOf().trim();
 
       // update illustration
-      api.put(`/illustration/${illustration.id}`, {title})
+      api.put(`/illustration/${illustration?.id}`, {title})
         .then(data => {
 
           if (data.message != 'Updated successfully') {
             dispatch(setFlashMessage({ severity: 'danger', message: data.message }))
             return
           }
-          dispatch(setFlashMessage({ severity: 'success', message: `Illustration "${illustration.title}" was updated.` }))
+          dispatch(setFlashMessage({ severity: 'success', message: `Illustration "${illustration?.title}" was updated.` }))
 
           router.replace(`/illustration/${data.id}`)
     });
@@ -51,7 +56,7 @@ export default function IllustrationForm({ illustration }: {
     const handleNewSave = (event: FormEvent<HTMLFormElement>) => {
       //todo: get all form objects and paste into object
       // maybe send it to re-usable function?
-      const title = event.currentTarget.title.value.trim();
+      const title = event.currentTarget.title.valueOf().trim();
 
       api.post(`/illustration`, {title}) // check right URI?
         .then(data => {
@@ -60,7 +65,7 @@ export default function IllustrationForm({ illustration }: {
             dispatch(setFlashMessage({ severity: 'danger', message: data.message }))
             return
           }
-          dispatch(setFlashMessage({ severity: 'success', message: `Illustration "${illustration.title}" was updated.` }))
+          dispatch(setFlashMessage({ severity: 'success', message: `Illustration "${illustration?.title}" was updated.` }))
 
           router.replace(`/illustration/${data.id}`)
     });
