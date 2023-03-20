@@ -61,7 +61,10 @@ export default class TagsController {
     const tagQuery = await tag.related('illustrations').query().where('user_id', `${auth.user?.id}`)
 
     if (tagQuery.length < 1) {
-      return response.status(204).send({ message: 'no results found' })
+      return {
+        id: tag.id,
+        name: tag.name
+      }
     }
 
      const returnTags = {
