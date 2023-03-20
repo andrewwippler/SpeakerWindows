@@ -1,0 +1,59 @@
+name: Deploy to Wippler k8s
+
+on:
+  push:
+    branches:
+      - master
+
+env:
+  REPOSITORY: speakerwindows
+  REGISTRY: d.wplr.rocks
+
+jobs:
+  build-and-deploy:
+    name: Deploy
+    runs-on: ubuntu-latest
+    environment: production
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Log in to the Container registry
+        uses: docker/login-action@f054a8b539a109f9f41c372932f1ae047eff08c9
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ secrets.REG_USER  }}
+          password: ${{ secrets.REG_PW }}
+
+      - name: Build and push Api image
+        uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
+        with:
+          context: api/.
+          push: true
+          tags: ${{ env.REGISTRY }}/${{ env.REPOSITORY }}:api-${{ github.sha }}
+
+      - name: Build and push Frontend image
+        uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
+        with:
+          context: frontend/.
+          push: true
+          tags: ${{ env.REGISTRY }}/${{ env.REPOSITORY }}:frontend-${{ github.sha }}
+
+      - name: Updating API
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.HOST }}
+          username: kubedeploy
+          key: ${{ secrets.SSH_KEY }}
+          port: 22
+          script: kubectl --namespace web set image deployment/speakerwindows-api api=${{ env.REGISTRY }}/${{ env.REPOSITORY }}:api-${{ github.sha }}
+
+      - name: Updating Frontend
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.HOST }}
+          username: kubedeploy
+          key: ${{ secrets.SSH_KEY }}
+          port: 22
+          script: kubectl --namespace web set image deployment/speakerwindows-frontend frontend=${{ env.REGISTRY }}/${{ env.REPOSITORY }}:frontend-${{ github.sha }}
