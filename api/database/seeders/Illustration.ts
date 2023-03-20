@@ -27,7 +27,7 @@ export default class extends BaseSeeder {
         tags[_.random(21, 40)].id,
         tags[_.random(41, 69)].id,
         tags[_.random(61, 80)].id,
-        tags[_.random(81, 100)].id,
+        tags[_.random(81, 99)].id
       ])
       await i.related('places').save(places[_.random(0, 3)])
     })
@@ -39,7 +39,7 @@ export default class extends BaseSeeder {
         tagsTwo[_.random(21, 40)].id,
         tagsTwo[_.random(41, 69)].id,
         tagsTwo[_.random(61, 80)].id,
-        tagsTwo[_.random(81, 100)].id,
+        tagsTwo[_.random(81, 99)].id
       ])
       await i.related('places').save(placesTwo[_.random(0, 3)])
     })
