@@ -18,7 +18,11 @@ RUN node ace build --production
 
 FROM base AS production
 ENV HOST=0.0.0.0
+ENV NODE_ENV=production
 ENV PORT=3333
+ENV APP_NAME=SpeakerWindows
+ENV APP_URL=http://${HOST}:${PORT}
+ENV HASH_DRIVER=bcrypt
 COPY --chown=node:node ./package*.json ./
 RUN npm ci --omit=dev
 COPY --chown=node:node --from=build /home/node/app/build .
