@@ -135,14 +135,19 @@ export default class IllustrationsController {
     if (tags && tags.length > 0) {
       // drop the tags and re-add them
       await illustration.related('tags').detach()
-      let newTags = []
-      tags.map(async tag => {
-        const tg = await Tag.firstOrNew({ name: tag, user_id: auth.user?.id })
-        // @ts-ignore
-        newTags.push(tg.id)
-      })
 
-      await illustration.related('tags').attach(newTags)
+      tags.map(async tag => {
+
+        const tg = await Tag.firstOrNew({ name: tag, user_id: auth.user?.id })
+        // let tg
+        // try {
+        //   tg = await Tag.query().where({ name: tag, user_id: auth.user?.id }).firstOrFail()
+        // } catch (e) {
+        //   tg = await Tag.create({ name: tag, user_id: auth.user?.id })
+        // }
+
+        await illustration.related('tags').attach([tg.id])
+      })
 
     }
     const returnValue = await illustration.toJSON()
