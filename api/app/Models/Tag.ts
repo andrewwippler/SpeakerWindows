@@ -26,8 +26,8 @@ export default class Tag extends BaseModel {
   @column.dateTime({ autoCreate: true, autoUpdate: true })
   public updatedAt: DateTime
 
-  @manyToMany(() => Illustration,{
-    pivotTable: 'ill_tags',
+  @manyToMany(() => Illustration, {
+    pivotTimestamps: true
   })
   public illustrations: ManyToMany<typeof Illustration>
 }

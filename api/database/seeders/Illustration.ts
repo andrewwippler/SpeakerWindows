@@ -1,253 +1,30 @@
 //@ts-nocheck
 
 import BaseSeeder from '@ioc:Adonis/Lucid/Seeder'
+import Illustration from 'App/Models/Illustration'
 import User from 'App/Models/User'
+import Tag from 'App/Models/Tag'
 import IllustrationFactory from 'Database/factories/IllustrationFactory'
 import PlaceFactory from 'Database/factories/PlaceFactory'
 import TagFactory from 'Database/factories/TagFactory'
 import { _ } from 'lodash'
 
-async function getTags(user) {
-  const array = [{ name: 'Abomasum',
-    user_id: user,},
-    { name: 'Absquatulate',
-    user_id: user,},
-    { name: 'Adagio',
-    user_id: user,},
-    { name: 'Alfresco',
-    user_id: user,},
-    { name: 'Alcazar',
-    user_id: user,},
-    { name: 'Amok',
-    user_id: user,},
-    { name: 'Amphisbaena',
-    user_id: user,},
-    { name: 'Antimacassar',
-    user_id: user,},
-    { name: 'Atingle',
-    user_id: user,},
-    { name: 'Bailiwick',
-    user_id: user,},
-    { name: 'Bafflegab',
-    user_id: user,},
-    { name: 'Ballistic',
-    user_id: user,},
-    { name: 'Bamboozle',
-    user_id: user,},
-    { name: 'Bedlam',
-    user_id: user,},
-    { name: 'Bugbear',
-    user_id: user,},
-    { name: 'Bulbous',
-    user_id: user,},
-    { name: 'Calamity',
-    user_id: user,},
-    { name: 'Calliope',
-    user_id: user,},
-    { name: 'Catamaran',
-    user_id: user,},
-    { name: 'Convivial',
-    user_id: user,},
-    { name: 'Cornucopia',
-    user_id: user,},
-    { name: 'Crescendo',
-    user_id: user,},
-    { name: 'Crestfallen',
-    user_id: user,},
-    { name: 'Cryptozoology',
-    user_id: user,},
-    { name: 'Demitasse',
-    user_id: user,},
-    { name: 'Derecho',
-    user_id: user,},
-    { name: 'Diphthong',
-    user_id: user,},
-    { name: 'Doldrums',
-    user_id: user,},
-    { name: 'DoohickeyDoppelgänger',
-    user_id: user,},
-    { name: 'Dumfounded',
-    user_id: user,},
-    { name: 'Earwig',
-    user_id: user,},
-    { name: 'Elixir',
-    user_id: user,},
-    { name: 'Ephemeral',
-    user_id: user,},
-    { name: 'Ersatz',
-    user_id: user,},
-    { name: 'Finagle',
-    user_id: user,},
-    { name: 'Festooned',
-    user_id: user,},
-    { name: 'Fez',
-    user_id: user,},
-    { name: 'Flimflam',
-    user_id: user,},
-    { name: 'Flummery',
-    user_id: user,},
-    { name: 'Flyspeck',
-    user_id: user,},
-    { name: 'Foofaraw',
-    user_id: user,},
-    { name: 'Fracas',
-    user_id: user,},
-    { name: 'Frangipani',
-    user_id: user,},
-    { name: 'Fuddy-duddy',
-    user_id: user,},
-    { name: 'Futz',
-    user_id: user,},
-    { name: 'Gadzooks',
-    user_id: user,},
-    { name: 'Gambit',
-    user_id: user,},
-    { name: 'Gazebo',
-    user_id: user,},
-    { name: 'Gizmo',
-    user_id: user,},
-    { name: 'Glabella',
-    user_id: user,},
-    { name: 'Gossamer',
-    user_id: user,},
-    { name: 'Guffaw',
-    user_id: user,},
-    { name: 'Guru',
-    user_id: user,},
-    { name: 'Haboob',
-    user_id: user,},
-    { name: 'Halcyon',
-    user_id: user,},
-    { name: 'Haphazard',
-    user_id: user,},
-    { name: 'Headlong',
-    user_id: user,},
-    { name: 'Heyday',
-    user_id: user,},
-    { name: 'Hodgepodge',
-    user_id: user,},
-    { name: 'Hokum',
-    user_id: user,},
-    { name: 'Hooligan',
-    user_id: user,},
-    { name: 'Hullabaloo',
-    user_id: user,},
-    { name: 'Huzzah',
-    user_id: user,},
-    { name: 'Ignoramus',
-    user_id: user,},
-    { name: 'Infinitesimal',
-    user_id: user,},
-    { name: 'Interrobang',
-    user_id: user,},
-    { name: 'Izzard',
-    user_id: user,},
-    { name: 'Jabberwocky',
-    user_id: user,},
-    { name: 'Jalopy',
-    user_id: user,},
-    { name: 'Jitney',
-    user_id: user,},
-    { name: 'Juggernaut',
-    user_id: user,},
-    { name: 'Juxtaposition',
-    user_id: user,},
-    { name: 'Kaput',
-    user_id: user,},
-    { name: 'Kerfuffle',
-    user_id: user,},
-    { name: 'Kerplunk',
-    user_id: user,},
-    { name: 'Kismet',
-    user_id: user,},
-    { name: 'Kumquat',
-    user_id: user,},
-    { name: 'Kvetch',
-    user_id: user,},
-    { name: 'Lackadaisical',
-    user_id: user,},
-    { name: 'Lampoon',
-    user_id: user,},
-    { name: 'Limburger',
-    user_id: user,},
-    { name: 'Lollapalooza',
-    user_id: user,},
-    { name: 'Lollygag',
-    user_id: user,},
-    { name: 'Lugubrious',
-    user_id: user,},
-    { name: 'Lummox',
-    user_id: user,},
-    { name: 'Machinations',
-    user_id: user,},
-    { name: 'Maelstrom',
-    user_id: user,},
-    { name: 'Manifesto',
-    user_id: user,},
-    { name: 'Miffed',
-    user_id: user,},
-    { name: 'Moocher',
-    user_id: user,},
-    { name: 'Mnemonic',
-    user_id: user,},
-    { name: 'Mufti',
-    user_id: user,},
-    { name: 'Mulligatawny',
-    user_id: user,},
-    { name: 'Murmuration',
-    user_id: user,},
-    { name: 'Muumuu',
-    user_id: user,},
-    { name: 'Nabob',
-    user_id: user,},
-    { name: 'Nagware',
-    user_id: user,},
-    { name: 'Nainsook',
-    user_id: user,},
-    { name: 'Nesh',
-    user_id: user,},
-    { name: 'Noctambulist',
-    user_id: user,},
-    ]
-  return array
-}
-
 export default class extends BaseSeeder {
-  public async run () {
-    const user1 = await User.create({ email: 'test@test.com', password: 'Test1234' })
-    const user2 = await User.create({ email: 'test5@test.com', password: 'Test12345' })
+  public async run() {
 
-    const illustrations = await IllustrationFactory.merge({ user_id: user1.id }).createMany(50)
-    const illustrationsTwo = await IllustrationFactory.merge({user_id: user2.id }).createMany(50)
-    const places = await PlaceFactory.merge({ user_id: user1.id }).makeMany(3)
-    const tags = await TagFactory.merge(await getTags(user1.id)).createMany(100)
-    const placesTwo = await PlaceFactory.merge({ user_id: user2.id }).makeMany(3)
-    const tagsTwo = await TagFactory.merge(await getTags(user2.id)).createMany(100)
 
-    let idOne = await _.chunk(tags, 2)
-    let idTwo = await _.chunk(tagsTwo, 2)
+    const user1 = await User.find(1)
+    const user2 = await User.find(2)
 
-    _.forEach(illustrations, async (i, index) => {
+    const illus1 = await IllustrationFactory.merge({ user_id: user1.id }).create()
+    const illus2 = await IllustrationFactory.merge({ user_id: user2.id }).create()
 
-      await i.related('tags').attach([
-        tags[1].id,
-        tags[index].id,
-        idOne[index][0].id,
-        idOne[index][1].id,
-      ])
-      await i.related('places').save(places[_.random(0, 3)])
-    })
-
-    _.forEach(illustrationsTwo, async (i, index) => {
-
-      await i.related('tags').attach([
-        tagsTwo[1].id,
-        tagsTwo[index].id,
-        idTwo[index][0].id,
-        idTwo[index][1].id,
-      ])
-      await i.related('places').save(placesTwo[_.random(0, 3)])
-    })
+    const allTags1 = [1,2,3,4,5,6,7,8,9,10]
+    const allTags2 = [11,12,13,14,15,16,17,18,19,20]
+    const ill1 = await Illustration.find(illus1.id)
+    await ill1.related('tags').attach(allTags1)
+    const ill2 = await Illustration.find(illus2.id)
+    await ill2.related('tags').attach(allTags2)
 
   }
 }
