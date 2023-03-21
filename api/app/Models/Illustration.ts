@@ -41,8 +41,8 @@ export default class Illustration extends BaseModel {
   })
   public places: HasMany<typeof Place>
 
-  @manyToMany(() => Tag,{
-    pivotTable: 'ill_tags',
+  @manyToMany(() => Tag, {
+    pivotTimestamps: true
   })
   public tags: ManyToMany<typeof Tag>
 

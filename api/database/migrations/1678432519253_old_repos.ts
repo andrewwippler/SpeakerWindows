@@ -26,7 +26,7 @@ export default class extends BaseSchema {
 
     //tags
     this.schema.createTable('tags', table => {
-      table.increments('id')
+      table.increments('id').primary()
       table.string('name').index('tag_name_index')
       table.timestamp('created_at', { useTz: true })
       table.timestamp('updated_at', { useTz: true })
@@ -34,7 +34,7 @@ export default class extends BaseSchema {
 
     //illustrations
     this.schema.createTable('illustrations', t => {
-      t.increments('id')
+      t.increments('id').primary()
       t.string('title').index('illustration_titles')
       t.string('author').index('illustration_authors')
       t.string('source')

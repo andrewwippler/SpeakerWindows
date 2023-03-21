@@ -124,6 +124,9 @@ class Api {
       })
       .then(json => {
         return json;
+      }).catch(error => {
+        console.log("FETCH ERROR: ",error)
+        return error
       });
   }
 

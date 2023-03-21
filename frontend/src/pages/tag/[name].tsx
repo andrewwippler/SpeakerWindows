@@ -115,7 +115,7 @@ export default function Tag() {
 
       <ul role="list">
 
-        {data.illustrations && data.illustrations.map((d,i) => (
+        {data.illustrations ? data.illustrations.map((d,i) => (
 
           <li key={i} className="group/item hover:bg-slate-200">
           <Link className="block pb-1 group-hover/item:underline" href={`/illustration/${d.id}`}>{d.title}</Link>
@@ -123,7 +123,10 @@ export default function Tag() {
             {d.content.substr(0,256)}...
           </div>
         </li>
-      ))}
+        ))
+          :
+          <div>No illustrations found</div>
+      }
       </ul>
       <ConfirmDialog handleAgree={handleDelete} title={name} deleteName="Tag" />
     </Layout>
