@@ -1,6 +1,7 @@
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import _ from 'lodash'
 import Tag from 'App/Models/Tag'
+import TagValidator from 'App/Validators/TagValidator'
 
 export default class TagsController {
 
@@ -88,6 +89,12 @@ export default class TagsController {
   public async update({ bouncer, params, request, response }: HttpContextContract) {
 
     const { name } = request.all()
+
+    try {
+      await request.validate(TagValidator)
+   } catch (error) {
+     return response.status(400).send(error.messages)
+   }
     // places are on their own URI. Tags can be in the illustration post
 
     let tag = await Tag.findOrFail(params.id)
