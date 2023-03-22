@@ -57,13 +57,13 @@ export default function IllustrationForm({ illustration }: {
       api.post(`/illustration`, form)
         .then(data => {
 
-          if (data.message != 'Updated successfully') {
+          if (data.message != 'Created successfully') {
             dispatch(setFlashMessage({ severity: 'danger', message: data.message }))
             return
           }
-          dispatch(setFlashMessage({ severity: 'success', message: `Illustration "${illustration?.title}" was created.` }))
+          dispatch(setFlashMessage({ severity: 'success', message: `Illustration "${form.title}" was created.` }))
           dispatch(setUpdateUI(true))
-          router.replace(`/illustration/${data.illustration.id}`)
+          router.replace(`/illustration/${data.id}`)
     });
     };
 

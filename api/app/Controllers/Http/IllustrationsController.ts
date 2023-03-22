@@ -1,4 +1,5 @@
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
+import TagSlugSanitizer from 'App/Helpers/Tag'
 import Illustration from 'App/Models/Illustration'
 import Place from 'App/Models/Place'
 import Tag from 'App/Models/Tag'
@@ -92,10 +93,13 @@ export default class IllustrationsController {
 
     const illustration = await Illustration.create(create_data)
     if (tags && tags.length > 0) {
-      tags.map(async tag => {
-        const tg = await Tag.firstOrCreate({ name: tag, user_id: auth.user?.id })
-        await illustration.related('tags').attach([tg.id])
+      const newTags = [...new Set(tags)].map(tag => {
+        return { slug: TagSlugSanitizer(tag+'-'+auth.user?.id), name: tag, user_id: auth.user?.id }
       })
+      // console.log(newTags)
+      // @ts-ignore
+      const allTags = await Tag.fetchOrCreateMany('slug', newTags)
+      await illustration.related('tags').saveMany(await allTags)
     }
 
     if (places && places.length > 0) {
@@ -131,17 +135,17 @@ export default class IllustrationsController {
     illustration.content = content
 
     await illustration.save()
-    let newTags: number[] = []
 
     if (tags && tags.length > 0) {
-      tags.map(async tag => {
-        const tg = await Tag.firstOrCreate({ name: tag, user_id: auth.user?.id })
-        newTags.push(tg.id)
+      const newTags = [...new Set(tags)].map(tag => {
+        return { slug: TagSlugSanitizer(tag+'-'+auth.user?.id), name: tag, user_id: auth.user?.id }
       })
+      // console.log(newTags)
+      // @ts-ignore
+      const allTags = await Tag.fetchOrCreateMany('slug', newTags)
+      await illustration.related('tags').detach()
+      await illustration.related('tags').saveMany(await allTags)
     }
-    // sync detaches and adds new
-    await illustration.related('tags').sync(await newTags)
-    // console.log("await",await newTags)
 
     const returnValue = await illustration.toJSON()
     returnValue.tags = await tags

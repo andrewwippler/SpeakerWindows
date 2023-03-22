@@ -60,8 +60,7 @@ export default function Tag() {
 
   const handleDelete = () => {
 
-    // console.log('handle delete')
-    // delete illustration
+    // delete tag
     api.delete(`/tags/${data.id}`, '')
       .then(data => {
         dispatch(setModal(false))
@@ -70,7 +69,7 @@ export default function Tag() {
           return
         }
         dispatch(setFlashMessage({severity: 'danger', message: `Tag "${name}" was deleted.`}))
-        router.back()
+        router.replace('/') // go home
   });
   };
 

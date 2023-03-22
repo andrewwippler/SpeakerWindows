@@ -119,7 +119,7 @@ test.group('Illustrations', (group) => {
       source: 'test',
       content: 'this shall pass',
       tags: [
-        'work', 'Home', 'testing camel case'
+        'work', 'Home', 'testing camel case', 'Home'
       ],
       places: [
         {
@@ -146,6 +146,7 @@ test.group('Illustrations', (group) => {
     // console.log(verify.body())
     assert.equal(verify.body().title, 'Testy Mctest') // should be State Case
     assert.equal(verify.body().tags[0].name, 'Home') // should be alphabetical
+    assert.equal(verify.body().tags.length, 3) // should only have 3
     assert.equal(verify.body().places[1].place, 'place1')
   })
 
