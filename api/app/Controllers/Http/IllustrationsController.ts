@@ -98,11 +98,11 @@ export default class IllustrationsController {
       })
     }
 
-    // if (places && places.length > 0) {
-    //   places.map(async (place) => {
-    //     await Place.create({...place, illustration_id: illustration.id, user_id})
-    //   })
-    // }
+    if (places && places.length > 0) {
+      places.map(async (place) => {
+        await Place.create({...place, illustration_id: illustration.id, user_id})
+      })
+    }
 
     return response.send({message: 'Created successfully', id: illustration.id})
   }
@@ -131,25 +131,18 @@ export default class IllustrationsController {
     illustration.content = content
 
     await illustration.save()
+    let newTags: number[] = []
 
     if (tags && tags.length > 0) {
-      // drop the tags and re-add them
-      await illustration.related('tags').detach()
-
       tags.map(async tag => {
-
-        const tg = await Tag.firstOrNew({ name: tag, user_id: auth.user?.id })
-        // let tg
-        // try {
-        //   tg = await Tag.query().where({ name: tag, user_id: auth.user?.id }).firstOrFail()
-        // } catch (e) {
-        //   tg = await Tag.create({ name: tag, user_id: auth.user?.id })
-        // }
-
-        await illustration.related('tags').attach([tg.id])
+        const tg = await Tag.firstOrCreate({ name: tag, user_id: auth.user?.id })
+        newTags.push(tg.id)
       })
-
     }
+    // sync detaches and adds new
+    await illustration.related('tags').sync(await newTags)
+    // console.log("await",await newTags)
+
     const returnValue = await illustration.toJSON()
     returnValue.tags = await tags
 
