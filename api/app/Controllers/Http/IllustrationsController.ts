@@ -98,11 +98,11 @@ export default class IllustrationsController {
       })
     }
 
-    if (places && places.length > 0) {
-      places.map(async (place) => {
-        await Place.create({...place, illustration_id: illustration.id, user_id})
-      })
-    }
+    // if (places && places.length > 0) {
+    //   places.map(async (place) => {
+    //     await Place.create({...place, illustration_id: illustration.id, user_id})
+    //   })
+    // }
 
     return response.send({message: 'Created successfully', id: illustration.id})
   }
