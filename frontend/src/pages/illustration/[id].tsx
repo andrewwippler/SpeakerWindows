@@ -12,10 +12,15 @@ import { selectModal, setModal } from '@/features/modal/reducer'
 import { setFlashMessage } from '@/features/flash/reducer'
 import IllustrationForm from '@/components/IllustrationForm';
 import { illustrationType } from '@/library/illustrationType';
+import { selectIllustrationEdit, setIllustrationEdit, selectUpdateUI, setUpdateUI } from '@/features/ui/reducer';
 
 export default function IllustrationWrapper() {
   const router = useRouter()
   const dispatch = useAppDispatch()
+
+  const editIllustration = useAppSelector(selectIllustrationEdit)
+  const refreshUI = useAppSelector(selectUpdateUI)
+
   const { user } = useUser({
     redirectTo: '/login',
   })
@@ -23,7 +28,6 @@ export default function IllustrationWrapper() {
   // console.log(router.query, name)
   const [illustration, setData] = useState<illustrationType>()
   const [isLoading, setLoading] = useState(false)
-  const [editIllustration, setEditIllustration] = useState(false)
 
   useEffect(() => {
     setLoading(true)
@@ -33,9 +37,10 @@ export default function IllustrationWrapper() {
     api.get(`/illustration/${router.query.id}`, '')
       .then(data => {
       setData(data);
-      setLoading(false)
+        setLoading(false)
+        dispatch(setUpdateUI(false))
     });
-  },[router.query.id])
+  },[router.query.id,refreshUI])
 
   if (isLoading) return <Layout>Loading...</Layout>
 
@@ -107,7 +112,7 @@ export default function IllustrationWrapper() {
         onClick={() => router.back()}>
           <ArrowLeftIcon className="h-4 w-4 mr-2" />Back
       </button>
-          <button onClick={() => router.back()} className='px-4 py-2 mr-4 mt-2 font-semibold text-sm bg-green-300 hover:bg-green-500 text-white rounded-full shadow-sm inline-flex items-center' >
+          <button onClick={() => dispatch(setIllustrationEdit(true))} className='px-4 py-2 mr-4 mt-2 font-semibold text-sm bg-green-300 hover:bg-green-500 text-white rounded-full shadow-sm inline-flex items-center' >
             <PencilSquareIcon className="h-4 w-4 mr-2" />Edit Illustration</button>
           <ConfirmDialog handleAgree={handleDelete} title={illustration?.title} deleteName="Illustration" />
           <button onClick={() => dispatch(setModal(true))} className='px-4 py-2 mr-4 mt-2 font-semibold text-sm bg-red-300 hover:bg-red-500 text-white rounded-full shadow-sm inline-flex items-center'>

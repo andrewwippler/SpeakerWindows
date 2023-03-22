@@ -1,7 +1,8 @@
 import { DateTime } from 'luxon'
-import { BaseModel, column, manyToMany, ManyToMany } from '@ioc:Adonis/Lucid/Orm'
+import { BaseModel, beforeSave, column, manyToMany, ManyToMany } from '@ioc:Adonis/Lucid/Orm'
 import Illustration from './Illustration'
 import { _ } from 'lodash'
+import TagSlugSanitizer from 'App/Helpers/Tag'
 
 function fixName(name) {
   let first = _.startCase(name)
@@ -14,6 +15,9 @@ export default class Tag extends BaseModel {
 
   @column()
   public user_id: number
+
+  @column()
+  public slug: string
 
   @column({
     prepare: (value: string) => fixName(value), // uppercase the Title.
@@ -30,4 +34,13 @@ export default class Tag extends BaseModel {
     pivotTimestamps: true
   })
   public illustrations: ManyToMany<typeof Illustration>
+
+  @beforeSave()
+  public static async createSlug (tag: Tag) {
+    if (!tag.slug) {
+      tag.slug = tag.name+'-'+tag.user_id
+    }
+    tag.slug = TagSlugSanitizer(tag.slug)
+
+  }
 }

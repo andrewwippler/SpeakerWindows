@@ -75,7 +75,7 @@ test.group('Tag', (group) => {
     const response = await client.get('/tag/Searching').bearerToken(loggedInUser.body().token)
 
     response.assertStatus(200)
-    console.log(response.body())
+    // console.log(response.body())
     assert.isTrue(response.body().name == 'Searching')
     assert.isTrue(response.body().id == tags.id)
     assert.isTrue(response.body().illustrations.length == 1)

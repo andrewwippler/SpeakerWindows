@@ -51,7 +51,7 @@ export const runnerHooks: Pick<Required<Config>, 'setup' | 'teardown'> = {
     () => TestUtils.ace().loadCommands(),
     () => TestUtils.db().truncate()
   ],
-  teardown: [],
+  teardown: [() => TestUtils.db().truncate()],
 }
 
 /*
