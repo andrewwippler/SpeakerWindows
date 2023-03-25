@@ -1,9 +1,10 @@
 import { createSlice } from '@reduxjs/toolkit'
 
 import type { AppState } from '@/store'
+import { tagType } from '@/library/tagtype'
 
 export interface TagState {
-  tags: Array<object>
+  tags: tagType[]
 }
 
 const initialState: TagState = {
@@ -18,11 +19,19 @@ export const tagReducer = createSlice({
     setTags: (state, actions) => {
       state.tags = actions.payload
     },
+    addTag: (state, actions) => {
+      state.tags.push(actions.payload)
+    },
+    removeTag: (state, actions) => {
+      state.tags = state.tags.filter(item => item.name !== actions.payload)
+    },
   },
 
 })
-export const getTags = (state: AppState) => state.tags
+export const getTags = (state: AppState) => state.tags.tags
 
-export const { setTags } = tagReducer.actions
+export const getFormattedTags = (state: AppState) => { return state.tags.tags.map(tag => { return tag.name }) }
+
+export const { setTags, addTag, removeTag } = tagReducer.actions
 
 export default tagReducer.reducer
