@@ -15,7 +15,7 @@ export default function IllustrationForm({ illustration }: {
   }) {
     const router = useRouter()
     const dispatch = useAppDispatch()
-    const formattedTags = useAppSelector(getFormattedTags) // TODO
+    const formattedTags = useAppSelector(getFormattedTags)
     const { user } = useUser({
       redirectTo: '/login',
     })

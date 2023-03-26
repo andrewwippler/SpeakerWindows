@@ -1,9 +1,10 @@
 import { useAppSelector, useAppDispatch } from '@/hooks'
 import api from '@/library/api'
-import { useState, useEffect, MouseEvent, ChangeEvent, useRef } from 'react'
+import { useState, useEffect, ChangeEvent, useRef, KeyboardEvent } from 'react'
 import { tagType } from '@/library/tagtype';
 import { getTags, setTags, addTag, removeTag } from '@/features/tags/reducer';
 import { XMarkIcon } from '@heroicons/react/24/solid';
+import _ from 'lodash';
 
 export default function TagSelect({ defaultValue }:{ defaultValue: string | tagType[] }) {
 
@@ -15,7 +16,7 @@ export default function TagSelect({ defaultValue }:{ defaultValue: string | tagT
   const [showAutoComplete, show] = useState(false)
   const [filteredTags, setFilteredTags] = useState([]);
   const illustrationTags = useAppSelector(getTags);
-  const inputRef = useRef(null);
+  const inputRef = useRef<HTMLInputElement>(null);
   const inheritedTags = defaultValue
 
   useEffect(() => {
@@ -28,34 +29,52 @@ export default function TagSelect({ defaultValue }:{ defaultValue: string | tagT
   }, [dispatch, inheritedTags])
 
   const search = (event: ChangeEvent<HTMLInputElement>) => {
-    // Timeout to emulate a network connection
-
     let _filteredTags;
-    show(true)
-    // console.log(event.target.value)
-        if (!event.target.value.trim().length) {
-            _filteredTags = [...tags];
-        }
-        else {
-            _filteredTags = tags.filter((tag: tagType) => {
-                return tag.name.toLowerCase().startsWith(event.target.value.toLowerCase());
-            });
-          }
-          setFilteredTags(_filteredTags);
+
+    //show if 2 or more characters
+    if (event.target.value.trim().length > 2) {
+      show(true)
+    }
+
+    if (!event.target.value.trim().length) {
+        _filteredTags = [...tags];
+    } else {
+      _filteredTags = tags.filter((tag: tagType) => {
+          return tag.name.toLowerCase().startsWith(event.target.value.toLowerCase());
+      });
+    }
+    setFilteredTags(_filteredTags);
+  }
+
+  const handleKeyPress = (event: KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === ",") {
+      event.preventDefault()
+      if (inputRef.current) {
+        handleTagAdd(inputRef.current.value)
+      }
+    }
+    if (event.key === 'Enter') {
+      event.preventDefault()
+      if (inputRef.current) {
+        handleTagAdd(inputRef.current.value)
+      }
+    }
   }
 
   const handleTagAutoCompleteClicked = (event: any) : void => {
-    // console.log("tag clicked", event.target.innerText)
-
-    show(false)
-    // @ts-ignore
-    inputRef.current.value = ''
-    // @ts-ignore
-    dispatch(addTag({ name: event.target.innerText }))
+    handleTagAdd(event.target.innerText)
   }
 
   const handleTagRemove = (name: string) => {
     dispatch(removeTag(name.trim()))
+  }
+
+  const handleTagAdd = (name: string) => {
+    show(false)
+    if (inputRef.current) {
+      inputRef.current.value = ''
+    }
+    dispatch(addTag({ name: _.startCase(name) }))
   }
 
   if (isLoading) return <p>Loading Tags...</p>
@@ -80,13 +99,13 @@ export default function TagSelect({ defaultValue }:{ defaultValue: string | tagT
         className='clear-left ml-1 px-2 text-sky-900'
         autoComplete='off'
         onChange={e => search(e)}
-        onBlur={() => show(false)}
+        onKeyDown={e => handleKeyPress(e) }
         ref={inputRef}
       />
 
     </div>
       {showAutoComplete && filteredTags.map((tag: tagType, index) => {
-        return <div key={index} className='bg-sky-300 p-2 m-1 text-white rounded-md z-10' onClick={e => handleTagAutoCompleteClicked(e)}>{tag.name}</div>
+        return <div key={tag.name + index} className='bg-sky-300 p-2 m-1 text-white rounded-md z-10' onClick={e => handleTagAutoCompleteClicked(e)}>{tag.name}</div>
       })}
       </>
   )

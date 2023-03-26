@@ -19,7 +19,6 @@ export const userReducer = createSlice({
       state.apitoken
     },
     setToken: (state, actions) => {
-      // console.log("dispatch",state.apitoken, actions.payload)
       state.apitoken = actions.payload
     },
   },

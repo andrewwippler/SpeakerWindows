@@ -18,11 +18,9 @@ export const uiReducer = createSlice({
   // The `reducers` field lets us define reducers and generate associated actions
   reducers: {
     setIllustrationEdit: (state, actions) => {
-      // console.log("modal",state.illustrationEdit, actions.payload)
       state.illustrationEdit = actions.payload
     },
     setUpdateUI: (state, actions) => {
-      // console.log("modal",state.illustrationEdit, actions.payload)
       state.updateUI = actions.payload
     },
   },

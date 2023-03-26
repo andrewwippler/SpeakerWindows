@@ -25,11 +25,9 @@ export const flashReducer = createSlice({
   // The `reducers` field lets us define reducers and generate associated actions
   reducers: {
     setFlash: (state, actions) => {
-      // console.log("flash",state.show, actions.payload)
       state.show = actions.payload
     },
     setFlashMessage: (state, actions) => {
-      // console.log("flash",state.show, actions.payload)
       state.show = true
       state.object = actions.payload
     },

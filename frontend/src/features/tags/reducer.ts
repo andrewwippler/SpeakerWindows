@@ -2,6 +2,7 @@ import { createSlice } from '@reduxjs/toolkit'
 
 import type { AppState } from '@/store'
 import { tagType } from '@/library/tagtype'
+import _ from 'lodash'
 
 export interface TagState {
   tags: tagType[]
@@ -20,7 +21,11 @@ export const tagReducer = createSlice({
       state.tags = actions.payload
     },
     addTag: (state, actions) => {
-      state.tags.push(actions.payload)
+      // Remove duplicate tags, must include space to - conversion
+      if (!state.tags.some(item => item.name === actions.payload.name.replace(/ /g, '-'))) {
+        state.tags = [...state.tags, actions.payload]
+      }
+
     },
     removeTag: (state, actions) => {
       state.tags = state.tags.filter(item => item.name !== actions.payload)
@@ -30,7 +35,12 @@ export const tagReducer = createSlice({
 })
 export const getTags = (state: AppState) => state.tags.tags
 
-export const getFormattedTags = (state: AppState) => { return state.tags.tags.map(tag => { return tag.name }) }
+export const getFormattedTags = (state: AppState) => {
+  if (state.tags.tags) {
+    return state.tags.tags.map(tag => { return tag.name })
+  }
+  return null
+}
 
 export const { setTags, addTag, removeTag } = tagReducer.actions
 
