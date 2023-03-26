@@ -33,6 +33,9 @@ jobs:
           push: true
           tags: ${{ env.REGISTRY }}/${{ env.REPOSITORY }}:api-${{ github.sha }}
 
+      - name: Echo public API
+        run: echo "NEXT_PUBLIC_HOST_URL=https://sw-api.wplr.rocks" > frontend/.env.local
+
       - name: Build and push Frontend image
         uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
         with:

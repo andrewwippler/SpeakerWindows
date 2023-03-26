@@ -1,9 +1,4 @@
 import store from '@/store';
-import getConfig from 'next/config';
-
-const {
-  publicRuntimeConfig: { processEnv },
-} = getConfig();
 
 const defaultHeaders = {
   'Accept': 'application/json',
@@ -14,8 +9,6 @@ const defaultMultiHeaders = {
   'Accept': 'application/json',
   'Content-Type': 'application/x-www-form-urlencoded',
 };
-
-const { NEXT_PUBLIC_HOST_URL } = processEnv;
 
 class Api {
   headers() {
@@ -88,7 +81,7 @@ class Api {
         options.body.append(key, params[key]);
       }
     }
-    const url = `${NEXT_PUBLIC_HOST_URL}${route}`;
+    const url = `${process.env.NEXT_PUBLIC_HOST_URL}${route}`;
 
     return fetch(url, options)
       .then(resp => {
@@ -113,10 +106,10 @@ class Api {
     let query, url;
     if (verb === 'GET') {
       query = this.getQuery(params);
-      (!query) ? url = `${NEXT_PUBLIC_HOST_URL}${route}` : url = `${NEXT_PUBLIC_HOST_URL}${route}?${query}`;
+      (!query) ? url = `${process.env.NEXT_PUBLIC_HOST_URL}${route}` : url = `${process.env.NEXT_PUBLIC_HOST_URL}${route}?${query}`;
     } else {
       options.body = JSON.stringify(params);
-      url = `${NEXT_PUBLIC_HOST_URL}${route}`;
+      url = `${process.env.NEXT_PUBLIC_HOST_URL}${route}`;
     }
     return fetch(url, options)
       .then(resp => {
