@@ -109,7 +109,6 @@ class Api {
       (!query) ? url = `${process.env.NEXT_PUBLIC_HOST_URL}${route}` : url = `${process.env.NEXT_PUBLIC_HOST_URL}${route}?${query}`;
     } else {
       options.body = JSON.stringify(params);
-      // console.log("options body", options)
       url = `${process.env.NEXT_PUBLIC_HOST_URL}${route}`;
     }
     return fetch(url, options)
@@ -139,4 +138,4 @@ class Api {
 }
 
 // @ts-ignore
-export default new Api();
+export default Api = new Api();

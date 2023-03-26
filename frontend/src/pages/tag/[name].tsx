@@ -21,7 +21,7 @@ export default function Tag() {
     redirectTo: '/login',
   })
   // remove - for visual representation
-  let name = _.get(router.query, 'name', '').replace('-', ' ')
+  let name = _.get(router.query, 'name', '').replace(/-/g, ' ')
 
   const [data, setData] = useState([])
   const [isLoading, setLoading] = useState(false)
@@ -33,7 +33,7 @@ export default function Tag() {
       return
     }
     // add - for data fetching
-    api.get(`/tag/${name}`.replace(' ', '-'), '')
+    api.get(`/tag/${name}`.replace(/ /g, '-'), '')
       .then(data => {
         setData(data); // illustrations
       setLoading(false)

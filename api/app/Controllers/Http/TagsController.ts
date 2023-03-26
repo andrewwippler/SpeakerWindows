@@ -53,7 +53,7 @@ export default class TagsController {
    * @param {Response} ctx.response
    * @param {View} ctx.view
    */
-   public async illustrations({ params, auth, response }: HttpContextContract) {
+   public async illustrations({ params, auth }: HttpContextContract) {
 
     const thetag = _.get(params, 'name', '')
 

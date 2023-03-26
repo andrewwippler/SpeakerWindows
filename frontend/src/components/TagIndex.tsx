@@ -27,7 +27,6 @@ function Tags() {
   let columnOneData = _.take(data, rows_per_column);
   let columnTwoData = _.takeRight(_.take(data, rows_per_column * 2), rows_per_column);
   let columnThreeData = _.takeRight(data, data.length-(rows_per_column*2));
-  // console.log(rows_per_column, data, columnOneData, columnTwoData,columnThreeData)
     return (
     <>
         <div className="text-xl font-bold text-sky-900 pb-4">Tags</div>

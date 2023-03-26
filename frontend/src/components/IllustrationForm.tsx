@@ -1,21 +1,21 @@
 import { FormEvent } from 'react'
-import { LockClosedIcon, ArrowLeftIcon } from '@heroicons/react/24/solid'
-import { AppProps } from 'next/app'
+import { ArrowLeftIcon } from '@heroicons/react/24/solid'
 import api from '@/library/api'
 import { useAppSelector, useAppDispatch } from '@/hooks'
-import { selectModal, setModal } from '@/features/modal/reducer'
 import { setFlashMessage } from '@/features/flash/reducer'
 import useUser from '@/library/useUser';
 import { useRouter } from 'next/router'
 import { illustrationType } from '@/library/illustrationType'
-import { tagType } from '@/library/tagtype'
 import { setIllustrationEdit, setUpdateUI } from '@/features/ui/reducer'
+import TagSelect from './TagSelect/TagSelect'
+import { getFormattedTags } from '@/features/tags/reducer';
 
 export default function IllustrationForm({ illustration }: {
   illustration?: illustrationType
   }) {
     const router = useRouter()
     const dispatch = useAppDispatch()
+    const formattedTags = useAppSelector(getFormattedTags)
     const { user } = useUser({
       redirectTo: '/login',
     })
@@ -33,8 +33,7 @@ export default function IllustrationForm({ illustration }: {
   }
 
   const handleEditSave = (event: FormEvent<HTMLFormElement>) => {
-    const form = grabAndReturnObject(event.currentTarget)
-
+    let form = grabAndReturnObject(event.currentTarget)
     // update illustration
     api.put(`/illustration/${illustration?.id}`, form)
       .then(data => {
@@ -50,9 +49,8 @@ export default function IllustrationForm({ illustration }: {
     });
     };
 
-    const handleNewSave = (event: FormEvent<HTMLFormElement>) => {
-
-      const form = grabAndReturnObject(event.currentTarget)
+  const handleNewSave = (event: FormEvent<HTMLFormElement>) => {
+    let form = grabAndReturnObject(event.currentTarget)
 
       api.post(`/illustration`, form)
         .then(data => {
@@ -67,20 +65,12 @@ export default function IllustrationForm({ illustration }: {
     });
     };
 
-    const formatTags = (tags: tagType[]) => {
-      let string = ''
-      tags.map((tag) => {
-        string = string + tag.name + ', '
-      })
-      return string
-    }
-
   const grabAndReturnObject = (form: EventTarget & HTMLFormElement) => {
     return {
       title: form.ititle.value.trim(),
       author: form.author.value.trim(),
       source: form.source.value.trim(),
-      tags: form.tags.value.trim().split(', '),
+      tags: formattedTags,
       content: form.content.value.trim(),
     }
     }
@@ -136,19 +126,11 @@ export default function IllustrationForm({ illustration }: {
                       />
                     </div>
 
-
                     <div className="col-span-6">
                       <label htmlFor="tags" className="block text-sm font-medium leading-6 text-gray-900">
                         Tags
-                      </label>
-                      <input
-                        type="text"
-                        name="tags"
-                        id="tags"
-                        placeholder="Tags"
-                        defaultValue={edit && illustration ? formatTags(illustration.tags) : ''}
-                        className="mt-2 block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-                      />
+                  </label>
+                      <TagSelect defaultValue={edit && illustration ? illustration.tags : ''} />
                     </div>
                     <div className="col-span-6">
                       <label htmlFor="content" className="block text-sm font-medium leading-6 text-gray-900">

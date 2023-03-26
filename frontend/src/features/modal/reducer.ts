@@ -17,7 +17,6 @@ export const modalReducer = createSlice({
   // The `reducers` field lets us define reducers and generate associated actions
   reducers: {
     setModal: (state, actions) => {
-      // console.log("modal",state.show, actions.payload)
       state.show = actions.payload
     },
   },

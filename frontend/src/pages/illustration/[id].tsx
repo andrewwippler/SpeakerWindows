@@ -25,7 +25,6 @@ export default function IllustrationWrapper() {
     redirectTo: '/login',
   })
 
-  // console.log(router.query, name)
   const [illustration, setData] = useState<illustrationType>()
   const [isLoading, setLoading] = useState(false)
 
@@ -40,7 +39,7 @@ export default function IllustrationWrapper() {
         setLoading(false)
         dispatch(setUpdateUI(false))
     });
-  },[router.query.id,refreshUI])
+  },[router.query.id,refreshUI, dispatch])
 
   if (isLoading) return <Layout>Loading...</Layout>
 
@@ -56,7 +55,6 @@ export default function IllustrationWrapper() {
   }
 
   const handleDelete = () => {
-    console.log('handle delete')
     // delete illustration
     api.delete(`/illustration/${illustration?.id}`, '')
     .then(data => {
@@ -93,7 +91,7 @@ export default function IllustrationWrapper() {
         <div>
           <span className="font-bold pr-2">Tags:</span>
           {illustration?.tags ? illustration.tags.map((tag, index, arr) => (
-            <Link key={index} className="inline-block mr-2 text-sky-500" href={`/tag/${tag.name.replace(/ /g, "-")}`}>{tag.name}{index != (arr.length-1) ? ', ' : ''}</Link>
+            <Link key={index} className="inline-block mr-2 text-sky-500" href={`/tag/${tag.name}`}>{tag.name.replace(/-/g, " ")}{index != (arr.length-1) ? ', ' : ''}</Link>
             ))
             : 'no tags'}
     </div>

@@ -1,5 +1,5 @@
 import Layout from '@/components/Layout'
-import Tags from '@/components/tags';
+import Tags from '@/components/TagIndex';
 import useUser from '@/library/useUser';
 
 export default function Home() {
