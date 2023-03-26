@@ -139,4 +139,4 @@ class Api {
 }
 
 // @ts-ignore
-export default new Api();
+export default Api = new Api();

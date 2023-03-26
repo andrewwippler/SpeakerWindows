@@ -1,15 +1,11 @@
 import { FormEvent } from 'react'
-import { LockClosedIcon, ArrowLeftIcon } from '@heroicons/react/24/solid'
-import { AutoComplete } from 'primereact/autocomplete'
-import { AppProps } from 'next/app'
+import { ArrowLeftIcon } from '@heroicons/react/24/solid'
 import api from '@/library/api'
 import { useAppSelector, useAppDispatch } from '@/hooks'
-import { selectModal, setModal } from '@/features/modal/reducer'
 import { setFlashMessage } from '@/features/flash/reducer'
 import useUser from '@/library/useUser';
 import { useRouter } from 'next/router'
 import { illustrationType } from '@/library/illustrationType'
-import { tagType } from '@/library/tagtype'
 import { setIllustrationEdit, setUpdateUI } from '@/features/ui/reducer'
 import TagSelect from './TagSelect/TagSelect'
 import { getFormattedTags } from '@/features/tags/reducer';

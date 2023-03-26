@@ -36,7 +36,7 @@ export default function LegacyIllustration() {
         router.replace(`/illustration/${data.id}`)
         setLoading(false)
     });
-  },[id])
+  },[id, dispatch, router])
 
   if (isLoading) return (
     <Layout>

@@ -40,7 +40,7 @@ export default function IllustrationWrapper() {
         setLoading(false)
         dispatch(setUpdateUI(false))
     });
-  },[router.query.id,refreshUI])
+  },[router.query.id,refreshUI, dispatch])
 
   if (isLoading) return <Layout>Loading...</Layout>
 

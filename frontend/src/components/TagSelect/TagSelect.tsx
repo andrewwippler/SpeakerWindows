@@ -5,7 +5,7 @@ import { tagType } from '@/library/tagtype';
 import { getTags, setTags, addTag, removeTag } from '@/features/tags/reducer';
 import { XMarkIcon } from '@heroicons/react/24/solid';
 
-export default function TagSelect({ defaultValue }:{ defaultValue: tagType[] }) {
+export default function TagSelect({ defaultValue }:{ defaultValue: string | tagType[] }) {
 
 
   const dispatch = useAppDispatch()
@@ -16,15 +16,16 @@ export default function TagSelect({ defaultValue }:{ defaultValue: tagType[] }) 
   const [filteredTags, setFilteredTags] = useState([]);
   const illustrationTags = useAppSelector(getTags);
   const inputRef = useRef(null);
+  const inheritedTags = defaultValue
 
   useEffect(() => {
     setLoading(true)
     api.get('/tags', '').then(tags => {
       setLocalTags(tags);
-      dispatch(setTags(defaultValue))
+      dispatch(setTags(inheritedTags))
       setLoading(false)
     });
-  }, [])
+  }, [dispatch, inheritedTags])
 
   const search = (event: ChangeEvent<HTMLInputElement>) => {
     // Timeout to emulate a network connection
@@ -36,19 +37,20 @@ export default function TagSelect({ defaultValue }:{ defaultValue: tagType[] }) 
             _filteredTags = [...tags];
         }
         else {
-            _filteredTags = tags.filter((tag) => {
+            _filteredTags = tags.filter((tag: tagType) => {
                 return tag.name.toLowerCase().startsWith(event.target.value.toLowerCase());
             });
           }
           setFilteredTags(_filteredTags);
   }
 
-  const handleTagAutoCompleteClicked = (event: MouseEvent<HTMLDivElement, MouseEvent>) => {
-    console.log("tag clicked", event.target.innerText)
+  const handleTagAutoCompleteClicked = (event: any) : void => {
+    // console.log("tag clicked", event.target.innerText)
 
     show(false)
     // @ts-ignore
     inputRef.current.value = ''
+    // @ts-ignore
     dispatch(addTag({ name: event.target.innerText }))
   }
 
@@ -83,8 +85,8 @@ export default function TagSelect({ defaultValue }:{ defaultValue: tagType[] }) 
       />
 
     </div>
-      {showAutoComplete && filteredTags.map((tag: tagType) => {
-        return <div className='bg-sky-300 p-2 m-1 text-white rounded-md z-10' onClick={e => handleTagAutoCompleteClicked(e)}>{tag.name}</div>
+      {showAutoComplete && filteredTags.map((tag: tagType, index) => {
+        return <div key={index} className='bg-sky-300 p-2 m-1 text-white rounded-md z-10' onClick={e => handleTagAutoCompleteClicked(e)}>{tag.name}</div>
       })}
       </>
   )
