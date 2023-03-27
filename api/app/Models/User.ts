@@ -7,7 +7,6 @@ import Tag from './Tag'
 import Place from './Place'
 import { v4 } from 'uuid'
 
-
 export default class User extends BaseModel {
   @column({ isPrimary: true })
   public id: number
@@ -17,6 +16,12 @@ export default class User extends BaseModel {
 
   @column()
   public email: string
+
+  @column({ serializeAs: null })
+  public tos: boolean
+
+  @column({ serializeAs: null })
+  public thirteen: boolean
 
   @column({ serializeAs: null })
   public password: string

@@ -11,14 +11,6 @@ export default function Form({
 }) {
   return (
       <>
-      {/*
-        This example requires updating your template:
-
-        ```
-        <html class="h-full bg-gray-50">
-        <body class="h-full">
-        ```
-      */}
       <div className="flex min-h-full items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
         <div className="w-full max-w-md space-y-8">
           <div>
@@ -26,12 +18,12 @@ export default function Form({
             <h2 className="mt-6 text-center text-3xl font-bold tracking-tight text-gray-900">
               Sign in to your account
             </h2>
-            {/* <p className="mt-2 text-center text-sm text-gray-600">
+            <p className="mt-2 text-center text-sm text-gray-600">
               Or{' '}
               <Link href="/register" className="font-medium text-sky-600 hover:text-sky-500">
-                register your account
+                register a new account
               </Link>
-            </p> */}
+            </p>
           </div>
           <form className="mt-8 space-y-6" onSubmit={onSubmit}>
             <input type="hidden" name="remember" defaultValue="true" />
@@ -48,7 +40,6 @@ export default function Form({
                   required
                   className="relative block w-full rounded-t-md border-0 py-1.5 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:z-10 focus:ring-2 focus:ring-inset focus:ring-sky-600 sm:text-sm sm:leading-6"
                   placeholder="Email address"
-                  defaultValue="test@test.com"
                 />
               </div>
               <div>
@@ -63,7 +54,6 @@ export default function Form({
                   required
                   className="relative block w-full rounded-b-md border-0 py-1.5 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:z-10 focus:ring-2 focus:ring-inset focus:ring-sky-600 sm:text-sm sm:leading-6"
                   placeholder="Password"
-                  defaultValue="Test1234"
                 />
               </div>
             </div>
