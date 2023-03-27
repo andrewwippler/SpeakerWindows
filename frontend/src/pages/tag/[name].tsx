@@ -119,7 +119,7 @@ export default function Tag() {
           <li key={i} className="group/item hover:bg-slate-200">
           <Link className="block pb-1 group-hover/item:underline" href={`/illustration/${d.id}`}>{d.title}</Link>
           <div className='invisible h-0 group-hover/item:h-auto group-hover/item:visible'>
-            {d.content.substr(0,256)}...
+            {d.content.slice(0,256)}...
           </div>
         </li>
         ))

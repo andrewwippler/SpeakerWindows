@@ -7,7 +7,7 @@ import useUser from '@/library/useUser';
 import { useRouter } from 'next/router'
 import { illustrationType } from '@/library/illustrationType'
 import { setIllustrationEdit, setUpdateUI } from '@/features/ui/reducer'
-import TagSelect from './TagSelect/TagSelect'
+import TagSelect from './TagSelect'
 import { getFormattedTags } from '@/features/tags/reducer';
 
 export default function IllustrationForm({ illustration }: {

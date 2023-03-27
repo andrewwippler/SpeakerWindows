@@ -59,6 +59,9 @@ Route.group(() =>{
   Route.put('/places/:id', 'PlacesController.update')
   Route.delete('/places/:id', 'PlacesController.destroy')
 
+  //search
+  Route.post('/search', 'SearchesController.search')
+
   // Images
 //   Route.post('/upload', async ({ request }: ) => {
 // // to read: https://docs.adonisjs.com/guides/file-uploads

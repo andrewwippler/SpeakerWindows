@@ -22,6 +22,9 @@ export const tagReducer = createSlice({
     },
     addTag: (state, actions) => {
       // Remove duplicate tags, must include space to - conversion
+      if (!state.tags) {
+        state.tags = [actions.payload]
+      }
       if (!state.tags.some(item => item.name === actions.payload.name.replace(/ /g, '-'))) {
         state.tags = [...state.tags, actions.payload]
       }

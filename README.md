@@ -13,17 +13,14 @@ The project aims to have an testable API which allows the use of multiuser authe
 Need 3 terminals open to run:
 1. `docker-compose up`
 2. `cd api && yarn dev`
-3.  `cd frontend && yarn dev`
+3. `cd frontend && yarn dev`
 
-## Upgrading
+## Migrating from Speaker-Illustrations
 
 1. Clone this repository
-2. Place .sql backup inside `./tmp/seeds`
-3. `docker-compose up`
-4. `docker-compose exec api bash`
-5. `adonis migration:run`
-
-TODO: Update user password
+2. Place Speaker-Illustrations-backup.sql inside `./tmp/seeds`
+3. run `docker-compose up`
+4. run `cd api && node ace migration:run`
 
 ## Project Timeline
 
@@ -48,7 +45,7 @@ Version 0.4.0
 
 Version 0.5.0
 
-- User Preferences
+- User Preferences (password, API key)
 - Image uploads
 
 Version 0.6.0

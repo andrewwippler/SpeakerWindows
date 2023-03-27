@@ -81,22 +81,21 @@ export default function TagSelect({ defaultValue }:{ defaultValue: string | tagT
 
   return (
     <>
-    <div className=' text-white content-center text-sm flex flex-wrap mt-2 w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6'>
+    <div className='content-center text-sm flex flex-wrap mt-2 w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6'>
       {illustrationTags && illustrationTags.map((tag, index) => {
-        return <>
+        return <div key={index} className='group'>
         <div
-          key={index}
-          className="inline-flex items-center px-2 py-1 ml-2 mb-2 text-sm font-medium text-sky-800 bg-sky-100 rounded dark:bg-sky-900 dark:text-sky-300"
+          className="group-hover:text-white group-hover:bg-sky-900 inline-flex items-center px-2 py-1 ml-2 my-1 text-sm font-medium text-sky-800 bg-sky-200 rounded"
           >
           {tag.name}
-          <XMarkIcon onClick={e => handleTagRemove(tag.name)} className='ml-1 w-3.5 h-3.5 bg-sky-100' aria-hidden="true" />
+          <XMarkIcon onClick={e => handleTagRemove(tag.name)} className='group-hover:text-white group-hover:bg-sky-900 ml-1 w-3.5 h-3.5 bg-sky-200' aria-hidden="true" />
           </div>
-          </>
+          </div>
       })}
       <input
         name='tags'
         placeholder='Add New Tag...'
-        className='clear-left ml-1 px-2 text-sky-900'
+        className='ml-1 px-2 text-sky-900 border-0 focus:ring-2 ring-inset focus:ring-inset focus:ring-indigo-600'
         autoComplete='off'
         onChange={e => search(e)}
         onKeyDown={e => handleKeyPress(e) }
