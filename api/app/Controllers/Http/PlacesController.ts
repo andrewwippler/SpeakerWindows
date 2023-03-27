@@ -46,7 +46,7 @@ export default class PlacesController {
     }
 
     const place = await Place.create(posted)
-
+    await illustration.related('places').save(place)
     return response.send({message: 'Created successfully', id: place.id})
   }
 

@@ -1,6 +1,7 @@
 export type placeType = {
+  id: string | undefined
   place: string,
   location: string,
-  used: Date,
+  used: string,
   illustration_id: number
 }
