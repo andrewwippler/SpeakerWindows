@@ -28,9 +28,11 @@ export default class Place extends BaseModel {
   @column.dateTime({ autoCreate: true, autoUpdate: true })
   public updatedAt: DateTime
 
-  @belongsTo(() => Illustration)
-  public illustrations: BelongsTo<typeof Illustration>
+  @belongsTo(() => Illustration, {
+    foreignKey: 'illustration_id',
+  })
+  public illustration: BelongsTo<typeof Illustration>
 
   @belongsTo(() => User)
-  public users: BelongsTo<typeof User>
+  public user: BelongsTo<typeof User>
 }
