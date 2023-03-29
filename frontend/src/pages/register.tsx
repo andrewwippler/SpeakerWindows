@@ -13,7 +13,6 @@ const dispatch = useAppDispatch()
   const onSubmit = (event: FormEvent<HTMLFormElement>) => {
   event.preventDefault()
   let form = grabAndReturnObject(event.currentTarget)
-    console.log(form)
 
     if (form.password != form.password_confirmation) {
       dispatch(setFlashMessage({ severity: 'danger', message: "Passwords do not match" }))
@@ -21,7 +20,6 @@ const dispatch = useAppDispatch()
     }
     api.post(`/register`, form)
       .then(data => {
-        console.log(data)
         if (data.message != 'Created successfully') {
           data.errors.map((e: any) => {
             dispatch(setFlashMessage({ severity: 'danger', message: e.message }))

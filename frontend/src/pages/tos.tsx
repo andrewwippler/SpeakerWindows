@@ -12,14 +12,14 @@ export default function TermsOfService() {
           <span className='mr-4 col-span-6'>SpeakerWindows Terms of Use</span>
           <span className='text-sm'>Last updated: 2023-Mar-27</span>
         </div>
-        <p>Welcome to the SpeakerWindow's Terms of Use agreement. For purposes of this agreement, “Site” refers to the Company’s website, which can be accessed at <Link className='underline' href='/'>https://sw.wplr.rocks</Link> or through our mobile application. “Service” refers to the Company’s services accessed via the Site, in which users can store and retrieve personal illustrations, attachments, tags, and places where these are used. The terms “we,” “us,” and “our” refer to the Company. “You” refers to you, as a user of our Site or our Service.</p>
+        <p>Welcome to the SpeakerWindow&apos;s Terms of Use agreement. For purposes of this agreement, “Site” refers to the Company&apos;s website, which can be accessed at <Link className='underline' href='/'>https://sw.wplr.rocks</Link> or through our mobile application. “Service” refers to the Company’s services accessed via the Site, in which users can store and retrieve personal illustrations, attachments, tags, and places where these are used. The terms “we,” “us,” and “our” refer to the Company. “You” refers to you, as a user of our Site or our Service.</p>
 
         <p>The following Terms of Use apply when you view or use the Service via our website located at <Link className='underline' href='/'>https://sw.wplr.rocks</Link> or by accessing the Service through clicking on the application (the “App”) on your mobile device.</p>
 
         <p>Please review the following terms carefully. By accessing or using the Service, you signify your agreement to these Terms of Use. If you do not agree to be bound by these Terms of Use in their entirety, you may not access or use the Service.</p>
 
       <div className="text-xl font-bold pt-8 text-sky-900">PRIVACY POLICY</div>
-        <p>The Company respects the privacy of its Service users. Please refer to the Company’s Privacy Policy (found here: <Link className='underline' href='/privacy-policy'>https://sw.wplr.rocks/privacy-policy</Link>) which explains how we collect, use, and disclose information that pertains to your privacy. When you access or use the Service, you signify your agreement to the Privacy Policy as well as these Terms of Use.</p>
+        <p>The Company respects the privacy of its Service users. Please refer to the Company&apos;s Privacy Policy (found here: <Link className='underline' href='/privacy-policy'>https://sw.wplr.rocks/privacy-policy</Link>) which explains how we collect, use, and disclose information that pertains to your privacy. When you access or use the Service, you signify your agreement to the Privacy Policy as well as these Terms of Use.</p>
       <div className="text-xl font-bold pt-8 text-sky-900">ABOUT THE SERVICE</div>
         <p>The Service allows you to store and retrieve personal illustrations, attachments, tags, and places where these are used. Personal illustrations are what you enter and may or may not contain sensitive information.</p>
 
@@ -37,7 +37,7 @@ export default function TermsOfService() {
 <li>distribute any part or parts of the Site or the Service without our explicit written permission (we grant the operators of public search engines permission to use spiders to copy materials from the site for the sole purpose of creating publicly-available searchable indices but retain the right to revoke this permission at any time on a general or specific basis);</li>
 <li>use the Service for any unlawful purpose or for the promotion of illegal activities;</li>
 <li>attempt to, or harass, abuse or harm another person or group;</li>
-<li>use another user’s account without permission;</li>
+<li>use another user&apos;s account without permission;</li>
 <li>intentionally allow another user to access your account;</li>
 <li>provide false or inaccurate information when registering an account;</li>
 <li>interfere or attempt to interfere with the proper functioning of the Service;</li>
@@ -88,7 +88,7 @@ export default function TermsOfService() {
 <li>A statement that you have a good faith belief that use of the material in the manner complained of is not authorized by the copyright owner, its agent, or the law; and</li>
 <li>A statement that the information in the notification is accurate, and under penalty of perjury, that you are authorized to act on behalf of the owner of an exclusive right that is allegedly infringed.</li>
         </ul>
-<p>(c) Counter-Notices. If you believe that your User Content that has been removed from the Site is not infringing, or that you have the authorization from the copyright owner, the copyright owner's agent, or pursuant to the law, to post and use the content in your User Content, you may send a counter-notice containing the following information to our copyright agent using the contact information set forth above:</p>
+<p>(c) Counter-Notices. If you believe that your User Content that has been removed from the Site is not infringing, or that you have the authorization from the copyright owner, the copyright owner&apos;s agent, or pursuant to the law, to post and use the content in your User Content, you may send a counter-notice containing the following information to our copyright agent using the contact information set forth above:</p>
         <ul className='list-inside list-decimal'>
 
 <li>Your physical or electronic signature;</li>

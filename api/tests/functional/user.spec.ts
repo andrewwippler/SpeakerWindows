@@ -20,9 +20,9 @@ test.group('Users', (group) => {
 
     const response = await client.post('/register').json(fixedUser)
 
-    response.assertStatus(200)
     response.assertBodyContains({message: 'Created successfully'})
     response.assertBodyContains({uid: response.body().uid})
+    response.assertStatus(200)
 
     const loggedInUser = await client.post('/login').json({email: user.email, password: user.password})
 
