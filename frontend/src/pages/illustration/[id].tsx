@@ -81,7 +81,6 @@ export default function IllustrationWrapper() {
   const handlePlaceAdd = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     let form = grabAndReturnObject(event.currentTarget)
-    console.log(form)
     api.post(`/places/${illustration?.id}`, form)
       .then(data => {
         if (data.message != 'Created successfully') {

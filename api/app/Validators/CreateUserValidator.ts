@@ -31,7 +31,7 @@ export default class CreateUserValidator {
     password: schema.string({ trim: true }, [
         rules.required(),
         rules.confirmed(),
-        rules.regex(/^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z]).{8,}/)
+        rules.regex(/^(?=.*[0-9])(?=.*[!@#$%^&*])[a-zA-Z0-9!@#$%^&*].{8,}/)
       ]),
   })
 

@@ -22,6 +22,8 @@ import Route from '@ioc:Adonis/Core/Route'
 import HealthCheck from '@ioc:Adonis/Core/HealthCheck'
 // import Upload from 'App/Models/Upload'
 
+Route.post('contact', 'ContactsController.store')
+
 //auth
 Route.post('register', 'UsersController.store')
 Route.post('login', 'UsersController.login')

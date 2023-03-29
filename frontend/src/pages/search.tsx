@@ -41,7 +41,6 @@ export default function Login() {
           return
         }
         setData(data.data)
-        console.log(data.data)
         setSearched(form.search)
   });
   }
