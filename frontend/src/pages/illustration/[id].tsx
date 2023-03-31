@@ -16,6 +16,7 @@ import { selectIllustrationEdit, setIllustrationEdit, selectUpdateUI, setUpdateU
 import format from 'date-fns/format';
 import PlaceConfirmDialog from '@/components/PlaceConfirmDialog';
 import { placeType } from '@/library/placeType';
+import Head from 'next/head';
 
 export default function IllustrationWrapper() {
   const router = useRouter()
@@ -102,6 +103,9 @@ export default function IllustrationWrapper() {
 
   return (
     <Layout>
+      <Head>
+        <title>SW | {illustration?.title}</title>
+      </Head>
       {editIllustration ?
         <IllustrationForm illustration={illustration} />
         :
