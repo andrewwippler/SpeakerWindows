@@ -45,6 +45,7 @@ export default class PlacesController {
       return response.status(403).send({ message: 'You do not have permission to access this resource' })
     }
 
+    posted.user_id = auth.user?.id
     const place = await Place.create(posted)
     await illustration.related('places').save(place)
     return response.send({message: 'Created successfully', id: place.id})
@@ -60,7 +61,7 @@ export default class PlacesController {
    */
   public async update({ params, auth, request, response }: HttpContextContract) {
 
-    const post = request.post()
+    const post = request.body()
 
     let place = await Place.findOrFail(params.id)
 
