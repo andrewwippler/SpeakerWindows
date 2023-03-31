@@ -2,13 +2,13 @@ import { Transition } from '@headlessui/react'
 import { useAppSelector, useAppDispatch } from '@/hooks'
 import { useTimeoutFn } from 'react-use'
 import { selectFlash, setFlash, selectFlashMessage } from '@/features/flash/reducer'
+import { useEffect, useState } from 'react'
 export default function Flash() {
 
   const flashOpen = useAppSelector(selectFlash)
   const flash = useAppSelector(selectFlashMessage)
   const dispatch = useAppDispatch()
 
-  useTimeoutFn(() => dispatch(setFlash(false)), 3500)
   const handleClose = () => {
     dispatch(setFlash(false))
   };
@@ -31,6 +31,18 @@ export default function Flash() {
     danger: 'border-red-500',
     info: 'border-blue-500',
   }
+
+  useEffect(() => {
+    const timeId = setTimeout(() => {
+      handleClose()
+    }, 2500)
+
+    return () => {
+      clearTimeout(timeId)
+    }
+  }, [flashOpen]);
+
+  if (!flashOpen) return <></>
 
   return (
     <div className="flex mt-4 items-center justify-center px-4 sm:px-6 lg:px-8">
