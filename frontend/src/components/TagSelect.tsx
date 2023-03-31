@@ -59,6 +59,14 @@ export default function TagSelect({ defaultValue }:{ defaultValue: string | tagT
         handleTagAdd(inputRef.current.value)
       }
     }
+    if (event.key === 'Tab') {
+      // so then no tabbing to content? :(
+      event.preventDefault()
+      if (inputRef.current) {
+        // @ts-ignore
+        handleTagAdd(filteredTags[0].name)
+      }
+    }
   }
 
   const handleTagAutoCompleteClicked = (event: any) : void => {
