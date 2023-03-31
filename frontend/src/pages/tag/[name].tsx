@@ -9,6 +9,7 @@ import Layout from '@/components/Layout';
 import ConfirmDialog from '@/components/ConfirmDialog';
 import { PencilSquareIcon, CheckCircleIcon, TrashIcon } from '@heroicons/react/24/solid'
 import { FormEvent } from 'react';
+import Head from 'next/head';
 
 import { useAppSelector, useAppDispatch } from '@/hooks'
 import { selectModal, setModal } from '@/features/modal/reducer'
@@ -81,6 +82,9 @@ export default function Tag() {
 
   return (
     <Layout>
+      <Head>
+        <title>SW | {name}</title>
+      </Head>
       <div className="text-xl font-bold pb-4 text-sky-900">
         {editTag ?
           <form className="mt-8 space-y-6" onSubmit={handleSave}>
