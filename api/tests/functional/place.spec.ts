@@ -59,10 +59,12 @@ test.group('Place', (group) => {
 
     const response = await client.post(`/places/${illustration.id}`).bearerToken(loggedInUser.body().token).json(place)
     response.assertStatus(200)
+
     // console.log(response.body())
     assert.equal(response.body().message, 'Created successfully')
-    assert.equal(response.body().place.user_id,goodUser.id)
     assert.isNumber(response.body().id)
+    const savedPlace = await Place.find(response.body().id)
+    assert.equal(savedPlace.user_id,goodUser.id)
 
   })
 
