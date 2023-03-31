@@ -106,34 +106,34 @@ export default function IllustrationWrapper() {
         <IllustrationForm illustration={illustration} />
         :
         <>
-      <div className="p-4 bg-gray-50 columns-1 md:columns-2">
-        <div>
-          <span className="font-bold pr-2">Title:</span>
-          {illustration?.title ? illustration.title : 'Default Title'}
-        </div>
-        <div>
-          <span className="font-bold pr-2">Author:</span>
-          {illustration?.author ? illustration.author : 'Default Title'}
-        </div>
-        <div>
-          <span className="font-bold pr-2">Source:</span>
-          {illustration?.source ?
-            isValidHttpUrl(illustration.source) ? <Link href={illustration.source}>{illustration.source}</Link> : illustration.source
-            : 'Default Title'}
-        </div>
-        <div>
-          <span className="font-bold pr-2">Tags:</span>
-          {illustration?.tags ? illustration.tags.map((tag, index, arr) => (
-            <Link key={index} className="inline-block mr-2 text-sky-500" href={`/tag/${tag.name}`}>{tag.name.replace(/-/g, " ")}{index != (arr.length-1) ? ', ' : ''}</Link>
-            ))
-            : 'no tags'}
-    </div>
+      <div className="p-4 bg-gray-50 grid grid-cols-1 md:grid-cols-2">
+              <div>
+              <span className="font-bold pr-2">Title:</span>
+              {/* Title is required */}
+                {illustration?.title}
+              </div>
+            {illustration?.author &&
+              <div>
+                <span className="font-bold pr-2">Author:</span>
+                {illustration.author}
+              </div>}
+            {illustration?.source && <div>
+              <span className="font-bold pr-2">Source:</span>
+              {isValidHttpUrl(illustration.source) ? <Link href={illustration.source}>{illustration.source}</Link> : illustration.source}
+            </div>}
+            {illustration?.tags && <div>
+              <span className="font-bold pr-2">Tags:</span>
+              {illustration?.tags ? illustration.tags.map((tag, index, arr) => (
+                <Link key={index} className="inline-block mr-2 text-sky-500" href={`/tag/${tag.name}`}>{tag.name.replace(/-/g, " ")}{index != (arr.length - 1) ? ', ' : ''}</Link>
+              ))
+                : 'no tags'}
+            </div>}
       </div>
       <div className="columns-1">
     {illustration?.content && <button type="button" data-toggle="tooltip" data-placement="bottom" title="Copy to clipboard"
       className="flex w-full justify-center px-4 py-2 my-4 font-semibold text-medium bg-gray-300 hover:bg-gray-500 text-white rounded-md shadow-sm"
       onClick={() => { navigator.clipboard.writeText(illustration.content) }}><ClipboardDocumentListIcon className="h-6 w-6 mr-2" /> <span>Copy Illustration Content</span></button>}
-    <div className="py-4">
+    <div className="py-4 whitespace-pre-wrap">
     {illustration?.content ? illustration.content : 'No Content'}
     </div>
 
@@ -144,10 +144,10 @@ export default function IllustrationWrapper() {
           <ArrowLeftIcon className="h-4 w-4 mr-2" />Back
       </button>
           <button onClick={() => dispatch(setIllustrationEdit(true))} className='px-4 py-2 mr-4 mt-2 font-semibold text-sm bg-green-300 hover:bg-green-500 text-white rounded-full shadow-sm inline-flex items-center' >
-            <PencilSquareIcon className="h-4 w-4 mr-2" />Edit Illustration</button>
+            <PencilSquareIcon className="h-4 w-4 sm:mr-2 hidden sm:block" />Edit<span className='hidden md:block'>&nbsp;Illustration</span></button>
 
           <button onClick={() => handleDeleteIllustration()} className='px-4 py-2 mr-4 mt-2 font-semibold text-sm bg-red-300 hover:bg-red-500 text-white rounded-full shadow-sm inline-flex items-center'>
-            <TrashIcon className="h-4 w-4 mr-2" />Delete Illustration</button>
+                <TrashIcon className="h-4 w-4 sm:mr-2 hidden sm:block" />Delete<span className='hidden md:block'>&nbsp;Illustration</span></button>
         </div>
     </div>
         </>
@@ -157,14 +157,14 @@ export default function IllustrationWrapper() {
       <div className="text-xl font-bold pt-8 text-sky-900">
           <span className='mr-4'>Illustration Use:</span>
         </div>
-        <div className='grid grid-cols-3 text-sky-500'>
+        <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 text-sky-500'>
           {illustration && illustration?.places.length > 0 ? illustration.places.map((p, index) => (
 
             <div key={index} className='w-full gap-2 pb-2'>
               <span className='mr-2'>{p.place}, {p.location} - {p.used}</span>
               <button
                 onClick={() => handleDeletePlace(p)}
-                className='rounded-md p-2 font-semibold text-sm bg-red-300 hover:bg-red-500 text-white shadow-sm inline-flex items-center'>
+                className='hidden rounded-md p-2 font-semibold text-sm bg-red-300 hover:bg-red-500 text-white shadow-sm lg:inline-flex items-center'>
             <TrashIcon className="h-4 w-4" /></button>
             </div>
             ))
@@ -174,7 +174,7 @@ export default function IllustrationWrapper() {
           </div>
             <form className='mt-4' onSubmit={handlePlaceAdd}>
           <div className="grid grid-cols-6">
-          <div className="col-span-2">
+          <div className="mb-1 col-span-6 md:col-span-2">
             <label htmlFor="Place" className="sr-only block text-sm font-medium leading-6 text-gray-900">
               Place
             </label>
@@ -183,10 +183,10 @@ export default function IllustrationWrapper() {
               name="Place"
               id="Place"
               placeholder="Place"
-              className="block w-full rounded-l-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+              className="block w-full lg:rounded-l-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
               />
             </div>
-            <div className="col-span-2">
+            <div className="mb-1 col-span-6 md:col-span-2">
               <label htmlFor="Location" className="sr-only block text-sm font-medium leading-6 text-gray-900">
                 Location
               </label>
@@ -198,7 +198,7 @@ export default function IllustrationWrapper() {
                 className="block w-full border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
                 />
             </div>
-            <div className="col-span-1">
+            <div className="mb-1 col-span-6 md:col-span-1">
               <label htmlFor="Used" className="sr-only block text-sm font-medium leading-6 text-gray-900">
                 Used
               </label>
@@ -211,7 +211,7 @@ export default function IllustrationWrapper() {
                 />
             </div>
             <button type='submit'
-              className="inline-flex justify-center rounded-r-md bg-indigo-300 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500">
+              className="mb-1 col-span-6 md:col-span-1 inline-flex justify-center lg:rounded-r-md bg-indigo-300 px-2 lg:px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500">
               <PlusIcon className='h-5 w-5 mr-2'/>
               Add Place</button>
         </div>

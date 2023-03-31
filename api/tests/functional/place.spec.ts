@@ -49,11 +49,19 @@ test.group('Place', (group) => {
     const loggedInUser = await client.post('/login').json({ email: goodUser.email, password: 'oasssadfasdf' })
 
     const illustration = await Illustration.findByOrFail('title', 'Places Test')
-    const place = await PlaceFactory.make()
-// console.log(place.toJSON())
-    const response = await client.post(`/places/${illustration.id}`).bearerToken(loggedInUser.body().token).json(place.toJSON())
+    // not forcing the user ID here
+    // also not using factory, which creates a user
+    const place = {
+      place: 'Gusikowski and Sons',
+      location: 'South Tressie, South Dakota',
+      used: '2023-03-11'
+    }
+
+    const response = await client.post(`/places/${illustration.id}`).bearerToken(loggedInUser.body().token).json(place)
     response.assertStatus(200)
-    assert.equal(response.body().message,'Created successfully')
+    // console.log(response.body())
+    assert.equal(response.body().message, 'Created successfully')
+    assert.equal(response.body().place.user_id,goodUser.id)
     assert.isNumber(response.body().id)
 
   })

@@ -88,7 +88,8 @@ export default function IllustrationForm({ illustration }: {
                       <label htmlFor="ititle" className="block text-sm font-medium leading-6 text-gray-900">
                         Title
                       </label>
-                      <input
+                  <input
+                        required
                         type="text"
                         name="ititle"
                         id="ititle"
