@@ -106,34 +106,34 @@ export default function IllustrationWrapper() {
         <IllustrationForm illustration={illustration} />
         :
         <>
-      <div className="p-4 bg-gray-50 columns-1 md:columns-2">
-        <div>
-          <span className="font-bold pr-2">Title:</span>
-          {illustration?.title ? illustration.title : 'Default Title'}
-        </div>
-        <div>
-          <span className="font-bold pr-2">Author:</span>
-          {illustration?.author ? illustration.author : 'Default Title'}
-        </div>
-        <div>
-          <span className="font-bold pr-2">Source:</span>
-          {illustration?.source ?
-            isValidHttpUrl(illustration.source) ? <Link href={illustration.source}>{illustration.source}</Link> : illustration.source
-            : 'Default Title'}
-        </div>
-        <div>
-          <span className="font-bold pr-2">Tags:</span>
-          {illustration?.tags ? illustration.tags.map((tag, index, arr) => (
-            <Link key={index} className="inline-block mr-2 text-sky-500" href={`/tag/${tag.name}`}>{tag.name.replace(/-/g, " ")}{index != (arr.length-1) ? ', ' : ''}</Link>
-            ))
-            : 'no tags'}
-    </div>
+      <div className="p-4 bg-gray-50 grid grid-cols-1 md:grid-cols-2">
+              <div>
+              <span className="font-bold pr-2">Title:</span>
+              {/* Title is required */}
+                {illustration?.title}
+              </div>
+            {illustration?.author &&
+              <div>
+                <span className="font-bold pr-2">Author:</span>
+                {illustration.author}
+              </div>}
+            {illustration?.source && <div>
+              <span className="font-bold pr-2">Source:</span>
+              {isValidHttpUrl(illustration.source) ? <Link href={illustration.source}>{illustration.source}</Link> : illustration.source}
+            </div>}
+            {illustration?.tags && <div>
+              <span className="font-bold pr-2">Tags:</span>
+              {illustration?.tags ? illustration.tags.map((tag, index, arr) => (
+                <Link key={index} className="inline-block mr-2 text-sky-500" href={`/tag/${tag.name}`}>{tag.name.replace(/-/g, " ")}{index != (arr.length - 1) ? ', ' : ''}</Link>
+              ))
+                : 'no tags'}
+            </div>}
       </div>
       <div className="columns-1">
     {illustration?.content && <button type="button" data-toggle="tooltip" data-placement="bottom" title="Copy to clipboard"
       className="flex w-full justify-center px-4 py-2 my-4 font-semibold text-medium bg-gray-300 hover:bg-gray-500 text-white rounded-md shadow-sm"
       onClick={() => { navigator.clipboard.writeText(illustration.content) }}><ClipboardDocumentListIcon className="h-6 w-6 mr-2" /> <span>Copy Illustration Content</span></button>}
-    <div className="py-4">
+    <div className="py-4 whitespace-pre-wrap">
     {illustration?.content ? illustration.content : 'No Content'}
     </div>
 
@@ -144,10 +144,10 @@ export default function IllustrationWrapper() {
           <ArrowLeftIcon className="h-4 w-4 mr-2" />Back
       </button>
           <button onClick={() => dispatch(setIllustrationEdit(true))} className='px-4 py-2 mr-4 mt-2 font-semibold text-sm bg-green-300 hover:bg-green-500 text-white rounded-full shadow-sm inline-flex items-center' >
-            <PencilSquareIcon className="h-4 w-4 mr-2" />Edit Illustration</button>
+            <PencilSquareIcon className="h-4 w-4 sm:mr-2 hidden sm:block" />Edit<span className='hidden md:block'>&nbsp;Illustration</span></button>
 
           <button onClick={() => handleDeleteIllustration()} className='px-4 py-2 mr-4 mt-2 font-semibold text-sm bg-red-300 hover:bg-red-500 text-white rounded-full shadow-sm inline-flex items-center'>
-            <TrashIcon className="h-4 w-4 mr-2" />Delete Illustration</button>
+                <TrashIcon className="h-4 w-4 sm:mr-2 hidden sm:block" />Delete<span className='hidden md:block'>&nbsp;Illustration</span></button>
         </div>
     </div>
         </>
