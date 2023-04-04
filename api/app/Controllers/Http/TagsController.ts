@@ -102,6 +102,7 @@ export default class TagsController {
     await bouncer.authorize('updateTag', tag)
 
     tag.name = name
+    tag.slug = '' // empty to redo the slug
 
     await tag.save()
 
