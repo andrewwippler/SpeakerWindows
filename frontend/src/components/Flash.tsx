@@ -40,7 +40,7 @@ export default function Flash() {
     return () => {
       clearTimeout(timeId)
     }
-  }, [flashOpen]);
+  }, [flashOpen, handleClose]);
 
   if (!flashOpen) return <></>
 

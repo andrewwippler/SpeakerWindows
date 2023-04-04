@@ -9,6 +9,7 @@ import { illustrationType } from '@/library/illustrationType'
 import { setIllustrationEdit, setUpdateUI } from '@/features/ui/reducer'
 import TagSelect from './TagSelect'
 import { getFormattedTags } from '@/features/tags/reducer';
+import { User } from '@/pages/api/user'
 
 export default function IllustrationForm({ illustration }: {
   illustration?: illustrationType
@@ -35,7 +36,7 @@ export default function IllustrationForm({ illustration }: {
   const handleEditSave = (event: FormEvent<HTMLFormElement>) => {
     let form = grabAndReturnObject(event.currentTarget)
     // update illustration
-    api.put(`/illustration/${illustration?.id}`, form)
+    api.put(`/illustration/${illustration?.id}`, form, user?.token)
       .then(data => {
 
         if (data.message != 'Updated successfully') {
@@ -52,7 +53,7 @@ export default function IllustrationForm({ illustration }: {
   const handleNewSave = (event: FormEvent<HTMLFormElement>) => {
     let form = grabAndReturnObject(event.currentTarget)
 
-      api.post(`/illustration`, form)
+      api.post(`/illustration`, form, user?.token)
         .then(data => {
 
           if (data.message != 'Created successfully') {
@@ -131,7 +132,7 @@ export default function IllustrationForm({ illustration }: {
                       <label htmlFor="tags" className="block text-sm font-medium leading-6 text-gray-900">
                         Tags
                   </label>
-                      <TagSelect defaultValue={edit && illustration ? illustration.tags : ''} />
+                      <TagSelect token={user?.token} defaultValue={edit && illustration ? illustration.tags : ''} />
                     </div>
                     <div className="col-span-6">
                       <label htmlFor="content" className="block text-sm font-medium leading-6 text-gray-900">

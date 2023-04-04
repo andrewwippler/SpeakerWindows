@@ -8,6 +8,7 @@ import api from '@/library/api'
 import { tagType } from '@/library/tagtype'
 import { illustrationType } from '@/library/illustrationType'
 import { placeType } from '@/library/placeType'
+import { MagnifyingGlassCircleIcon } from '@heroicons/react/20/solid'
 
 type dataReturn = {
   illustrations: any
@@ -33,7 +34,7 @@ export default function Login() {
       search: event.currentTarget.search.value.trim(),
     }
 
-    api.post(`/search`, form)
+    api.post(`/search`, form, user?.token)
       .then(data => {
 
         if (data.message != 'success') {
@@ -67,9 +68,9 @@ export default function Login() {
           />
           <button
             type="submit"
-            className="min-w-fit justify-center rounded-r-md bg-indigo-300 px-4 font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500"
+            className="inline-flex items-center min-w-fit justify-center rounded-r-md bg-indigo-300 px-4 font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500"
             >
-            Search -.
+            <MagnifyingGlassCircleIcon className='h-6 w-6 mr-2' />Search
           </button>
         </div>
       </form>

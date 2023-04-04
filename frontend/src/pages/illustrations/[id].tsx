@@ -29,7 +29,7 @@ export default function LegacyIllustration() {
       return
     }
 
-    api.get(`/illustrations/${id}`, '')
+    api.get(`/illustrations/${id}`, '', user?.token)
       .then(data => {
         setData(data);
         dispatch(setFlashMessage({severity: 'info', message: 'You were rediected from an old link. Be sure to update your bookmark.'}))

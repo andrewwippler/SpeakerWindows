@@ -11,56 +11,62 @@ const defaultMultiHeaders = {
 };
 
 class Api {
-  headers() {
+  headers(token: string | undefined) {
+
+    const realToken = token ? token : store.getState().user.apitoken
+
     return Object.assign({}, defaultHeaders,
       (
         {
-          'Authorization': 'Bearer ' + store.getState().user.apitoken,
-          'X-Authorization': 'Bearer ' + store.getState().user.apitoken,
+          'Authorization': 'Bearer ' + realToken,
+          'X-Authorization': 'Bearer ' + realToken,
         }
       ));
 
   }
 
-  multiHeaders() {
+  multiHeaders(token: string | undefined) {
+
+    const realToken = token ? token : store.getState().user.apitoken
+
     return Object.assign({}, defaultMultiHeaders,
       (
         {
-          'Authorization': 'Bearer ' + store.getState().user.apitoken,
-          'X-Authorization': 'Bearer ' + store.getState().user.apitoken,
+          'Authorization': 'Bearer ' + realToken,
+          'X-Authorization': 'Bearer ' + realToken,
         }
       ));
 
   }
 
-  get(route: string, params: any) {
-    return this.xhr(route, params, 'GET');
+  get(route: string, params: any, token: string | undefined) {
+    return this.xhr(route, params, 'GET', token);
   }
 
-  patch(route: string, params: any) {
-    return this.xhr(route, params, 'PATCH');
+  patch(route: string, params: any, token: string | undefined) {
+    return this.xhr(route, params, 'PATCH', token);
   }
 
-  put(route: string, params: any) {
-    return this.xhr(route, params, 'PUT');
+  put(route: string, params: any, token: string | undefined) {
+    return this.xhr(route, params, 'PUT', token);
   }
 
-  post(route: string, params: any) {
-    return this.xhr(route, params, 'POST');
+  post(route: string, params: any, token: string | undefined) {
+    return this.xhr(route, params, 'POST', token);
   }
 
-  delete(route: string, params: any) {
-    return this.xhr(route, params, 'DELETE');
+  delete(route: string, params: any, token: string | undefined) {
+    return this.xhr(route, params, 'DELETE', token);
   }
 
-  postMultipart(route: string, params: any) {
-    return this.xhrMulti(route, params);
+  postMultipart(route: string, params: any, token: string | undefined) {
+    return this.xhrMulti(route, params, token);
   }
 
-  async xhrMulti(route: string, params: any) {
+  async xhrMulti(route: string, params: any, token: string | undefined) {
     let options = {
       method: 'POST',
-      headers: this.multiHeaders()
+      headers: this.multiHeaders(token)
     }
 
     // @ts-ignore
@@ -98,9 +104,9 @@ class Api {
       });
   }
 
-  async xhr(route: string, params: any, verb: string) {
+  async xhr(route: string, params: any, verb: string, token: string | undefined) {
     let options = Object.assign({ method: verb });
-    options.headers = this.headers();
+    options.headers = this.headers(token);
     params = params ? params : {};
 
     let query, url;

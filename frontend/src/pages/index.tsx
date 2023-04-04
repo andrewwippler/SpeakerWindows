@@ -9,7 +9,7 @@ export default function Home() {
 
   return (
     <Layout>
-      { user?.isLoggedIn && (<Tags />) }
+      { user?.isLoggedIn && (<Tags token={user?.token} />) }
     </Layout>
   )
 }

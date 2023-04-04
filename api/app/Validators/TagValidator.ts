@@ -27,7 +27,7 @@ export default class TagValidator {
    *    ```
    */
   public schema = schema.create({
-    name: schema.string([
+    name: schema.string({ trim: true },[
       rules.unique({
         table: 'tags',
         column: 'name',
@@ -47,5 +47,7 @@ export default class TagValidator {
    * }
    *
    */
-  public messages: CustomMessages = {}
+  public messages: CustomMessages = {
+    'name.unique': 'Cannot update tag with the same name of an existing tag'
+  }
 }

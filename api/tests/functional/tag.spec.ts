@@ -155,6 +155,19 @@ test.group('Tag', (group) => {
 
     const findTag = await Tag.findOrFail(tag.id)
     assert.equal(findTag.name, 'Adonis-102')
+    assert.equal(findTag.slug, 'adonis-102-' + goodUser.id)
+    assert.notEqual(tag.slug,findTag.slug)
+  })
+
+  test('Cannot update tag with the same name of an existing tag', async ({ client, assert }) => {
+    const tag = await Tag.findByOrFail('name', 'Adonis-Update-Me')
+
+    const updatedTag = {name: 'cooking'}
+    const loggedInUser = await client.post('/login').json({ email: goodUser.email, password: 'oasssadfasdf' })
+    const response = await client.put(`/tags/${tag.id}`).bearerToken(loggedInUser.body().token).json(updatedTag)
+
+    response.assertStatus(400)
+    assert.equal(response.body().errors[0].message, 'Cannot update tag with the same name of an existing tag')
 
   })
 

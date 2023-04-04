@@ -15,16 +15,17 @@ const reasons = [
   { type: 'TOS Violation' },
   { type: 'Unsubscribe' },
 ]
-export default function ContactForm() {
+export default function ContactForm({ token }:{ token: string | undefined }) {
 
   const [selected, setSelected] = useState(reasons[0])
   const dispatch = useAppDispatch()
+  const userToken = token
 
   const onSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     let form = grabAndReturnObject(event.currentTarget)
 
-    api.post(`/contact`, form)
+    api.post(`/contact`, form, userToken)
       .then(data => {
         if (data.message != 'Created successfully') {
           data.errors.map((e: any) => {

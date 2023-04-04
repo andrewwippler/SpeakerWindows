@@ -6,7 +6,7 @@ import { getTags, setTags, addTag, removeTag } from '@/features/tags/reducer';
 import { XMarkIcon } from '@heroicons/react/24/solid';
 import _ from 'lodash';
 
-export default function TagSelect({ defaultValue }:{ defaultValue: string | tagType[] }) {
+export default function TagSelect({ defaultValue, token }:{ defaultValue: string | tagType[], token: string | undefined }) {
 
 
   const dispatch = useAppDispatch()
@@ -18,15 +18,16 @@ export default function TagSelect({ defaultValue }:{ defaultValue: string | tagT
   const illustrationTags = useAppSelector(getTags);
   const inputRef = useRef<HTMLInputElement>(null);
   const inheritedTags = defaultValue
+  const userToken = token
 
   useEffect(() => {
     setLoading(true)
-    api.get('/tags', '').then(tags => {
+    api.get('/tags', '', userToken).then(tags => {
       setLocalTags(tags);
       dispatch(setTags(inheritedTags))
       setLoading(false)
     });
-  }, [dispatch, inheritedTags])
+  }, [dispatch, inheritedTags, userToken])
 
   const search = (event: ChangeEvent<HTMLInputElement>) => {
     let _filteredTags;

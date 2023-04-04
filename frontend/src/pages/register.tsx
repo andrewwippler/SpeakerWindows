@@ -18,7 +18,7 @@ const dispatch = useAppDispatch()
       dispatch(setFlashMessage({ severity: 'danger', message: "Passwords do not match" }))
       return
     }
-    api.post(`/register`, form)
+    api.post(`/register`, form, '')
       .then(data => {
         if (data.message != 'Created successfully') {
           data.errors.map((e: any) => {
