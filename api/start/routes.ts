@@ -50,6 +50,9 @@ Route.group(() =>{
 
   Route.get('/author/:name', 'AuthorsController.show')
 
+  Route.get('/settings', 'SettingsController.index')
+  Route.post('/settings', 'SettingsController.update')
+
   //tags
   //are created on new illustrations only
   Route.get('/tags', 'TagsController.index')

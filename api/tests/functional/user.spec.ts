@@ -112,7 +112,6 @@ test.group('Users', (group) => {
     const response = await client.post('/login').json(userLogin)
 
     response.assertStatus(200)
-    assert.equal(response.body().type,'bearer')
   })
 
   test('Pretty error on unsuccessful login', async ({ client, assert }) => {

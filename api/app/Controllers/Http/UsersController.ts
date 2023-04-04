@@ -2,6 +2,7 @@ import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import User from 'App/Models/User'
 import CreateUserValidator from 'App/Validators/CreateUserValidator'
 import { Limiter } from '@adonisjs/limiter/build/services/index'
+import Setting from 'App/Models/Setting'
 
 export default class UsersController {
 
@@ -23,11 +24,21 @@ export default class UsersController {
 
     try {
       const token = await auth.use('api').attempt(email, password)
+      const user = await User.findByOrFail('email', email)
+      const settingsSelect = await user.related('setting').query()
       await limiter.delete(throttleKey)
-      // const user = await User.findBy('email', email)
-      // console.log("USER D",user.id)
-      return token
+
+      let settings
+      if (!settingsSelect[0]) {
+        await user.related('setting').save(await new Setting())
+        settings = await user.related('setting').query()
+      } else {
+        settings = settingsSelect
+      }
+
+      return { token: token.token, settings }
     } catch (error) {
+      // console.log("login error: ", error)
       await limiter.increment(throttleKey)
     }
 
