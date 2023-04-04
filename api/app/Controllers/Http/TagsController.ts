@@ -59,7 +59,7 @@ export default class TagsController {
 
      //@tag.illustrations
     const tag = await Tag.findByOrFail('name', thetag);
-    const tagQuery = await tag.related('illustrations').query().where('user_id', `${auth.user?.id}`)
+    const tagQuery = await tag.related('illustrations').query().where('user_id', `${auth.user?.id}`).orderBy('title')
 
     if (tagQuery.length < 1) {
       return {
