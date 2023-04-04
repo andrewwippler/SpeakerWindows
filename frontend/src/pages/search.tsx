@@ -33,7 +33,7 @@ export default function Login() {
       search: event.currentTarget.search.value.trim(),
     }
 
-    api.post(`/search`, form)
+    api.post(`/search`, form, user?.token)
       .then(data => {
 
         if (data.message != 'success') {

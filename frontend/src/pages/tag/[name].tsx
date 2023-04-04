@@ -34,7 +34,7 @@ export default function Tag() {
       return
     }
     // add - for data fetching
-    api.get(`/tag/${name}`.replace(/ /g, '-'), '')
+    api.get(`/tag/${name}`.replace(/ /g, '-'), '', user?.token)
       .then(data => {
         setData(data); // illustrations
       setLoading(false)
@@ -46,7 +46,7 @@ export default function Tag() {
     const newname = event.currentTarget.tag.value.trim();
 
     // update tag
-    api.put(`/tags/${data.id}`, {name: newname})
+    api.put(`/tags/${data.id}`, {name: newname}, user?.token)
       .then(data => {
 
         if (data.message != 'Updated successfully') {
@@ -62,7 +62,7 @@ export default function Tag() {
   const handleDelete = () => {
 
     // delete tag
-    api.delete(`/tags/${data.id}`, '')
+    api.delete(`/tags/${data.id}`, '', user?.token)
       .then(data => {
         dispatch(setModal(false))
         if (data.message == 'You do not have permission to access this resource') {

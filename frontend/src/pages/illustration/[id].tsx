@@ -1,7 +1,7 @@
 import { useRouter } from 'next/router'
 import * as _ from "lodash";
 import api from '@/library/api';
-import { useState, useEffect, FormEvent } from 'react'
+import { useState, useEffect, FormEvent, use } from 'react'
 import Link from 'next/link';
 import Layout from '@/components/Layout';
 import useUser from '@/library/useUser';
@@ -38,13 +38,21 @@ export default function IllustrationWrapper() {
     if (!router.query.id) {
       return
     }
-    api.get(`/illustration/${router.query.id}`, '')
+    console.log(user?.token)
+    api.get(`/illustration/${router.query.id}`, '', user?.token)
       .then(data => {
-      setData(data);
-        setLoading(false)
-        dispatch(setUpdateUI(false))
+        // You do not have permission to access this resource
+        if (data.message == 'You do not have permission to access this resource' || data.errors || router.query.id == 'undefined') {
+          dispatch(setFlashMessage({ severity: 'danger', message: "Illustration not found." }))
+          router.replace('/')
+        } else {
+          setData(data);
+          setLoading(false)
+          dispatch(setUpdateUI(false))
+        }
+
     });
-  },[router.query.id,refreshUI, dispatch])
+  },[router.query.id,refreshUI, dispatch, user])
 
   if (isLoading) return <Layout>Loading...</Layout>
 
@@ -61,7 +69,7 @@ export default function IllustrationWrapper() {
 
   // delete illustration
   const handleDelete = () => {
-    api.delete(`/illustration/${illustration?.id}`, '')
+    api.delete(`/illustration/${illustration?.id}`, '', user?.token)
     .then(data => {
       dispatch(setModal(false))
       dispatch(setFlashMessage({severity: 'danger', message: `Illustration: "${illustration?.title}" was deleted.`}))
@@ -82,7 +90,7 @@ export default function IllustrationWrapper() {
   const handlePlaceAdd = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     let form = grabAndReturnObject(event.currentTarget)
-    api.post(`/places/${illustration?.id}`, form)
+    api.post(`/places/${illustration?.id}`, form, user?.token)
       .then(data => {
         if (data.message != 'Created successfully') {
           dispatch(setFlashMessage({ severity: 'danger', message: data.message }))
@@ -101,6 +109,7 @@ export default function IllustrationWrapper() {
     }
     }
 
+  if (!user?.token || !illustration) return <Layout>Loading...</Layout>
   return (
     <Layout>
       <Head>
@@ -162,7 +171,7 @@ export default function IllustrationWrapper() {
           <span className='mr-4'>Illustration Use:</span>
         </div>
         <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 text-sky-500'>
-          {illustration && illustration?.places.length > 0 ? illustration.places.map((p, index) => (
+          {illustration?.places && illustration?.places.length > 0 ? illustration.places.map((p, index) => (
 
             <div key={index} className='w-full gap-2 pb-2'>
               <span className='mr-2'>{p.place}, {p.location} - {p.used}</span>
@@ -224,7 +233,7 @@ export default function IllustrationWrapper() {
 
 }
 {deletePlace &&
-  <PlaceConfirmDialog title={deletePlace.place} id={deletePlace.id} />
+        <PlaceConfirmDialog token={user?.token} title={deletePlace.place} id={deletePlace.id} />
 }
 {!deletePlace &&
   <ConfirmDialog handleAgree={handleDelete} title={illustration?.title} deleteName="Illustration" />

@@ -6,19 +6,20 @@ import { useState, useEffect } from 'react'
 
 import { useAppDispatch } from '@/hooks'
 
-function Tags() {
+function Tags({ token }:{ token: string | undefined }) {
   const dispatch = useAppDispatch()
   const [data, setData] = useState([])
   const [isLoading, setLoading] = useState(false)
+  const userToken = token
 
   useEffect(() => {
     setLoading(true)
-    api.get('/tags', '').then(tags => {
+    api.get('/tags', '', userToken).then(tags => {
       setData(tags);
       // dispatch(setTags(tags)) // do we need?
       setLoading(false)
     });
-  },[])
+  },[userToken])
 
   if (isLoading) return <p>Loading...</p>
   if (!data) return <p>No Tags Found</p>
