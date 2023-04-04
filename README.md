@@ -45,6 +45,7 @@ Version 0.4.0
 
 Version 0.5.0
 
+- List by Author
 - User Preferences (password, API key)
 
 Version 0.6.0

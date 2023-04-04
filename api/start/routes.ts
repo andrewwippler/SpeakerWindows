@@ -42,10 +42,13 @@ Route.group(() =>{
   // illustrations
   Route.get('/illustrations', 'IllustrationsController.index')
   Route.post('/illustration', 'IllustrationsController.store')
+  Route.get('/illustration/authors', 'AuthorsController.index')
   Route.get('/illustration/:id', 'IllustrationsController.show')
   Route.get('/illustrations/:id', 'IllustrationsController.showOld')
   Route.put('/illustration/:id', 'IllustrationsController.update')
   Route.delete('/illustration/:id', 'IllustrationsController.destroy')
+
+  Route.get('/author/:name', 'AuthorsController.show')
 
   //tags
   //are created on new illustrations only
