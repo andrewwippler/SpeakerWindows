@@ -35,15 +35,14 @@ export default function IllustrationWrapper() {
 
   useEffect(() => {
     setLoading(true)
-    if (!router.query.id) {
+    if (!router.query.id || !user) {
       return
     }
-    console.log(user?.token)
-    api.get(`/illustration/${router.query.id}`, '', user?.token)
+    api.get(`/illustration/${router.query.id}`, '', user.token)
       .then(data => {
         // You do not have permission to access this resource
         if (data.message == 'You do not have permission to access this resource' || data.errors || router.query.id == 'undefined') {
-          dispatch(setFlashMessage({ severity: 'danger', message: "Illustration not found." }))
+          dispatch(setFlashMessage({ severity: 'info', message: "Illustration not found." }))
           router.replace('/')
         } else {
           setData(data);
@@ -52,7 +51,7 @@ export default function IllustrationWrapper() {
         }
 
     });
-  },[router.query.id,refreshUI, dispatch, user])
+  },[router.query.id, refreshUI, dispatch, user])
 
   if (isLoading) return <Layout>Loading...</Layout>
 
