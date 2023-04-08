@@ -66,8 +66,6 @@ export default class extends BaseSchema {
   }
 
   public async down () {
-    this.schema.dropTable('tokens')
-    this.schema.dropTable('ill_tags')
     this.schema.dropTable('users')
     this.schema.dropTable('tags')
     this.schema.dropTable('illustrations')
