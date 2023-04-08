@@ -20,21 +20,5 @@ export default class extends BaseSchema {
   }
 
   public async down () {
-    this.schema.table('ill_tags', (table) => {
-      table.timestamp('created_at', { useTz: true })
-      table.timestamp('updated_at', { useTz: true })
-    })
-
-    this.schema.table('illustrations', (table) => {
-      table.dropIndex(['user_id', 'user_id_on_illustrations'])
-    })
-
-    this.schema.table('tags', (table) => {
-      table.dropIndex(['user_id', 'user_id_on_tags'])
-    })
-
-    this.schema.table('places', (table) => {
-      table.dropIndex(['user_id', 'user_id_on_places'])
-    })
   }
 }

@@ -17,7 +17,7 @@ type dataReturn = {
   message: string,
 }
 
-export default function Login() {
+export default function Search() {
   // here we just check if user is already logged in and redirect to profile
   // should be last page
   const { user } = useUser({

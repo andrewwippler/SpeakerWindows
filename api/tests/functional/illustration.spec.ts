@@ -7,7 +7,7 @@ import Illustration from 'App/Models/Illustration'
 import TagFactory from 'Database/factories/TagFactory'
 import Tag from 'App/Models/Tag'
 import Place from 'App/Models/Place'
-let goodUser, badUser, testTagIdOne, testTagIdTwo
+let goodUser, badUser, testTagIdOne, testTagIdTwo, illustration
 
 test.group('Illustrations', (group) => {
   group.each.setup(async () => {
@@ -20,7 +20,7 @@ test.group('Illustrations', (group) => {
     badUser = await UserFactory.merge({password: 'oasssadfasdf'}).create() // bad user does not have access to good user
 
     // executed before all the tests for a given suite
-    const illustration = await IllustrationFactory.merge({ title: 'Illustrations Test', user_id: goodUser.id }).create()
+    illustration = await IllustrationFactory.merge({ title: 'Illustrations Test', user_id: goodUser.id }).create()
     const place1 = await PlaceFactory.merge({ user_id: goodUser.id }).make()
     const place2 = await PlaceFactory.merge({ user_id: goodUser.id }).make()
     const place3 = await PlaceFactory.merge({ user_id: goodUser.id }).make()
@@ -279,4 +279,35 @@ test.group('Illustrations', (group) => {
     response.assertStatus(401)
     response.assertBody({ errors: [{ "message": "E_UNAUTHORIZED_ACCESS: You do not have permission to access this resource" }] })
   })
+
+  test('Author routes', async ({ client, assert }) => {
+    const loggedInUser = await client.post('/login').json({ email: goodUser.email, password: 'oasssadfasdf' })
+
+    const illustration =  {
+      author: 'testy mctest',
+      title: 'New Post',
+      source: 'test',
+      content: 'this shall pass as new',
+    }
+    await client.post('/illustration').bearerToken(loggedInUser.body().token).json(illustration)
+
+    const second =  {
+      author: '',
+      title: 'New Post',
+      source: 'test',
+      content: 'this shall pass as new',
+    }
+    await client.post('/illustration').bearerToken(loggedInUser.body().token).json(second)
+
+    const both = await client.get('/illustration/authors').bearerToken(loggedInUser.body().token)
+
+    both.assertStatus(200)
+    assert.equal(both.body().length,2)
+
+    const response = await client.get('/author/'+illustration.author).bearerToken(loggedInUser.body().token)
+    response.assertStatus(200)
+    assert.equal(response.body().length,1)
+
+  })
+
 })

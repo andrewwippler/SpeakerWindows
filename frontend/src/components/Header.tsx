@@ -6,6 +6,7 @@ import Image from 'next/image'
 import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline'
 import { Dialog } from '@headlessui/react'
 import fetchJson from '@/library/fetchJson'
+import { PlusIcon } from '@heroicons/react/24/solid'
 
 export default function Header() {
   const { user, mutateUser } = useUser()
@@ -20,7 +21,11 @@ export default function Header() {
           <span>Speaker Windows</span>
         </Link>
       </div>
-      <div className="flex lg:hidden">
+        <div className="flex lg:hidden">
+          <Link href="/new-illustration" className="mr-10 text-sm font-bold leading-6 text-sky-100 ">
+          <span className="sr-only">Add New Illustration</span>
+          <PlusIcon className='h-8 w-8'/>
+          </Link>
         <button
           type="button"
           className="-m-2.5 inline-flex items-center justify-center rounded-md p-2.5 text-sky-100"
@@ -38,6 +43,12 @@ export default function Header() {
           </Link>
           <Link href="/new-illustration" className="text-sm font-semibold leading-6 text-sky-100 hover:text-sky-900">
           New illustration
+          </Link>
+          <Link href="/authors" className="text-sm font-semibold leading-6 text-sky-100 hover:text-sky-900">
+          List Authors
+          </Link>
+          <Link href="/settings" className="text-sm font-semibold leading-6 text-sky-100 hover:text-sky-900">
+          Settings
           </Link>
           <Link href="/search" className="text-sm font-semibold leading-6 text-sky-100 hover:text-sky-900">
           Search
@@ -98,6 +109,8 @@ export default function Header() {
                   <>
                   <Link href="/" className="-mx-3 block rounded-lg py-2 px-3 text-base font-semibold leading-7 text-sky-300 hover:bg-sky-900">Home</Link>
                   <Link href="/new-illustration" className="-mx-3 block rounded-lg py-2 px-3 text-base font-semibold leading-7 text-sky-300 hover:bg-sky-900">New Illustration</Link>
+                  <Link href="/authors" className="-mx-3 block rounded-lg py-2 px-3 text-base font-semibold leading-7 text-sky-300 hover:bg-sky-900">List Authors</Link>
+                  <Link href="/settings" className="-mx-3 block rounded-lg py-2 px-3 text-base font-semibold leading-7 text-sky-300 hover:bg-sky-900">Settings</Link>
                   <Link href="/search" className="-mx-3 block rounded-lg py-2 px-3 text-base font-semibold leading-7 text-sky-300 hover:bg-sky-900">Search</Link>
                   </>
                 )}

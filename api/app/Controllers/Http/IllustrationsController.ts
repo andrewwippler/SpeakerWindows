@@ -71,6 +71,8 @@ export default class IllustrationsController {
 
     }
 
+
+
     /**
    * Create/save a new illustration.
    * POST /illustration
