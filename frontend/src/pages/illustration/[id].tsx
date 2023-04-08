@@ -80,6 +80,11 @@ export default function IllustrationWrapper() {
   });
   };
 
+  const handleCopy = (event: any, content: string) => {
+    event.target.innerText = `Text Copied`
+    navigator.clipboard.writeText(content)
+  }
+
   const handleDeletePlace = (place: placeType) => {
     setdeletePlace(place)
     dispatch(setModal(true))
@@ -148,7 +153,7 @@ export default function IllustrationWrapper() {
       <div className="columns-1">
     {illustration?.content && <button type="button" data-toggle="tooltip" data-placement="bottom" title="Copy to clipboard"
       className="flex w-full justify-center px-4 py-2 my-4 font-semibold text-medium bg-gray-300 hover:bg-gray-500 text-white rounded-md shadow-sm"
-      onClick={() => { navigator.clipboard.writeText(illustration.content) }}><ClipboardDocumentListIcon className="h-6 w-6 mr-2" /> <span>Copy Illustration Content</span></button>}
+      onClick={(e) => { handleCopy(e, illustration.content) }}><ClipboardDocumentListIcon className="h-6 w-6 mr-2" /> <span>Copy Illustration Content</span></button>}
     <div className="py-4 whitespace-pre-wrap">
     {illustration?.content ? illustration.content : 'No Content'}
     </div>

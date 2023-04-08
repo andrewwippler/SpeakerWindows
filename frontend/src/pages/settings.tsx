@@ -1,13 +1,12 @@
 import React, { FormEvent, useEffect, useState } from 'react'
 import useUser from '@/library/useUser'
 import Layout from '@/components/Layout'
-import Link from 'next/link'
 import { useAppDispatch, useAppSelector } from '@/hooks'
 import { setFlashMessage } from '@/features/flash/reducer'
 import api from '@/library/api'
 import { getSettings, getThunkSettings, setSettings } from '@/features/user/reducer'
 import router from 'next/router'
-import { ArrowLeftIcon } from '@heroicons/react/24/solid'
+import { ArrowLeftIcon, ClipboardDocumentListIcon } from '@heroicons/react/24/solid'
 
 export default function Settings() {
   // here we just check if user is already logged in and redirect to profile
@@ -52,12 +51,15 @@ export default function Settings() {
         <form className="space-y-6" onSubmit={onSubmit}>
 
         <div className="mt-10 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
-          <div className="sm:col-span-6">
+          <div className="sm:col-span-6 justify-center">
             <label htmlFor="Api-Key" className="block text-sm font-medium leading-6 text-gray-900">
               Api Key
             </label>
-            <div className="mt-2">
-              {user?.token}
+            <div className="mt-2 ">
+                {user?.token}{user?.token && <button type="button" data-toggle="tooltip" data-placement="bottom" title="Copy API token to clipboard"
+                  className=" px-2 py-2 ml-2 bg-gray-300 hover:bg-gray-500 text-white rounded-md shadow-sm"
+                  onClick={() => { navigator.clipboard.writeText(user.token) }}><ClipboardDocumentListIcon className="h-4 w-4" /></button>}
+                {/* TODO: regenerate API key */}
             </div>
           </div>
         </div>
