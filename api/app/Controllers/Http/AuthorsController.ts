@@ -43,8 +43,6 @@ export default class AuthorsController {
 
     const theauthor = decodeURI(_.get(params, 'name', ''))
 
-    console.log(theauthor)
-
       const illustrationQuery = await Illustration.query()
         .where('author', theauthor)
         .andWhere('user_id', `${auth.user?.id}`)

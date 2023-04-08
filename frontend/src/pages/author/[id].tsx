@@ -31,7 +31,7 @@ export default function Author() {
     // add - for data fetching
     api.get(`/author/${name}`, '', user?.token)
       .then(data => {
-        console.log(data)
+        // console.log(data)
         setData(data); // illustrations
         setLoading(false)
     });

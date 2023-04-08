@@ -1,5 +1,5 @@
 import { createSlice } from '@reduxjs/toolkit'
-
+import { HYDRATE } from 'next-redux-wrapper';
 import type { AppState } from '@/store'
 import { tagType } from '@/library/tagtype'
 import _ from 'lodash'
@@ -35,7 +35,6 @@ export const tagReducer = createSlice({
       state.tags = state.tags.filter(item => item.name !== actions.payload)
     },
   },
-
 })
 export const getTags = (state: AppState) => state.tags.tags
 

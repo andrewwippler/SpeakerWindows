@@ -17,17 +17,19 @@ import format from 'date-fns/format';
 import PlaceConfirmDialog from '@/components/PlaceConfirmDialog';
 import { placeType } from '@/library/placeType';
 import Head from 'next/head';
+import { getSettings, getThunkSettings } from '@/features/user/reducer';
 
 export default function IllustrationWrapper() {
   const router = useRouter()
   const dispatch = useAppDispatch()
 
-  const editIllustration = useAppSelector(selectIllustrationEdit)
-  const refreshUI = useAppSelector(selectUpdateUI)
-
   const { user } = useUser({
     redirectTo: '/login',
   })
+
+  const editIllustration = useAppSelector(selectIllustrationEdit)
+  const refreshUI = useAppSelector(selectUpdateUI)
+  const userSettings = useAppSelector(getSettings)
 
   const [illustration, setData] = useState<illustrationType>()
   const [deletePlace, setdeletePlace] = useState<placeType | null>()
@@ -38,20 +40,22 @@ export default function IllustrationWrapper() {
     if (!router.query.id || !user) {
       return
     }
+    dispatch(getThunkSettings(user?.token))
+
     api.get(`/illustration/${router.query.id}`, '', user.token)
       .then(data => {
-        // You do not have permission to access this resource
-        if (data.message == 'You do not have permission to access this resource' || data.errors || router.query.id == 'undefined') {
-          dispatch(setFlashMessage({ severity: 'info', message: "Illustration not found." }))
-          router.replace('/')
-        } else {
+      // You do not have permission to access this resource
+      if (data.message == 'You do not have permission to access this resource' || data.errors || router.query.id == 'undefined') {
+        dispatch(setFlashMessage({ severity: 'info', message: "Illustration not found." }))
+        router.replace('/')
+      } else {
           setData(data);
           setLoading(false)
           dispatch(setUpdateUI(false))
         }
 
     });
-  },[router.query.id, refreshUI, dispatch, user])
+  },[router.query.id, refreshUI, user, userSettings])
 
   if (isLoading) return <Layout>Loading...</Layout>
 
@@ -108,7 +112,7 @@ export default function IllustrationWrapper() {
     }
     }
 
-  if (!user?.token || !illustration) return <Layout>Loading...</Layout>
+  if (!user?.token || !illustration || !userSettings) return <Layout>Loading...</Layout>
   return (
     <Layout>
       <Head>
@@ -195,6 +199,7 @@ export default function IllustrationWrapper() {
               name="Place"
               id="Place"
               placeholder="Place"
+              defaultValue={userSettings.place ? userSettings.place : ''}
               className="block w-full lg:rounded-l-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
               />
             </div>
@@ -207,6 +212,7 @@ export default function IllustrationWrapper() {
                 name="Location"
                 id="Location"
                 placeholder="Location"
+                defaultValue={userSettings.location ? userSettings.location : ''}
                 className="block w-full border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
                 />
             </div>
