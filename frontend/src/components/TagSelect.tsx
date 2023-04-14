@@ -50,7 +50,7 @@ export default function TagSelect({ defaultValue, token }:{ defaultValue: string
   const handleKeyPress = (event: KeyboardEvent<HTMLInputElement>) => {
     if (event.key === ",") {
       event.preventDefault()
-      if (inputRef.current) {
+      if (inputRef.current && (inputRef.current.value != "")) {
         handleTagAdd(inputRef.current.value)
       }
     }

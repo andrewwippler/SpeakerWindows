@@ -15,9 +15,11 @@ export default class SearchesController {
     }
 
     const illustrations = await Illustration.query()
-      .where('title', search)
-      .orWhere('content', 'LIKE', `%${search}%`)
-      .orWhere('author', 'LIKE', `%${search}%`)
+      .where((query) => {
+        query.where('title', search)
+          .orWhere('content', 'LIKE', `%${search}%`)
+          .orWhere('author', 'LIKE', `%${search}%`)
+      })
       .andWhere('user_id', `${auth.user?.id}`)
     const tagSanitizedSearch = _.startCase(search).replace(/ /g, '-')
     const tags = await Tag.query().where('name',tagSanitizedSearch).andWhere('user_id', `${auth.user?.id}`)

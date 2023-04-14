@@ -7,7 +7,7 @@ import Link from 'next/link'
 import useUser from '@/library/useUser';
 import Layout from '@/components/Layout';
 import Head from 'next/head';
-
+import { setRedirect } from '@/features/ui/reducer';
 import { useAppSelector, useAppDispatch } from '@/hooks'
 
 
@@ -24,6 +24,7 @@ export default function Author() {
   const [isLoading, setLoading] = useState(false)
 
   useEffect(() => {
+    if (!user?.token) dispatch(setRedirect(`/author/${name}`))
     if (!name) {
       setLoading(true)
       return
@@ -38,7 +39,7 @@ export default function Author() {
   }, [name]);
 
 
-
+  if (!user?.token) return
   if (isLoading) return (
     <Layout>
       <div>Loading...</div>

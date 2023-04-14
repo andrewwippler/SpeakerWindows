@@ -3,12 +3,16 @@ import useUser from '@/library/useUser'
 import Layout from '@/components/Layout'
 import Form from '@/components/Form'
 import fetchJson, { FetchError } from '@/library/fetchJson'
-
+import { useAppDispatch, useAppSelector } from '@/hooks'
+import { getRedirect, setRedirect } from '@/features/ui/reducer';
 export default function Login() {
-  // here we just check if user is already logged in and redirect to profile
-  // should be last page
+
+  const dispatch = useAppDispatch()
+
+  // retrieve first accessed path as unauthenticated user
+  const redirectPath = useAppSelector(getRedirect)
   const { mutateUser } = useUser({
-    redirectTo: '/',
+    redirectTo: redirectPath,
     redirectIfFound: true,
   })
 

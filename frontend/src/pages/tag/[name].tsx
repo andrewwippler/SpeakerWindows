@@ -10,7 +10,7 @@ import ConfirmDialog from '@/components/ConfirmDialog';
 import { PencilSquareIcon, CheckCircleIcon, TrashIcon } from '@heroicons/react/24/solid'
 import { FormEvent } from 'react';
 import Head from 'next/head';
-
+import { setRedirect } from '@/features/ui/reducer';
 import { useAppSelector, useAppDispatch } from '@/hooks'
 import { selectModal, setModal } from '@/features/modal/reducer'
 import { setFlashMessage } from '@/features/flash/reducer'
@@ -29,12 +29,13 @@ export default function Tag() {
   const [editTag, setEditTag] = useState(false)
 
   useEffect(() => {
+    if (!user?.token) dispatch(setRedirect(`/tag/${router.query.name}`))
     if (!name) {
       setLoading(true)
       return
     }
     // add - for data fetching
-    api.get(`/tag/${name}`.replace(/ /g, '-'), '', user?.token)
+    api.get(`/tag/${router.query.name}`, '', user?.token)
       .then(data => {
         setData(data); // illustrations
       setLoading(false)
@@ -73,7 +74,7 @@ export default function Tag() {
         router.replace('/') // go home
   });
   };
-
+  if (!user?.token) return
   if (isLoading) return (
     <Layout>
       <div>Loading...</div>

@@ -9,6 +9,8 @@ import { tagType } from '@/library/tagtype'
 import { illustrationType } from '@/library/illustrationType'
 import { placeType } from '@/library/placeType'
 import { MagnifyingGlassCircleIcon } from '@heroicons/react/20/solid'
+import { setRedirect } from '@/features/ui/reducer';
+import { useEffect } from 'react';
 
 type dataReturn = {
   illustrations: any
@@ -18,15 +20,17 @@ type dataReturn = {
 }
 
 export default function Search() {
-  // here we just check if user is already logged in and redirect to profile
-  // should be last page
   const { user } = useUser({
-    redirectTo: '/',
+    redirectTo: '/login',
   })
 
   const dispatch = useAppDispatch()
   const [data, setData] = useState<dataReturn | null>(null)
   const [searched, setSearched] = useState('')
+
+  useEffect(() => {
+    if (!user?.token) dispatch(setRedirect(`/search`))
+  }, [user])
 
   const onSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -45,7 +49,7 @@ export default function Search() {
         setSearched(form.search)
   });
   }
-
+  if (!user?.token) return
 // The UI does not allow the saving of an illustration without tags.
 // If it does, then we need to have a listing of those illustrations here.
   return (
