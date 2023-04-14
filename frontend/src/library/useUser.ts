@@ -2,17 +2,12 @@ import { useEffect } from 'react'
 import Router from 'next/router'
 import useSWR from 'swr'
 import { User } from '@/pages/api/user'
-import { useAppSelector, useAppDispatch } from '@/hooks'
-
-import { setToken } from '@/features/user/reducer';
 
 export default function useUser({
   redirectTo = '',
   redirectIfFound = false,
 } = {}) {
   const { data: user, mutate: mutateUser } = useSWR<User>('/api/user')
-  const dispatch = useAppDispatch()
-  // dispatch(setToken(user?.token)) // send token for api calls
 
   useEffect(() => {
     // if no redirect needed, just return (example: already on /dashboard)

@@ -7,17 +7,21 @@ import api from '@/library/api'
 import { getSettings, getThunkSettings, setSettings } from '@/features/user/reducer'
 import router from 'next/router'
 import { ArrowLeftIcon, ClipboardDocumentListIcon } from '@heroicons/react/24/solid'
+import { setRedirect } from '@/features/ui/reducer';
 
 export default function Settings() {
-  // here we just check if user is already logged in and redirect to profile
-  // should be last page
+
   const { user } = useUser({
-    redirectTo: '/',
+    redirectTo: '/login',
   })
 
   const dispatch = useAppDispatch()
   dispatch(getThunkSettings(user?.token))
   const settings = useAppSelector(getSettings)
+
+  useEffect(() => {
+    if (!user?.token) dispatch(setRedirect(`/settings`))
+  }, [user])
 
   const onSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -41,7 +45,7 @@ export default function Settings() {
       location: form.location.value.trim(),
     }
   }
-
+  if (!user?.token) return
   return (
     <Layout>
       {settings && <>

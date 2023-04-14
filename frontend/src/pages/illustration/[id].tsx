@@ -12,7 +12,7 @@ import { selectModal, setModal } from '@/features/modal/reducer'
 import { setFlashMessage } from '@/features/flash/reducer'
 import IllustrationForm from '@/components/IllustrationForm';
 import { illustrationType } from '@/library/illustrationType';
-import { selectIllustrationEdit, setIllustrationEdit, selectUpdateUI, setUpdateUI } from '@/features/ui/reducer';
+import { selectIllustrationEdit, setIllustrationEdit, selectUpdateUI, setUpdateUI, setRedirect } from '@/features/ui/reducer';
 import format from 'date-fns/format';
 import PlaceConfirmDialog from '@/components/PlaceConfirmDialog';
 import { placeType } from '@/library/placeType';
@@ -37,10 +37,11 @@ export default function IllustrationWrapper() {
 
   useEffect(() => {
     setLoading(true)
-    if (!router.query.id || !user) {
+    if (!user?.token) dispatch(setRedirect(`/illustration/${router.query.id}`))
+    if (!router.query.id || !user?.token) {
       return
     }
-    dispatch(getThunkSettings(user?.token))
+    dispatch(getThunkSettings(user.token))
 
     api.get(`/illustration/${router.query.id}`, '', user.token)
       .then(data => {
@@ -116,8 +117,8 @@ export default function IllustrationWrapper() {
       used: form.Used.value.trim(),
     }
     }
-
-  if (!user?.token || !illustration || !userSettings) return <Layout>Loading...</Layout>
+  if (!user?.token) return
+  if (!illustration || !userSettings) return <Layout>Loading...</Layout>
   return (
     <Layout>
       <Head>
