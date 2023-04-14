@@ -127,19 +127,19 @@ export default function IllustrationWrapper() {
         <IllustrationForm illustration={illustration} />
         :
         <>
-      <div className="p-4 bg-gray-50 grid grid-cols-1 md:grid-cols-2">
-              <div>
+      <div className="p-4 bg-gray-50 grid grid-cols-1 md:grid-cols-2 ">
+              <div className='truncate'>
               <span className="font-bold pr-2">Title:</span>
               {/* Title is required */}
                 {illustration?.title}
               </div>
             {illustration?.author &&
-              <div>
+              <div className='truncate'>
                 <span className="font-bold pr-2">Author:</span>
                 {illustration.author}
               </div>}
-            {illustration?.source && <div>
-              <span className="font-bold pr-2">Source:</span>
+            {illustration?.source && <div className='truncate'>
+              <span className="font-bold pr-2 ">Source:</span>
               {isValidHttpUrl(illustration.source) ? <Link href={illustration.source}>{illustration.source}</Link> : illustration.source}
             </div>}
             {illustration?.tags && <div>
