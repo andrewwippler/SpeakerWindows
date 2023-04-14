@@ -14,8 +14,8 @@ test.group('Users', (group) => {
     const user = await UserFactory.make()
     let fixedUser = {
       email: user.email,
-      password: user.password,
-      password_confirmation: user.password
+      password: user.password+"1A!a",
+      password_confirmation: user.password+"1A!a"
     }
 
     const response = await client.post('/register').json(fixedUser)
@@ -24,7 +24,7 @@ test.group('Users', (group) => {
     response.assertBodyContains({uid: response.body().uid})
     response.assertStatus(200)
 
-    const loggedInUser = await client.post('/login').json({email: user.email, password: user.password})
+    const loggedInUser = await client.post('/login').json({email: user.email, password: user.password+"1A!a"})
 
     const verify = await client.get(`/users/${response.body().uid}`).bearerToken(loggedInUser.body().token)
     verify.assertStatus(200)
