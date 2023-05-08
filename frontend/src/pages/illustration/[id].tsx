@@ -77,7 +77,7 @@ export default function IllustrationWrapper() {
     .then(data => {
       dispatch(setModal(false))
       dispatch(setFlashMessage({severity: 'danger', message: `Illustration: "${illustration?.title}" was deleted.`}))
-      router.back()
+      router.replace('/')
   });
   };
 
