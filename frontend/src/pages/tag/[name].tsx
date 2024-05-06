@@ -32,7 +32,6 @@ export default function Tag() {
     if (!user?.token) dispatch(setRedirect(`/tag/${router.query.name}`))
     if (!name) {
       setLoading(true)
-      return
     }
     // add - for data fetching
     api.get(`/tag/${router.query.name}`, '', user?.token)

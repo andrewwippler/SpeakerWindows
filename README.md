@@ -2,7 +2,7 @@
 
 [![API Tests](https://github.com/andrewwippler/SpeakerWindows/actions/workflows/api-tests.yml/badge.svg)](https://github.com/andrewwippler/SpeakerWindows/actions/workflows/api-tests.yml) [![Latest Version Deployed](https://github.com/andrewwippler/SpeakerWindows/actions/workflows/build-and-deploy.yml/badge.svg)](https://github.com/andrewwippler/SpeakerWindows/actions/workflows/build-and-deploy.yml)
 
-A complete rewrite of [Speaker-Illustrations](https://github.com/andrewwippler/speaker-illustrations). You have permission to use my [http://sw.wplr.rocks/](personal installation) or install this software on your own infrastructure. Dockerfiles are included in the respective folders.
+A complete rewrite of [Speaker-Illustrations](https://github.com/andrewwippler/speaker-illustrations). You have permission to use my [personal installation](http://sw.wplr.rocks/) or install this software on your own infrastructure. Dockerfiles are included in the respective folders.
 
 Speaker Windows is a personal, searchable repository of illustrations which are categorized by tags. This is a replacement to paper, word doc folder, and evernote/onenote notebook filing systems.
 
