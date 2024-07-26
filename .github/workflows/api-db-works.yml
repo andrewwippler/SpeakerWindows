@@ -27,7 +27,7 @@ jobs:
           - 6379:6379
     strategy:
       matrix:
-        node-version: [16.x, 18.x]
+        node-version: [18.x]
 
     steps:
     - uses: actions/checkout@v2

@@ -7,7 +7,9 @@ import Illustration from '#models/illustration'
 import TagFactory from '#database/factories/TagFactory'
 import Tag from '#models/tag'
 import Place from '#models/place'
-let goodUser, badUser, testTagIdOne, testTagIdTwo, illustration
+import User from '#models/user'
+import { ModelObject } from '@adonisjs/lucid/types/model'
+let goodUser: User, badUser: User, testTagIdOne: string | number | ModelObject, testTagIdTwo: number, illustration
 
 test.group('Illustrations', (group) => {
   group.each.setup(async () => {
