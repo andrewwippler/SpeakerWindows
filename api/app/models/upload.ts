@@ -8,6 +8,9 @@ export default class Upload extends BaseModel {
   declare id: number
 
   @column()
+  declare illustration_id: number
+
+  @column()
   declare name: string
 
   @column()
@@ -20,5 +23,5 @@ export default class Upload extends BaseModel {
   declare updatedAt: DateTime
 
   @belongsTo(() => Illustration)
-  declare illustrations: BelongsTo<typeof Illustration>
+  declare illustration: BelongsTo<typeof Illustration>
 }

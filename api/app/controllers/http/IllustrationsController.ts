@@ -29,6 +29,9 @@ export default class IllustrationsController {
       .preload('places', (builder) => {
         builder.orderBy('used', 'asc')
       })
+      .preload('uploads', (builder) => {
+        builder.orderBy('name', 'asc')
+      })
 
       // console.log(auth.user!.id,!!illustrationQuery[0],!illustrationQuery[0])
       if (!!illustrationQuery[0]) {

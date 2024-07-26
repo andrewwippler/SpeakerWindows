@@ -1,38 +1,44 @@
-import Upload from '#models/upload'
+import { editIllustration } from '#app/abilities/main'
+import Illustration from '#models/illustration'
+import { cuid } from '@adonisjs/core/helpers'
 import { HttpContext } from '@adonisjs/core/http'
 import app from '@adonisjs/core/services/app'
+import env from '#start/env'
 
 export default class UploadsController {
 
-  public async store({ auth, request, response }: HttpContext) {
+  public async store({ auth, bouncer, request, response }: HttpContext) {
+
+
     const { illustration_id } = request.all()
-    // request.multipart('illustration_image', {}, async (file) => {
-    //   const imagePath = `${auth.user!.id}/${illustration_id}/${file.clientName}`
-    //   // await Drive.disk('s3').put(imagePath, file.stream)
+    const illustration = await Illustration.findOrFail(illustration_id)
 
-    //   Upload.create({ illustrationId: illustration_id, name: imagePath, type: file.type })
-
-    // })
-
-    // await request.multipart.process()
-
-
-
-    const file = request.file('file', {
-      size: '2mb',
+    if (await bouncer.denies(editIllustration, illustration)) {
+      return response.forbidden({message: 'E_AUTHORIZATION_FAILURE: Not authorized to perform this action'})
+    }
+    const sentFile = request.file('illustration_image', {
+      size: '20mb',
       extnames: ['jpg', 'png', 'gif', 'pdf']
     })
-    if (!file) {
-      console.log(file)
+
+    if (!sentFile) {
+      console.log(sentFile)
       return response.badRequest({message: "No file uploaded"})
     }
 
-    if (!file.isValid) {
-      return response.badRequest(file.errors)
+    if (!sentFile.isValid) {
+      return response.badRequest(sentFile.errors)
     }
+    const pathEnv = env.get('NODE_ENV')
+    await sentFile.move(app.makePath('uploads', pathEnv), {
+      name: `${auth.user!.id}/${illustration_id}/${cuid()}.${sentFile.extname}`
+    })
 
-    await file.move(app.tmpPath('uploads'))
+    await illustration.related('uploads').create({
+      name: sentFile.fileName!,
+      type: sentFile.type
+    })
 
-    return response.ok({ message: 'File uploaded successfully', fileName: file.fileName })
+    return response.ok({ message: 'File uploaded successfully', fileName: sentFile.fileName })
   }
 }
