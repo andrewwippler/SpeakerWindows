@@ -32,8 +32,8 @@ export const runnerHooks: Required<Pick<Config, 'setup' | 'teardown'>> = {
 }
 
 export const reporters: Config['reporters'] = {
-  // activated: ['ndjson'],
-  activated: ['spec'],
+   activated: ['ndjson'],
+ // activated: ['spec'],
 }
 
 
