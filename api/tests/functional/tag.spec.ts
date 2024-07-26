@@ -1,19 +1,20 @@
 import { test } from '@japa/runner'
-import UserFactory from 'Database/factories/UserFactory'
-import Tag from 'App/Models/Tag'
-import TagFactory from 'Database/factories/TagFactory'
-import IllustrationFactory from 'Database/factories/IllustrationFactory'
-import Database from '@ioc:Adonis/Lucid/Database'
+import UserFactory from '#database/factories/UserFactory'
+import Tag from '#models/tag'
+import TagFactory from '#database/factories/TagFactory'
+import IllustrationFactory from '#database/factories/IllustrationFactory'
+import db from '@adonisjs/lucid/services/db'
 let goodUser, badUser
 
 test.group('Tag', (group) => {
   // Write your test here
   group.each.setup(async () => {
-    await Database.beginGlobalTransaction()
-    return () => Database.rollbackGlobalTransaction()
+    await db.beginGlobalTransaction()
+    return () => db.rollbackGlobalTransaction()
   })
   group.setup(async () => {
     // executed before all the tests for a given suite
+
 
   goodUser = await UserFactory.merge({password: 'oasssadfasdf'}).create()
   badUser = await UserFactory.merge({password: 'oasssadfasdf'}).create() // bad user does not have access to good user
@@ -149,7 +150,6 @@ test.group('Tag', (group) => {
     const updatedTag = {name: 'Adonis 102'}
     const loggedInUser = await client.post('/login').json({ email: goodUser.email, password: 'oasssadfasdf' })
     const response = await client.put(`/tags/${tag.id}`).bearerToken(loggedInUser.body().token).json(updatedTag)
-
     response.assertStatus(200)
     assert.equal(response.body().message, 'Updated successfully')
 
@@ -167,7 +167,8 @@ test.group('Tag', (group) => {
     const response = await client.put(`/tags/${tag.id}`).bearerToken(loggedInUser.body().token).json(updatedTag)
 
     response.assertStatus(400)
-    assert.equal(response.body().errors[0].message, 'Cannot update tag with the same name of an existing tag')
+    console.log(response.body())
+    assert.equal(response.body()[0].message, 'Cannot update tag with the same name of an existing tag')
 
   })
 
@@ -184,6 +185,7 @@ test.group('Tag', (group) => {
     assert.equal(findTag.name.toLowerCase(), tag.name)
 
   })
+
 
   test('Can delete my tag', async ({ client }) => {
     const loggedInUser = await client.post('/login').json({ email: goodUser.email, password: 'oasssadfasdf' })

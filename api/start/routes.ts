@@ -17,59 +17,67 @@
 | import './routes/customer'
 |
 */
+import router from '@adonisjs/core/services/router'
+import { middleware } from '#start/kernel'
+const HealthChecksController = () => import('#controllers/health_checks_controller')
+const UsersController = () => import('#controllers/http/UsersController')
+const IllustrationsController = () => import('#controllers/http/IllustrationsController')
+const AuthorsController = () => import('#controllers/http/AuthorsController')
+const SettingsController = () => import('#controllers/http/SettingsController')
+const TagsController = () => import('#controllers/http/TagsController')
+const PlacesController = () => import('#controllers/http/PlacesController')
+const SearchesController = () => import('#controllers/http/SearchesController')
+const UploadsController = () => import('#controllers/http/UploadsController')
+const ContactsController = () => import('#controllers/http/ContactsController')
 
-import Route from '@ioc:Adonis/Core/Route'
-import HealthCheck from '@ioc:Adonis/Core/HealthCheck'
-// import Upload from 'App/Models/Upload'
 
-Route.post('contact', 'ContactsController.store')
+
+router.post('contact', [ContactsController, 'store'])
 
 //auth
-Route.post('register', 'UsersController.store')
-Route.post('login', 'UsersController.login')
-Route.get('/healthz', async ({ response }) => {
-  const report = await HealthCheck.getReport()
+router.post('register', [UsersController, 'store'])
+router.post('login', [UsersController, 'login'])
+router.get('/healthz', [HealthChecksController])
+router
+  .get('users/:uid', [UsersController, 'show'])
+  .use([middleware.auth({
+    guards: ['api']
+  })])
 
-  return report.healthy
-    ? response.ok(report)
-    : response.badRequest(report)
-})
-Route
-  .get('users/:uid', 'UsersController.show')
-  .middleware('auth')
-
-Route.group(() =>{
+router.group(() =>{
   // illustrations
-  Route.get('/illustrations', 'IllustrationsController.index')
-  Route.post('/illustration', 'IllustrationsController.store')
-  Route.get('/illustration/authors', 'AuthorsController.index')
-  Route.get('/illustration/:id', 'IllustrationsController.show')
-  Route.get('/illustrations/:id', 'IllustrationsController.showOld')
-  Route.put('/illustration/:id', 'IllustrationsController.update')
-  Route.delete('/illustration/:id', 'IllustrationsController.destroy')
+  router.get('/illustrations', [IllustrationsController, 'index'])
+  router.post('/illustration', [IllustrationsController, 'store'])
+  router.get('/illustration/authors', [AuthorsController, 'index'])
+  router.get('/illustration/:id', [IllustrationsController, 'show'])
+  router.get('/illustrations/:id', [IllustrationsController, 'showOld'])
+  router.put('/illustration/:id', [IllustrationsController, 'update'])
+  router.delete('/illustration/:id', [IllustrationsController, 'destroy'])
 
-  Route.get('/author/:name', 'AuthorsController.show')
+  router.get('/author/:name', [AuthorsController, 'show'])
 
-  Route.get('/settings', 'SettingsController.index')
-  Route.post('/settings', 'SettingsController.update')
+  router.get('/settings', [SettingsController,'index'])
+  router.post('/settings', [SettingsController,'update'])
 
   //tags
   //are created on new illustrations only
-  Route.get('/tags', 'TagsController.index')
-  Route.get('/tags/:name', 'TagsController.search')
-  Route.get('/tag/:name', 'TagsController.illustrations')
-  Route.put('/tags/:id', 'TagsController.update')
-  Route.delete('/tags/:id', 'TagsController.destroy')
+  router.get('/tags', [TagsController, 'index'])
+  router.get('/tags/:name', [TagsController, 'search'])
+  router.get('/tag/:name', [TagsController, 'illustrations'])
+  router.put('/tags/:id', [TagsController, 'update'])
+  router.delete('/tags/:id', [TagsController, 'destroy'])
 
   // places
-  Route.get('/places/:illustration_id', 'PlacesController.show')
-  Route.post('/places/:illustration_id', 'PlacesController.store')
-  Route.put('/places/:id', 'PlacesController.update')
-  Route.delete('/places/:id', 'PlacesController.destroy')
+  router.get('/places/:illustration_id', [PlacesController, 'show'])
+  router.post('/places/:illustration_id', [PlacesController, 'store'])
+  router.put('/places/:id', [PlacesController, 'update'])
+  router.delete('/places/:id', [PlacesController, 'destroy'])
 
   //search
-  Route.post('/search', 'SearchesController.search')
+  router.post('/search', [SearchesController, 'search'])
 
   // Images
-  Route.post('/upload','UploadsController.store')
-}).middleware('auth')
+  router.post('/upload',[UploadsController, 'store'])
+}).use([middleware.auth({
+    guards: ['api']
+  })])

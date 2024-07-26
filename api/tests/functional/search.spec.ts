@@ -1,16 +1,16 @@
 import { test } from '@japa/runner'
-import IllustrationFactory from 'Database/factories/IllustrationFactory'
-import PlaceFactory from 'Database/factories/PlaceFactory'
-import UserFactory from 'Database/factories/UserFactory'
-import TagFactory from 'Database/factories/TagFactory'
-import Database from '@ioc:Adonis/Lucid/Database'
+import IllustrationFactory from '#database/factories/IllustrationFactory'
+import PlaceFactory from '#database/factories/PlaceFactory'
+import UserFactory from '#database/factories/UserFactory'
+import TagFactory from '#database/factories/TagFactory'
+import db from '@adonisjs/lucid/services/db'
 let goodUser
 
 test.group('Search', (group) => {
   // Write your test here
   group.each.setup(async () => {
-    await Database.beginGlobalTransaction()
-    return () => Database.rollbackGlobalTransaction()
+    await db.beginGlobalTransaction()
+    return () => db.rollbackGlobalTransaction()
   })
   group.setup(async () => {
     goodUser = await UserFactory.merge({password: 'oasssadfasdf'}).create()

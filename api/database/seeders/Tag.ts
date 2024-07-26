@@ -1,6 +1,6 @@
-import BaseSeeder from '@ioc:Adonis/Lucid/Seeder'
-import TagFactory from 'Database/factories/TagFactory'
-import Tag from 'App/Models/Tag'
+import { BaseSeeder } from '@adonisjs/lucid/seeders'
+import TagFactory from '#database/factories/TagFactory'
+import Tag from '#models/tag'
 
 async function getTags(user) {
   if (user == 1) {

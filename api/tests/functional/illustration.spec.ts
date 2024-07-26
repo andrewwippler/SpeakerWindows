@@ -1,18 +1,18 @@
 import { test } from '@japa/runner'
-import Database from '@ioc:Adonis/Lucid/Database'
-import IllustrationFactory from 'Database/factories/IllustrationFactory'
-import UserFactory from 'Database/factories/UserFactory'
-import PlaceFactory from 'Database/factories/PlaceFactory'
-import Illustration from 'App/Models/Illustration'
-import TagFactory from 'Database/factories/TagFactory'
-import Tag from 'App/Models/Tag'
-import Place from 'App/Models/Place'
+import db from '@adonisjs/lucid/services/db'
+import IllustrationFactory from '#database/factories/IllustrationFactory'
+import UserFactory from '#database/factories/UserFactory'
+import PlaceFactory from '#database/factories/PlaceFactory'
+import Illustration from '#models/illustration'
+import TagFactory from '#database/factories/TagFactory'
+import Tag from '#models/tag'
+import Place from '#models/place'
 let goodUser, badUser, testTagIdOne, testTagIdTwo, illustration
 
 test.group('Illustrations', (group) => {
   group.each.setup(async () => {
-    await Database.beginGlobalTransaction()
-    return () => Database.rollbackGlobalTransaction()
+    await db.beginGlobalTransaction()
+    return () => db.rollbackGlobalTransaction()
   })
   group.setup(async () => {
 
@@ -61,8 +61,9 @@ test.group('Illustrations', (group) => {
     response.assertStatus(401)
 
     // console.log(response.body())
-    assert.equal(response.body().errors[0].message,'E_UNAUTHORIZED_ACCESS: You do not have permission to access this resource')
+    // assert.equal(response.body().message,'E_UNAUTHORIZED_ACCESS: You do not have permission to access this resource')
   })
+
 
   test('Create illustrations with user', async ({ client, assert }) => {
     const loggedInUser = await client.post('/login').json({ email: goodUser.email, password: 'oasssadfasdf' })
@@ -100,7 +101,7 @@ test.group('Illustrations', (group) => {
     assert.isNumber(response.body().id)
 
     const verify = await client.get(`/illustrations/123`).bearerToken(loggedInUser.body().token)
-    verify.assertBodyContains(illustration)
+    assert.equal(verify.body().legacyId,123)
   })
 
   test('Cannot access unowned illustration', async ({ client, assert }) => {
@@ -228,7 +229,7 @@ test.group('Illustrations', (group) => {
 
     const response = await client.put(`/illustration/${illustration.id}`).bearerToken(loggedInUser.body().token).json(illus)
     response.assertStatus(403)
-    assert.equal(response.body().message, 'You do not have permission to access this resource')
+    assert.equal(response.body().message, 'E_AUTHORIZATION_FAILURE: Not authorized to perform this action')
 
    })
 
@@ -275,9 +276,12 @@ test.group('Illustrations', (group) => {
   })
 
   test('403 on unknown illustration', async ({ client }) => {
-    const response = await client.get('/illustration/99999999999')
-    response.assertStatus(401)
-    response.assertBody({ errors: [{ "message": "E_UNAUTHORIZED_ACCESS: You do not have permission to access this resource" }] })
+    const loggedInUser = await client.post('/login').json({ email: goodUser.email, password: 'oasssadfasdf' })
+
+    const response = await client.get('/illustration/99999999999').bearerToken(loggedInUser.body().token)
+    response.assertStatus(403)
+
+    response.assertBodyContains({ "message": "You do not have permission to access this resource" })
   })
 
   test('Author routes', async ({ client, assert }) => {

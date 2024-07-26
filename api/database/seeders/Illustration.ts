@@ -1,13 +1,13 @@
 //@ts-nocheck
 
-import BaseSeeder from '@ioc:Adonis/Lucid/Seeder'
-import Illustration from 'App/Models/Illustration'
-import User from 'App/Models/User'
-import Tag from 'App/Models/Tag'
-import IllustrationFactory from 'Database/factories/IllustrationFactory'
-import PlaceFactory from 'Database/factories/PlaceFactory'
-import TagFactory from 'Database/factories/TagFactory'
-import { _ } from 'lodash'
+import { BaseSeeder } from '@adonisjs/lucid/seeders'
+import Illustration from '#models/illustration'
+import User from '#models/user'
+import Tag from '#models/tag'
+import IllustrationFactory from '#database/factories/IllustrationFactory'
+import PlaceFactory from '#database/factories/PlaceFactory'
+import TagFactory from '#database/factories/TagFactory'
+import _ from 'lodash'
 
 export default class extends BaseSeeder {
   public async run() {
