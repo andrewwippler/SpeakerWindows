@@ -19,7 +19,7 @@ import sourceMapSupport from 'source-map-support'
 import { Ignitor } from '@adonisjs/core/build/standalone'
 import { configure, processCliArgs, run, RunnerHooksHandler } from '@japa/runner'
 
-sourceMapSupport.install({ handleUncaughtExceptions: false })
+sourceMapSupport.install({ handleUncaughtExceptions: true })
 
 const kernel = new Ignitor(__dirname).kernel('test')
 
@@ -38,7 +38,7 @@ kernel
         setup: app.concat(runnerHooks.setup),
         teardown: runnerHooks.teardown,
       },
-      cwd: kernel.application.appRoot,
+      cwd: kernel.application.appRoot
     })
 
     run()

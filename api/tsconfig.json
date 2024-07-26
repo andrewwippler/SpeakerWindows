@@ -5,8 +5,7 @@
   ],
   "exclude": [
     "node_modules",
-    "build",
-    "tests/functional"
+    "build"
   ],
   "compilerOptions": {
     "strictNullChecks": true,
