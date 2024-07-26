@@ -54,6 +54,8 @@
       ]
     },
     "types": [],
-    "strictPropertyInitialization": false
+    "strictPropertyInitialization": false,
+    "skipLibCheck": true,
+    "typeRoots": ["./node_modules/@types"]
   }
 }

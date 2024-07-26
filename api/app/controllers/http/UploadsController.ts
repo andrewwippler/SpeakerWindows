@@ -1,15 +1,16 @@
+import Upload from '#models/upload'
 import { HttpContext } from '@adonisjs/core/http'
 import app from '@adonisjs/core/services/app'
 
 export default class UploadsController {
 
-  public async store({ request, response }: HttpContext) {
-    // const { illustration_id } = request.all()
-    // request.multipart.file('illustration_image', {}, async (file) => {
-    //   const imagePath = `${auth.user.uid}/${illustration_id}/${file.clientName}`
-    //   await Drive.disk('s3').put(imagePath, file.stream)
+  public async store({ auth, request, response }: HttpContext) {
+    const { illustration_id } = request.all()
+    // request.multipart('illustration_image', {}, async (file) => {
+    //   const imagePath = `${auth.user!.id}/${illustration_id}/${file.clientName}`
+    //   // await Drive.disk('s3').put(imagePath, file.stream)
 
-    //   Upload.create({ illustration_id, name: imagePath, type: file.type })
+    //   Upload.create({ illustrationId: illustration_id, name: imagePath, type: file.type })
 
     // })
 
@@ -21,9 +22,9 @@ export default class UploadsController {
       size: '2mb',
       extnames: ['jpg', 'png', 'gif', 'pdf']
     })
-
     if (!file) {
-      return response.badRequest('No file uploaded')
+      console.log(file)
+      return response.badRequest({message: "No file uploaded"})
     }
 
     if (!file.isValid) {
