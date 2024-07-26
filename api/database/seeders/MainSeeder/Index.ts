@@ -1,4 +1,4 @@
-import BaseSeeder from '@ioc:Adonis/Lucid/Seeder'
+import { BaseSeeder } from '@adonisjs/lucid/seeders'
 
 export default class IndexSeeder extends BaseSeeder {
   private async runSeeder(Seeder: { default: typeof BaseSeeder }) {

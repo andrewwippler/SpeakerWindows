@@ -5,9 +5,10 @@
  * file.
  */
 
-import type { BodyParserConfig } from '@ioc:Adonis/Core/BodyParser'
+import type { BodyParserConfig } from '@adonisjs/core/bodyparser'
+import { defineConfig } from "@adonisjs/core/bodyparser";
 
-const bodyParserConfig: BodyParserConfig = {
+const bodyParserConfig = defineConfig({
   /*
   |--------------------------------------------------------------------------
   | White listed methods
@@ -30,7 +31,7 @@ const bodyParserConfig: BodyParserConfig = {
   */
   json: {
     encoding: 'utf-8',
-    limit: '1mb',
+    limit: '5mb',
     strict: true,
     types: [
       'application/json',
@@ -51,7 +52,7 @@ const bodyParserConfig: BodyParserConfig = {
   */
   form: {
     encoding: 'utf-8',
-    limit: '1mb',
+    limit: '50mb',
     queryString: {},
 
     /*
@@ -188,7 +189,7 @@ const bodyParserConfig: BodyParserConfig = {
     | and fields data.
     |
     */
-    limit: '20mb',
+    limit: '50mb',
 
     /*
     |--------------------------------------------------------------------------
@@ -200,6 +201,6 @@ const bodyParserConfig: BodyParserConfig = {
     */
     types: ['multipart/form-data'],
   },
-}
+})
 
 export default bodyParserConfig

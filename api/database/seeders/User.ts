@@ -1,5 +1,5 @@
-import BaseSeeder from '@ioc:Adonis/Lucid/Seeder'
-import User from 'App/Models/User'
+import { BaseSeeder } from '@adonisjs/lucid/seeders'
+import User from '#models/user'
 
 export default class extends BaseSeeder {
   public async run () {

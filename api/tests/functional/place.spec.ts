@@ -1,17 +1,17 @@
 import { test } from '@japa/runner'
-import IllustrationFactory from 'Database/factories/IllustrationFactory'
-import PlaceFactory from 'Database/factories/PlaceFactory'
-import Illustration from 'App/Models/Illustration'
-import UserFactory from 'Database/factories/UserFactory'
-import Place from 'App/Models/Place'
-import Database from '@ioc:Adonis/Lucid/Database'
+import IllustrationFactory from '#database/factories/IllustrationFactory'
+import PlaceFactory from '#database/factories/PlaceFactory'
+import Illustration from '#models/illustration'
+import UserFactory from '#database/factories/UserFactory'
+import Place from '#models/place'
+import db from '@adonisjs/lucid/services/db'
 let goodUser, badUser
 
 test.group('Place', (group) => {
   // Write your test here
   group.each.setup(async () => {
-    await Database.beginGlobalTransaction()
-    return () => Database.rollbackGlobalTransaction()
+    await db.beginGlobalTransaction()
+    return () => db.rollbackGlobalTransaction()
   })
   group.setup(async () => {
     goodUser = await UserFactory.merge({password: 'oasssadfasdf'}).create()
@@ -161,6 +161,6 @@ test.group('Place', (group) => {
 
     const response = await client.post(`/places/999999999999999999999999999999999`).bearerToken(loggedInUser.body().token).json(place.toJSON())
     response.assertStatus(404)
-    assert.equal(response.body().message,'E_ROW_NOT_FOUND: Row not found')
+    assert.equal(response.body().message,'Illustration does not exist')
   })
 })

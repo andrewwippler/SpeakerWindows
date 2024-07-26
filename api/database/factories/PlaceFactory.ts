@@ -1,12 +1,12 @@
-import Place from 'App/Models/Place'
-import Factory from '@ioc:Adonis/Lucid/Factory'
+import Place from '#models/place'
+import Factory from '@adonisjs/lucid/factories'
 import { DateTime } from 'luxon'
 
 export default Factory.define(Place, ({ faker }) => {
   return {
     place: faker.company.name(),
-    location: faker.address.city() + ', ' + faker.address.state(),
-    used: DateTime.fromObject({ ordinal: faker.datatype.number({ min: 1, max: 360 }) }),
-    user_id: faker.datatype.number({ min: 1, max: 2 }),
+    location: faker.location.city() + ', ' + faker.location.state(),
+    used: DateTime.fromObject({ ordinal: faker.number.int({ min: 1, max: 360 }) }),
+    user_id: faker.number.int({ min: 1, max: 2 }),
   }
 }).build()

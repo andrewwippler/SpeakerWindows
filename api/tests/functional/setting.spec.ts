@@ -1,14 +1,14 @@
 import { test } from '@japa/runner'
-import Contact from 'App/Models/Contact'
-import Database from '@ioc:Adonis/Lucid/Database'
-import UserFactory from 'Database/factories/UserFactory'
+import Contact from '#models/contact'
+import db from '@adonisjs/lucid/services/db'
+import UserFactory from '#database/factories/UserFactory'
 
 let goodUser, badUser
 
 test.group('Contact', (group) => {
   group.each.setup(async () => {
-    await Database.beginGlobalTransaction()
-    return () => Database.rollbackGlobalTransaction()
+    await db.beginGlobalTransaction()
+    return () => db.rollbackGlobalTransaction()
   })
   group.setup(async () => {
     goodUser = await UserFactory.merge({password: 'oasssadfasdf'}).create()

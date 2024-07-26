@@ -1,19 +1,13 @@
 import { test } from '@japa/runner'
-import Contact from 'App/Models/Contact'
-import Database from '@ioc:Adonis/Lucid/Database'
+import Contact from '#models/contact'
+import db from '@adonisjs/lucid/services/db'
 
 test.group('Contact', (group) => {
   group.each.setup(async () => {
-    await Database.beginGlobalTransaction()
-    return () => Database.rollbackGlobalTransaction()
+    await db.beginGlobalTransaction()
+    return () => db.rollbackGlobalTransaction()
   })
-  // group.setup(async () => {
 
-  // })
-
-  // group.teardown(async () => {
-
-  // })
 
   test('Can submit a contact form request', async ({ client }) => {
     const response = await client.post('/contact').json({

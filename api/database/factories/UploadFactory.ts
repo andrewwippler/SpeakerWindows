@@ -1,5 +1,5 @@
-import Upload from 'App/Models/Upload'
-import Factory from '@ioc:Adonis/Lucid/Factory'
+import Upload from '#models/upload'
+import Factory from '@adonisjs/lucid/factories'
 
 export default Factory.define(Upload, ({ faker }) => {
   const textArray = ['image', 'video']

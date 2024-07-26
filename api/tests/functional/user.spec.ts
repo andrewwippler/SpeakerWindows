@@ -1,13 +1,13 @@
 //@ts-nocheck
 import { processCliArgs, test } from '@japa/runner'
-import UserFactory from 'Database/factories/UserFactory'
-import User from 'App/Models/User'
-import Database from '@ioc:Adonis/Lucid/Database'
+import UserFactory from '#database/factories/UserFactory'
+import User from '#models/user'
+import db from '@adonisjs/lucid/services/db'
 
 test.group('Users', (group) => {
   group.each.setup(async () => {
-    await Database.beginGlobalTransaction()
-    return () => Database.rollbackGlobalTransaction()
+    await db.beginGlobalTransaction()
+    return () => db.rollbackGlobalTransaction()
   })
   test('Can create an account', async ({ client, assert }) => {
 
@@ -19,7 +19,6 @@ test.group('Users', (group) => {
     }
 
     const response = await client.post('/register').json(fixedUser)
-
     response.assertBodyContains({message: 'Created successfully'})
     response.assertBodyContains({uid: response.body().uid})
     response.assertStatus(200)
@@ -43,7 +42,7 @@ test.group('Users', (group) => {
     const response = await client.post('/register').json(fixedUser)
 
     response.assertStatus(400)
-    assert.equal(response.body().errors[0].message, 'The password field is required')
+    assert.equal(response.body()[0].message, 'The password field is required')
 
     // weak password
     fixedUser.password_confirmation = '12345'
@@ -52,7 +51,7 @@ test.group('Users', (group) => {
     const weak = await client.post('/register').json(fixedUser)
 
     weak.assertStatus(400)
-    assert.equal(weak.body().errors[0].message, 'The password field must be at least 8 characters with one of the following: a number, uppercase character, and lowercase character.')
+    assert.equal(weak.body()[0].message, 'The password field must be at least 8 characters with one of the following: a number, uppercase character, and lowercase character.')
 
     // don't match
     fixedUser.password = 'Aa12345678'
@@ -60,7 +59,7 @@ test.group('Users', (group) => {
     const match = await client.post('/register').json(fixedUser)
 
     match.assertStatus(400)
-    assert.equal(match.body().errors[0].message, 'confirmed validation failed')
+    assert.equal(match.body()[0].message, 'The password fields do not match')
   })
 
   test('Bad emails', async ({ client, assert }) => {
@@ -79,7 +78,7 @@ test.group('Users', (group) => {
     const weak = await client.post('/register').json(fixedUser)
 
     weak.assertStatus(400)
-    assert.equal(weak.body().errors[0].message, 'Enter a valid email address')
+    assert.equal(weak.body()[0].message, 'Enter a valid email address')
 
     // no email
     fixedUser.email = ''
@@ -87,7 +86,7 @@ test.group('Users', (group) => {
     const none = await client.post('/register').json(fixedUser)
 
     none.assertStatus(400)
-    assert.equal(none.body().errors[0].message, 'The email field is required')
+    assert.equal(none.body()[0].message, 'The email field is required')
 
     // unique
 
@@ -95,7 +94,7 @@ test.group('Users', (group) => {
     const duplicate = await client.post('/register').json(fixedUser)
 
     duplicate.assertStatus(400)
-    assert.equal(duplicate.body().errors[0].message, 'Email already exists')
+    assert.equal(duplicate.body()[0].message, 'Email already exists')
   })
 
 
@@ -151,4 +150,5 @@ test.group('Users', (group) => {
     assert.equal(login.body().message, 'Too many requests. Please wait 30 minutes and try again.')
 
   })
+
 })
