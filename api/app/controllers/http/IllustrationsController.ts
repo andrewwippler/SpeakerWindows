@@ -6,6 +6,10 @@ import Tag from '#models/tag'
 import _ from 'lodash'
 import { DateTime } from 'luxon'
 import { editIllustration } from '#app/abilities/main'
+import Upload from '#models/upload'
+import app from '@adonisjs/core/services/app'
+import fs from 'fs/promises'
+import env from '#start/env'
 
 export default class IllustrationsController {
 
@@ -63,6 +67,9 @@ export default class IllustrationsController {
         })
         .preload('places', (builder) => {
           builder.orderBy('used', 'asc')
+        })
+        .preload('uploads', (builder) => {
+          builder.orderBy('name', 'asc')
         })
 
         // console.log(_.get(params, 'id', 0),auth.user?.id,!!illustrationQuery[0],!illustrationQuery[0])
@@ -176,6 +183,10 @@ export default class IllustrationsController {
     }
 
     await Place.query().where('illustration_id', id).delete()
+    await Upload.query().where('illustration_id', id).delete()
+    const uploadsPath = app.makePath('uploads', env.get("NODE_ENV"), auth.user?.id, id) // delete just the illustration folder
+    await fs.rm(uploadsPath, { recursive: true, force: true })
+
     await illustration[0].related('tags').detach()
     await illustration[0].delete()
     return response.send({message: `Deleted illustration id: ${illustration[0].id}`})

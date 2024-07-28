@@ -12,6 +12,7 @@ export default function PlaceConfirmDialog({ title, id, token }: {title: string 
   const placeId = id
   const userToken = token
 
+
   const handlePlaceDelete = () => {
     // delete illustration
     api.delete(`/places/${placeId}`, '', userToken)
