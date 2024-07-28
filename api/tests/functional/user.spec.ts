@@ -32,6 +32,32 @@ test.group('Users', (group) => {
 
   })
 
+  test('Cannot see your profile', async ({ client, assert }) => {
+
+    const user = await UserFactory.make()
+    const userTwo = await UserFactory.make()
+    let fixedUser = {
+      email: user.email,
+      password: user.password+"1A!a",
+      password_confirmation: user.password+"1A!a"
+    }
+    let fixedUser2 = {
+      email: userTwo.email,
+      password: userTwo.password+"1A!a",
+      password_confirmation: userTwo.password+"1A!a"
+    }
+
+    const userOne = await client.post('/register').json(fixedUser)
+    const registeredTwo = await client.post('/register').json(fixedUser2)
+
+    const loggedInUser = await client.post('/login').json({email: user.email, password: user.password+"1A!a"})
+
+    const verify = await client.get(`/users/${registeredTwo.body().uid}`).bearerToken(loggedInUser.body().token)
+    verify.assertStatus(401)
+    assert.equal(verify.body().message, "You cannot see someone else's profile")
+
+  })
+
   test('Bad passwords', async ({ client, assert }) => {
     // no password
     const user = await UserFactory.make()

@@ -65,7 +65,7 @@ export default class UploadsController {
     await upload[0].delete()
 
     const uploadsPath = app.makePath('uploads', env.get("NODE_ENV"), upload[0].name ) // delete just the attachment
-    console.log('deleting:', uploadsPath)
+    // console.log('deleting:', uploadsPath)
     await fs.rm(uploadsPath, { recursive: false, force: true })
     return response.send({ message: `Deleted Upload id: ${upload[0].id}` })
   }

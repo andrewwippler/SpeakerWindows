@@ -49,9 +49,9 @@ export default class UsersController {
 
   }
 
-  public show({ auth, params }: HttpContext) {
+  public show({ auth, params, response }: HttpContext) {
     if (auth.user?.uid !== params.uid) {
-      return "You cannot see someone else's profile"
+      return response.status(401).send({ message: "You cannot see someone else's profile" })
     }
     return auth.user
   }
