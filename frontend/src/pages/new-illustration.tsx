@@ -14,7 +14,7 @@ export default function Login() {
   const dispatch = useAppDispatch();
   useEffect(() => {
     if (!user?.token) dispatch(setRedirect(`/new-illustration`));
-  }, [user]);
+  }, [user, dispatch]);
   if (!user?.token) return;
   return (
     <Layout>

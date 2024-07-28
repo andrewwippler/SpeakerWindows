@@ -8,7 +8,6 @@ import {
   setThingToDelete,
   thingToDelete,
 } from "@/features/modal/reducer";
-import { transpileDeclaration } from "typescript";
 import useUser from "@/library/useUser";
 import api from "@/library/api";
 import { setUpdateUI } from "@/features/ui/reducer";
@@ -62,7 +61,6 @@ export default function ConfirmDialog() {
   };
 
   return (
-    <div>
       <Transition.Root show={open} as={Fragment}>
         <Dialog
           as="div"
@@ -146,6 +144,5 @@ export default function ConfirmDialog() {
           </div>
         </Dialog>
       </Transition.Root>
-    </div>
   );
 }

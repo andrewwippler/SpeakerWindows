@@ -40,7 +40,7 @@ export default function LegacyIllustration() {
       router.replace(`/illustration/${data.id}`);
       setLoading(false);
     });
-  }, [id, dispatch, router]);
+  }, [id, dispatch, router, user?.token]);
 
   if (isLoading)
     return (

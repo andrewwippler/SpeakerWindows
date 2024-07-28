@@ -1,5 +1,5 @@
 # source: https://github.com/vercel/next.js/blob/7cc4159561f6591140ff669c4ac3c74a049c783b/examples/with-docker/Dockerfile
-FROM node:18-alpine AS base
+FROM node:20-alpine AS base
 
 # Install dependencies only when needed
 FROM base AS deps
