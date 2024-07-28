@@ -184,7 +184,7 @@ export default class IllustrationsController {
 
     await Place.query().where('illustration_id', id).delete()
     await Upload.query().where('illustration_id', id).delete()
-    const uploadsPath = app.makePath('uploads', env.get("NODE_ENV"), auth.user?.id, id) // delete just the illustration folder
+    const uploadsPath = app.makePath('uploads', env.get("NODE_ENV"), auth.user?.id.toString(), id.toString()) // delete just the illustration folder
     await fs.rm(uploadsPath, { recursive: true, force: true })
 
     await illustration[0].related('tags').detach()
