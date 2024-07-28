@@ -27,7 +27,7 @@ export default function Settings() {
 
   useEffect(() => {
     if (!user?.token) dispatch(setRedirect(`/settings`));
-  }, [user]);
+  }, [user, dispatch]);
 
   const onSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();

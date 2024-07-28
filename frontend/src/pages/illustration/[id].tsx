@@ -80,7 +80,7 @@ export default function IllustrationWrapper() {
         dispatch(setUpdateUI(false));
       }
     });
-  }, [router.query.id, refreshUI, user, userSettings]);
+  }, [router.query.id, refreshUI, user, userSettings, dispatch, router]);
 
   if (isLoading) return <Layout>Loading...</Layout>;
 
@@ -223,7 +223,7 @@ export default function IllustrationWrapper() {
             )}
 
             <div className="columns-1">
-              {illustration?.uploads > 0 && (
+              {illustration?.uploads.length > 0 && (
                 <div className="text-l font-bold pt-8 text-sky-900">
                   <span className="mr-4">Attachments</span>
                 </div>

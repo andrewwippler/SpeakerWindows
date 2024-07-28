@@ -8,13 +8,13 @@ export class UploadType {
 }
 
 export class illustrationType {
-  uploads: Array<UploadType> | undefined;
-  content: string | undefined;
-  tags: Array<tagType> | undefined;
-  places: Array<placeType> | undefined;
-  source: string | undefined;
-  author: string | undefined;
-  title: string | undefined;
-  id: number | undefined;
+  uploads: Array<UploadType> = [];
+  content!: string;
+  tags: Array<tagType> = [];
+  places: Array<placeType> = [];
+  source!: string;
+  author!: string ;
+  title!: string ;
+  id!: number ;
 
 }

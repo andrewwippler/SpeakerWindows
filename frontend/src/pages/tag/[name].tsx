@@ -45,7 +45,7 @@ export default function Tag() {
       setData(data); // illustrations
       setLoading(false);
     });
-  }, [name]);
+  }, [name, user, dispatch, router.query.name]);
 
   const handleSave = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();

@@ -36,7 +36,7 @@ export default function Author() {
         setData(data); // illustrations
         setLoading(false)
     });
-  }, [name]);
+  }, [name, dispatch, user?.token]);
 
 
   if (!user?.token) return

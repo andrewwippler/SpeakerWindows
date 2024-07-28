@@ -1,4 +1,4 @@
-import { FormEvent, useState } from "react";
+import { ChangeEvent, FormEvent, useState } from "react";
 import { ArrowLeftIcon, TrashIcon, PhotoIcon } from "@heroicons/react/24/solid";
 import api from "@/library/api";
 import { useAppSelector, useAppDispatch } from "@/hooks";
@@ -34,8 +34,12 @@ export default function IllustrationForm({
   const [file, setFile] = useState<Boolean>();
   const [deleteUpload, setDeleteUpload] = useState<UploadType>();
 
-  function handleFileChange(event) {
-    const uploadedFile = event.target.files[0];
+  function handleFileChange(event: ChangeEvent<HTMLInputElement>) {
+
+    const files = event.target.files
+    if (!files) { return }
+    const uploadedFile = files[0];
+
     if (
       uploadedFile.type !== "image/png" &&
       uploadedFile.type !== "application/pdf" &&

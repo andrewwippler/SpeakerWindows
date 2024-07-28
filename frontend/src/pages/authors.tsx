@@ -13,7 +13,7 @@ export default function Authors() {
   const dispatch = useAppDispatch();
   useEffect(() => {
     if (!user?.token) dispatch(setRedirect(`/authors`));
-  }, [user]);
+  }, [user, dispatch]);
   if (!user?.token) return;
   return <Layout>{user?.isLoggedIn && <Author token={user?.token} />}</Layout>;
 }

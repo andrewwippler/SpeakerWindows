@@ -30,7 +30,7 @@ export default function Search() {
 
   useEffect(() => {
     if (!user?.token) dispatch(setRedirect(`/search`));
-  }, [user]);
+  }, [user, dispatch]);
 
   const onSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
