@@ -19,6 +19,11 @@
 */
 import router from '@adonisjs/core/services/router'
 import { middleware } from '#start/kernel'
+import { sep, normalize } from 'node:path'
+import app from '@adonisjs/core/services/app'
+import env from '#start/env'
+import { join } from 'path'
+
 const HealthChecksController = () => import('#controllers/health_checks_controller')
 const UsersController = () => import('#controllers/http/UsersController')
 const IllustrationsController = () => import('#controllers/http/IllustrationsController')
@@ -30,7 +35,7 @@ const SearchesController = () => import('#controllers/http/SearchesController')
 const UploadsController = () => import('#controllers/http/UploadsController')
 const ContactsController = () => import('#controllers/http/ContactsController')
 
-
+const PATH_TRAVERSAL_REGEX = /(?:^|[\\/])\.\.(?:[\\/]|$)/
 
 router.post('contact', [ContactsController, 'store'])
 
@@ -77,7 +82,24 @@ router.group(() =>{
   router.post('/search', [SearchesController, 'search'])
 
   // Images
-  router.post('/upload',[UploadsController, 'store'])
+  router.post('/upload', [UploadsController, 'store'])
+  router.delete('/upload/:id', [UploadsController, 'destroy'])
+
 }).use([middleware.auth({
-    guards: ['api']
-  })])
+  guards: ['api']
+})])
+
+//public
+router.get('/uploads/*', ({ request, response }) => {
+  const pathEnv = env.get('NODE_ENV')
+  const filePath = join(pathEnv,request.param('*').join(sep))
+  // console.log(filePath.toString(), request.param('*'))
+  const normalizedPath = normalize(filePath)
+
+  if (PATH_TRAVERSAL_REGEX.test(normalizedPath)) {
+    return response.badRequest('Malformed path')
+  }
+
+  const absolutePath = app.makePath('uploads', normalizedPath)
+  return response.download(absolutePath)
+})

@@ -1,7 +1,7 @@
-export type placeType = {
-  id: string | undefined
-  place: string,
-  location: string,
-  used: string,
-  illustration_id: number
+export class placeType {
+  public id: string | undefined;
+  public place: string | undefined;
+  public location: string | undefined;
+  public used: string | undefined;
+  public illustration_id: number | undefined;
 }

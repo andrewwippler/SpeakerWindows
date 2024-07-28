@@ -22,6 +22,8 @@ export default class Upload extends BaseModel {
   @column.dateTime({ autoCreate: true, autoUpdate: true })
   declare updatedAt: DateTime
 
-  @belongsTo(() => Illustration)
+  @belongsTo(() => Illustration, {
+    foreignKey: 'illustration_id',
+  })
   declare illustration: BelongsTo<typeof Illustration>
 }

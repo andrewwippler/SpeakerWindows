@@ -108,11 +108,14 @@ test.group('Illustrations', (group) => {
 
   test('Cannot access unowned illustration', async ({ client, assert }) => {
     const loggedInUser = await client.post('/login').json({ email: badUser.email, password: 'oasssadfasdf' })
-    const illustration = await IllustrationFactory.merge({ title: 'Illustrations Test2', user_id: goodUser.id }).create()
-// console.log("test",illustration.id,goodUser.id)
+    const illustration = await IllustrationFactory.merge({ title: 'Illustrations Test2', legacy_id: 899, user_id: goodUser.id }).create()
     const response = await client.get(`/illustration/${illustration.id}`).bearerToken(loggedInUser.body().token)
     response.assertStatus(403)
-    assert.equal(response.body().message,'You do not have permission to access this resource')
+    assert.equal(response.body().message, 'You do not have permission to access this resource')
+
+    const legacy = await client.get(`/illustrations/${illustration.legacy_id}`).bearerToken(loggedInUser.body().token)
+    legacy.assertStatus(403)
+    assert.equal(legacy.body().message,'You do not have permission to access this resource')
   })
 
   test('Create illustrations with tags and places', async ({ client, assert }) => {
@@ -288,6 +291,7 @@ test.group('Illustrations', (group) => {
 
   test('Author routes', async ({ client, assert }) => {
     const loggedInUser = await client.post('/login').json({ email: goodUser.email, password: 'oasssadfasdf' })
+    const secondLoggedInUser = await client.post('/login').json({ email: badUser.email, password: 'oasssadfasdf' })
 
     const illustration =  {
       author: 'testy mctest',
@@ -304,15 +308,23 @@ test.group('Illustrations', (group) => {
       content: 'this shall pass as new',
     }
     await client.post('/illustration').bearerToken(loggedInUser.body().token).json(second)
+    await client.post('/illustration').bearerToken(secondLoggedInUser.body().token).json(second)
 
     const both = await client.get('/illustration/authors').bearerToken(loggedInUser.body().token)
+    const none = await client.get('/illustration/authors').bearerToken(secondLoggedInUser.body().token)
 
     both.assertStatus(200)
-    assert.equal(both.body().length,2)
+    assert.equal(both.body().length, 2)
+
+    none.assertStatus(204)
+    assert.isObject(none.body())
+
 
     const response = await client.get('/author/'+illustration.author).bearerToken(loggedInUser.body().token)
     response.assertStatus(200)
-    assert.equal(response.body().length,1)
+    assert.equal(response.body().length, 1)
+    const last = await client.get('/author/boogers').bearerToken(loggedInUser.body().token)
+    last.assertStatus(204)
 
   })
 

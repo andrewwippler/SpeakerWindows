@@ -43,9 +43,6 @@ export default class PlacesController {
     } catch (error) {
       return response.status(404).send({ message: 'Illustration does not exist' })
     }
-    if (!illustration) {
-      return response.status(403).send({ message: 'Illustration does not exist' })
-    }
 
     if (!illustration.toJSON()[0] && illustration.user_id != auth.user?.id) {
       return response.status(403).send({ message: 'You do not have permission to access this resource' })

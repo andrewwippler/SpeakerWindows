@@ -20,4 +20,9 @@ test.group('Contact', (group) => {
 
   })
 
+  test('Errors submit a contact form request', async ({ client }) => {
+    const response = await client.post('/contact').json({})
+    response.assertStatus(400)
+  })
+
 })

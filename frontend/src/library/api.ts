@@ -7,7 +7,7 @@ const defaultHeaders = {
 
 const defaultMultiHeaders = {
   'Accept': 'application/json',
-  'Content-Type': 'application/x-www-form-urlencoded',
+  // 'Content-Type': 'multipart/form-data', //https://stackoverflow.com/a/39281156
 };
 
 class Api {
@@ -88,6 +88,7 @@ class Api {
       }
     }
     const url = `${process.env.NEXT_PUBLIC_HOST_URL}${route}`;
+    // console.log("api options.body", options.body)
 
     return fetch(url, options)
       .then(resp => {
@@ -130,7 +131,7 @@ class Api {
       .then(json => {
         return json;
       }).catch(error => {
-        console.log("FETCH ERROR: ",error)
+        console.log("FETCH ERROR: ", error)
         return error
       });
   }

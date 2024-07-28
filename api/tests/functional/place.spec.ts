@@ -68,7 +68,7 @@ test.group('Place', (group) => {
 
   })
 
-  test('Cannot add new place to your illustration', async ({ client, assert }) => {
+  test('Cannot add new place to your illustration or unknown', async ({ client, assert }) => {
 
     const loggedInUser = await client.post('/login').json({ email: badUser.email, password: 'oasssadfasdf' })
     const illustration = await Illustration.findByOrFail('title', 'Places Test')
@@ -76,7 +76,11 @@ test.group('Place', (group) => {
 
     const response = await client.post(`/places/${illustration.id}`).bearerToken(loggedInUser.body().token).json(place.toJSON())
     response.assertStatus(403)
-    assert.equal(response.body().message,'You do not have permission to access this resource')
+    assert.equal(response.body().message, 'You do not have permission to access this resource')
+
+    const unknown = await client.post(`/places/9999999999`).bearerToken(loggedInUser.body().token).json(place.toJSON())
+    unknown.assertStatus(404)
+    assert.equal(unknown.body().message,'Illustration does not exist')
 
   })
 
