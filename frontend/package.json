@@ -21,7 +21,7 @@
     "eslint-config-next": "14.2.5",
     "iron-session": "^6.3.1",
     "lodash": "^4.17.21",
-    "next": "14.2.5",
+    "next": "14.2.10",
     "next-redux-wrapper": "^8.1.0",
     "octokit": "^4.0.2",
     "react": "18.3.1",
