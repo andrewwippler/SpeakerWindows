@@ -153,7 +153,7 @@ export default function Tag() {
                 {d.title}
               </Link>
               <div className="invisible h-0 group-hover/item:h-auto group-hover/item:visible">
-                {d.content.slice(0, 256)}...
+                {d.content ? (d.content.slice(0, 256) + "...") : ( "No Content" )}
               </div>
             </li>
           ))
