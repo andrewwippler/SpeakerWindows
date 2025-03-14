@@ -98,6 +98,28 @@ export default function IllustrationWrapper() {
   const handleCopy = (event: any, content: string) => {
     event.target.innerText = `Text Copied`;
     navigator.clipboard.writeText(content);
+
+    let form = {
+      place: userSettings.place ? userSettings.place : "",
+      location: userSettings.location ? userSettings.location : "",
+      used: format(new Date(), "yyyy-MM-dd")
+    }
+
+    api.post(`/places/${illustration?.id}`, form, user?.token).then((data) => {
+      if (data.message != "Created successfully") {
+        dispatch(
+          setFlashMessage({ severity: "danger", message: data.message })
+        );
+        return;
+      }
+      dispatch(setUpdateUI(true));
+      dispatch(
+        setFlashMessage({
+          severity: "success",
+          message: `Added ${form.place}, ${form.location} to "${illustration?.title}"`,
+        })
+      );
+    });
   };
 
   const handleDeletePlace = (place: placeType) => {
@@ -298,7 +320,7 @@ export default function IllustrationWrapper() {
                   </span>
                   <button
                     onClick={() => handleDeletePlace(p)}
-                    className="hidden rounded-md p-2 font-semibold text-sm bg-red-300 hover:bg-red-500 text-white shadow-sm lg:inline-flex items-center"
+                    className="rounded-md p-2 font-semibold text-sm bg-red-300 hover:bg-red-500 text-white shadow-sm lg:inline-flex items-center"
                   >
                     <TrashIcon className="h-4 w-4" />
                   </button>
