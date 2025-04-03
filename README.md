@@ -8,6 +8,12 @@ Speaker Windows is a personal, searchable repository of illustrations which are 
 
 The project aims to have an testable API which allows the use of multiuser authentication, sharing of illustrations, and React UI to easily add illustrations.
 
+## Readwise import script
+
+I have included a helper script that imports a readwise `data.csv` to my speaker windows instance. Run it from the command line: `API_TOKEN=<token-from-password-page> ./readwise-import-script`
+
+Both the `data.csv` and `readwise-import-script` must be in the same folder.
+
 ## Development
 
 Need 3 terminals open to run:
@@ -45,11 +51,11 @@ Version 0.4.0
 
 Version 0.5.0
 
-- List by Author
-- User Preferences (password, API key)
+- ~~List by Author~~
+- User Preferences (password, ~~API key~~)
 
 Version 0.6.0
-- Image uploads
+- ~~Image uploads~~
 
 Version 0.7.0
 
