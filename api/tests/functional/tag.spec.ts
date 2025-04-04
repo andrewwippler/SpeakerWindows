@@ -206,4 +206,32 @@ test.group('Tag', (group) => {
     response.assertBodyContains({ 'message': 'You do not have permission to access this resource' })
 
   })
+
+  test('Renaming a tag retains its illustrations', async ({ client, assert }) => {
+    const loggedInUser = await client.post('/login').json({ email: goodUser.email, password: 'oasssadfasdf' })
+
+    // Create tag and illustrations
+    const tag = await Tag.create({ name: 'Old-Tag-Name', user_id: goodUser.id })
+    const illustration1 = await IllustrationFactory.merge({ title: 'Illustration One', user_id: goodUser.id }).create()
+    const illustration2 = await IllustrationFactory.merge({ title: 'Illustration Two', user_id: goodUser.id }).create()
+
+    // Attach illustrations to the tag
+    await illustration1.related('tags').attach([tag.id])
+    await illustration2.related('tags').attach([tag.id])
+
+    // Rename the tag
+    const updatedTagData = { name: 'New-Tag-Name' }
+    const response = await client.put(`/tags/${tag.id}`).bearerToken(loggedInUser.body().token).json(updatedTagData)
+
+    response.assertStatus(200)
+    assert.equal(response.body().message, 'Updated successfully')
+
+    // Fetch the updated tag and check if illustrations are still linked
+    const updatedTag = await Tag.findByOrFail('name', 'New-Tag-Name')
+    const relatedIllustrations = await updatedTag.related('illustrations').query()
+
+    assert.equal(relatedIllustrations.length, 2)
+    assert.isTrue(relatedIllustrations.some(ill => ill.id === illustration1.id))
+    assert.isTrue(relatedIllustrations.some(ill => ill.id === illustration2.id))
+  })
 })
