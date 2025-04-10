@@ -49,6 +49,6 @@ export default await Env.create(new URL("../", import.meta.url), {
   | Variables for configuring Magnify search engine
   |----------------------------------------------------------
   */
-  TYPESENSE_NODE_URL: Env.schema.string({ format: 'host' }),
+  TYPESENSE_NODE_URL: Env.schema.string(),
   TYPESENSE_API_KEY: Env.schema.string()
 })

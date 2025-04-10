@@ -52,7 +52,7 @@ export default defineConfig({
     () => import('@adonisjs/limiter/limiter_provider'),
     () => import('@adonisjs/core/providers/vinejs_provider'),
     () => import('@adonisjs/cors/cors_provider'),
-    () => import('@foadonis/magnify/providers/magnify_provider'), // Ensure the package is installed
+    () => import('@foadonis/magnify/magnify_provider'), // Ensure the package is installed
   ],
   /*
   |--------------------------------------------------------------------------
