@@ -4,13 +4,15 @@ import Illustration from './illustration.js'
 import _ from 'lodash'
 import TagSlugSanitizer from '#app/helpers/tag'
 import type { ManyToMany } from '@adonisjs/lucid/types/relations'
+import { compose } from '@adonisjs/core/helpers'
+import { Searchable } from '@foadonis/magnify'
 
-function fixName(name) {
+function fixName(name: string | undefined) {
   let first = _.startCase(name)
   return first.replaceAll(' ', '-')
 }
 
-export default class Tag extends BaseModel {
+export default class Tag extends compose(BaseModel, Searchable) {
   @column({ isPrimary: true })
   declare id: number
 

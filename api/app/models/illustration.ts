@@ -6,8 +6,10 @@ import Tag from './tag.js'
 import User from './user.js'
 import Upload from './upload.js'
 import type { ManyToMany, BelongsTo, HasMany } from '@adonisjs/lucid/types/relations'
+import { compose } from '@adonisjs/core/helpers'
+import { Searchable } from '@foadonis/magnify'
 
-export default class Illustration extends BaseModel {
+export default class Illustration extends compose(BaseModel, Searchable) {
   @column({ isPrimary: true })
   declare id: number
 
