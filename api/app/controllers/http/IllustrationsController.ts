@@ -103,6 +103,19 @@ export default class IllustrationsController {
       create_data = {author, title, source, content, user_id, legacy_id}
     }
 
+    // checks if create data items are empty and inserts default values
+    if (!create_data.author) {
+      create_data.author = 'Unknown'
+    }
+    if (!create_data.title) {
+      create_data.title = 'Untitled'
+    }
+    if (!create_data.content) {
+      create_data.content = 'No description'
+    }
+
+    // console.log(create_data)
+
     const illustration = await Illustration.create(create_data)
     if (tags && tags.length > 0) {
       const newTags = [...new Set(tags)].map(tag => {
@@ -112,7 +125,13 @@ export default class IllustrationsController {
       // @ts-ignore
       const allTags = await Tag.fetchOrCreateMany('slug', newTags)
       await illustration.related('tags').saveMany(await allTags)
+    } else {
+      const newTags = [{ slug: TagSlugSanitizer('untitled-' + auth.user?.id), name: 'untitled', user_id: auth.user?.id }]
+      // @ts-ignore
+      const allTags = await Tag.fetchOrCreateMany('slug', newTags)
+      await illustration.related('tags').saveMany(await allTags)
     }
+    // console.log(illustration)
 
     if (places && places.length > 0) {
       places.map(async (place: Partial<{ id: number; user_id: number; createdAt: DateTime<boolean>; updatedAt: DateTime<boolean>; illustration_id: number; place: string; location: string; used: DateTime<boolean> }>) => {

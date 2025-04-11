@@ -15,6 +15,15 @@ services:
       MYSQL_DATABASE: speaker_illus
     ports:
       - 3306:3306
+  typesense:
+    image: typesense/typesense:28.0
+    ports:
+      - 8108:8108
+    environment:
+      TYPESENSE_API_KEY: 0c4d2e1a-3b8f-4b5f-8a6c-7d9e0f1a2b3c
+      TYPESENSE_DATA_DIR: /data
+    volumes:
+      - ./tmp/typesense:/data
 
   # adonis_app:
   #   container_name: adonis_app

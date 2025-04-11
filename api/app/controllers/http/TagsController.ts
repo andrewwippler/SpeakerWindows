@@ -31,13 +31,18 @@ export default class TagsController {
   public async search({ params, auth, response }: HttpContext) {
 
     const tag = _.get(params, 'name', '')
+     const user_id = `${auth.user?.id}`
 
     // assuming bad data can be sent here. Raw should parameterize input
     // https://security.stackexchange.com/q/172297/35582
     // @ts-ignore
-    const tagQuery = await Tag.query().whereRaw('name LIKE ?', `${tag}%`).andWhere('user_id', `${auth.user?.id}`).orderBy('name')
+    // const tagQuery = await Tag.search(tag).where('user_id', user_id).get()
+    const tagQuery = await Tag.query().where('name', 'LIKE', `${tag}%`).andWhere('user_id', `${auth.user?.id}`).orderBy('name')
 
-
+    // console.log({
+    //   message: 'debug', user_id, searchString: tag, data: tagQuery
+    //   , data2: tagQuery2
+    // })
     if (tagQuery.length < 1) {
       return response.status(204).send({ message: 'no results found' })
     }

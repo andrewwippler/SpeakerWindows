@@ -14,6 +14,7 @@ export default defineConfig({
     () => import('@adonisjs/core/commands'),
     () => import('@adonisjs/lucid/commands'),
     () => import('@adonisjs/bouncer/commands'),
+    () => import("@foadonis/magnify/commands"),
 
   ],
   /*
@@ -50,7 +51,8 @@ export default defineConfig({
     () => import('@adonisjs/bouncer/bouncer_provider'),
     () => import('@adonisjs/limiter/limiter_provider'),
     () => import('@adonisjs/core/providers/vinejs_provider'),
-    () => import('@adonisjs/cors/cors_provider')
+    () => import('@adonisjs/cors/cors_provider'),
+    () => import('@foadonis/magnify/magnify_provider'), // Ensure the package is installed
   ],
   /*
   |--------------------------------------------------------------------------
