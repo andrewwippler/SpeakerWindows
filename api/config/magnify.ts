@@ -28,11 +28,11 @@ const magnifyConfig = defineConfig({
               name: 'author',
               type: 'string',
             },
-            // {
-            //   name: 'user_id',
-            //   type: 'int32',
-            //   optional: true,
-            // },
+            {
+              name: 'user_id',
+              type: 'int32',
+              optional: true,
+            },
             {
               name: 'updatedAt',
               type: 'string',
@@ -50,11 +50,11 @@ const magnifyConfig = defineConfig({
               name: 'name',
               type: 'string',
             },
-            // {
-            //   name: 'user_id',
-            //   type: 'int32',
-            //   optional: true,
-            // },
+            {
+              name: 'user_id',
+              type: 'int32',
+              optional: true,
+            },
           ],
         }
       },
