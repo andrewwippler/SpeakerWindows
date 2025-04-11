@@ -35,7 +35,7 @@ export default class TagsController {
     // assuming bad data can be sent here. Raw should parameterize input
     // https://security.stackexchange.com/q/172297/35582
     // @ts-ignore
-    const tagQuery = await Tag.search(tag).andWhere('user_id', `${auth.user?.id}`).orderBy('name').get()
+    const tagQuery = await Tag.search(tag).where('user_id', `${auth.user?.id}`).orderBy('name').get()
     // const tagQuery = await Tag.query().where('name', 'LIKE', `%${tag}%`).andWhere('user_id', `${auth.user?.id}`).orderBy('name')
 
 
