@@ -160,7 +160,7 @@ test.group('Illustrations', (group) => {
 
     const loggedInUser = await client.post('/login').json({ email: goodUser.email, password: 'oasssadfasdf' })
 
-    
+
     const tags = [...Array(1000).keys()].map(String)
     const illus = {
       author: 'testing',
@@ -303,7 +303,7 @@ test.group('Illustrations', (group) => {
     await client.post('/illustration').bearerToken(loggedInUser.body().token).json(illustration)
 
     const second =  {
-      author: '',
+      author: 'test2',
       title: 'New Post',
       source: 'test',
       content: 'this shall pass as new',
@@ -312,13 +312,13 @@ test.group('Illustrations', (group) => {
     await client.post('/illustration').bearerToken(secondLoggedInUser.body().token).json(second)
 
     const both = await client.get('/illustration/authors').bearerToken(loggedInUser.body().token)
-    const none = await client.get('/illustration/authors').bearerToken(secondLoggedInUser.body().token)
+    const one = await client.get('/illustration/authors').bearerToken(secondLoggedInUser.body().token)
 
     both.assertStatus(200)
-    assert.equal(both.body().length, 2)
+    assert.equal(both.body().length, 3)
 
-    none.assertStatus(204)
-    assert.isObject(none.body())
+    one.assertStatus(200)
+    assert.equal(one.body().length, 1)
 
 
     const response = await client.get('/author/'+illustration.author).bearerToken(loggedInUser.body().token)

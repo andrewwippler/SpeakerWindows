@@ -23,6 +23,7 @@ export default class AuthorsController {
       .distinct('author')
       .orderBy('author')
 
+    // console.log({ message: 'author', user_id: `${auth.user?.id}`, data: illustrationQuery })
     if (illustrationQuery.length < 1) {
       return response.status(204).send({ message: 'no results found' })
     }
