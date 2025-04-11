@@ -160,7 +160,8 @@ test.group('Illustrations', (group) => {
 
     const loggedInUser = await client.post('/login').json({ email: goodUser.email, password: 'oasssadfasdf' })
 
-    const tags = [...Array(1000).keys()]
+    
+    const tags = [...Array(1000).keys()].map(String)
     const illus = {
       author: 'testing',
       title: 'testy mctest',
