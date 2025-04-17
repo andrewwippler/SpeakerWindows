@@ -27,21 +27,21 @@ jobs:
           password: ${{ secrets.REG_PW }}
 
       - name: Build and push Api image
-        uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
+        uses: docker/build-push-action@v6
         with:
           context: api/.
           push: true
-          tags: ${{ env.REGISTRY }}/${{ env.REPOSITORY }}:api-${{ github.sha }}
+          tags: ${{ env.REGISTRY }}/${{ env.REPOSITORY }}:api-${{ github.sha }},${{ env.REGISTRY }}/${{ env.REPOSITORY }}:api-latest
 
       - name: Echo public API
         run: echo "NEXT_PUBLIC_HOST_URL=https://sw-api.wplr.rocks" > frontend/.env.local
 
       - name: Build and push Frontend image
-        uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
+        uses: docker/build-push-action@v6
         with:
           context: frontend/.
           push: true
-          tags: ${{ env.REGISTRY }}/${{ env.REPOSITORY }}:frontend-${{ github.sha }}
+          tags: ${{ env.REGISTRY }}/${{ env.REPOSITORY }}:frontend-${{ github.sha }},${{ env.REGISTRY }}/${{ env.REPOSITORY }}:frontend-latest
 
       - name: Updating API
         uses: appleboy/ssh-action@master
