@@ -9,7 +9,7 @@ services:
     image: mysql:8
     volumes:
       - ./tmp/db:/var/lib/mysql
-      - ./tmp/seeds:/docker-entrypoint-initdb.d
+      - ./api/database/docker-seed.sql:/docker-entrypoint-initdb.d/docker-seed.sql
     environment:
       MYSQL_ROOT_PASSWORD: adonis
       MYSQL_DATABASE: speaker_illus
