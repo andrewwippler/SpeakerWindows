@@ -47,11 +47,11 @@ export default function Author() {
 
     const handleSave = (event: FormEvent<HTMLFormElement>) => {
       event.preventDefault();
-      const newname = event.currentTarget.Author.value.trim();
+      const newname = event.currentTarget.author.value.trim();
 
       // update author
-      api.put(`/author/${name}`, { name: newname }, user?.token).then((data) => {
-        if (data.message != "Updated successfully") {
+      api.put(`/author/${name}`, { author: newname }, user?.token).then((data) => {
+        if (data.message != `Author updated from ${name} to ${newname}`) {
           dispatch(
             setFlashMessage({ severity: "danger", message: data.message })
           );
@@ -86,17 +86,17 @@ export default function Author() {
         <span className='mr-4'>
         {editAuthor ? (
           <form className="mt-8 space-y-6" onSubmit={handleSave}>
-            <label htmlFor="Author" className="sr-only">
+            <label htmlFor="author" className="sr-only">
               Rename Author
             </label>
             <input
-              id="Author"
-              name="Author"
-              type="Author"
-              autoComplete="Author"
+              id="author"
+              name="author"
+              type="author"
+              autoComplete="author"
               required
               className="pl-1.5 py-1.5 ring-1 mr-4"
-              placeholder="Author"
+              placeholder="author"
               defaultValue={name}
             />
 
@@ -125,19 +125,25 @@ export default function Author() {
       </div>
 
       <ul role="list">
-
-        {data ? data.map((d,i) => (
-
+      {!data ? (
+        <div>Loading illustrations...</div>
+      ) : data && data.length > 0 ? (
+        data.map((d, i) => (
           <li key={i} className="group/item hover:bg-slate-200">
-          <Link className="block pb-1 group-hover/item:underline" href={`/illustration/${d.id}`}>{d.title}</Link>
-          <div className='invisible h-0 group-hover/item:h-auto group-hover/item:visible'>
-            {d.content.slice(0,256)}...
-          </div>
-        </li>
+            <Link
+        className="block pb-1 group-hover/item:underline"
+        href={`/illustration/${d.id}`}
+            >
+        {d.title}
+            </Link>
+            <div className="invisible h-0 group-hover/item:h-auto group-hover/item:visible">
+        {d.content.slice(0, 256)}...
+            </div>
+          </li>
         ))
-          :
-          <div>No illustrations found</div>
-      }
+      ) : (
+        <div>No illustrations found</div>
+      )}
       </ul>
     </Layout>
   )
