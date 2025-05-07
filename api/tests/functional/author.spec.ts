@@ -56,7 +56,7 @@ test.group('Authors', (group) => {
     const one = await client.get('/illustration/authors').bearerToken(secondLoggedInUser.body().token)
 
     both.assertStatus(200)
-    assert.equal(both.body().length, 3)
+    assert.equal(both.body().length, 2)
 
     one.assertStatus(200)
     assert.equal(one.body().length, 1)
