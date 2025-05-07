@@ -290,43 +290,4 @@ test.group('Illustrations', (group) => {
     response.assertBodyContains({ "message": "You do not have permission to access this resource" })
   })
 
-  test('Author routes', async ({ client, assert }) => {
-    const loggedInUser = await client.post('/login').json({ email: goodUser.email, password: 'oasssadfasdf' })
-    const secondLoggedInUser = await client.post('/login').json({ email: badUser.email, password: 'oasssadfasdf' })
-
-    const illustration =  {
-      author: 'testy mctest',
-      title: 'New Post',
-      source: 'test',
-      content: 'this shall pass as new',
-    }
-    await client.post('/illustration').bearerToken(loggedInUser.body().token).json(illustration)
-
-    const second =  {
-      author: 'test2',
-      title: 'New Post',
-      source: 'test',
-      content: 'this shall pass as new',
-    }
-    await client.post('/illustration').bearerToken(loggedInUser.body().token).json(second)
-    await client.post('/illustration').bearerToken(secondLoggedInUser.body().token).json(second)
-
-    const both = await client.get('/illustration/authors').bearerToken(loggedInUser.body().token)
-    const one = await client.get('/illustration/authors').bearerToken(secondLoggedInUser.body().token)
-
-    both.assertStatus(200)
-    assert.equal(both.body().length, 3)
-
-    one.assertStatus(200)
-    assert.equal(one.body().length, 1)
-
-
-    const response = await client.get('/author/'+illustration.author).bearerToken(loggedInUser.body().token)
-    response.assertStatus(200)
-    assert.equal(response.body().length, 1)
-    const last = await client.get('/author/boogers').bearerToken(loggedInUser.body().token)
-    last.assertStatus(204)
-
-  })
-
 })

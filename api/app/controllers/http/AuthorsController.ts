@@ -56,5 +56,32 @@ export default class AuthorsController {
       return illustrationQuery
     }
 
+  /**
+   * Updates the author of all illustrations
+   * PUT /author/:name
+   *
+   * @param {object} ctx
+   * @param {Request} ctx.request
+   * @param {Response} ctx.response
+   * @param {View} ctx.view
+   */
+  public async update({ params, auth, request, response }: HttpContext) {
+    const theauthor = decodeURI(_.get(params, 'name', ''))
+    const newauthor = decodeURI(_.get(request.all(), 'author', ''))
 
+    if (theauthor === newauthor) {
+      return response.status(400).send({ message: 'no changes made' })
+    }
+
+    const illustrationQuery = await Illustration.query()
+      .where('author', theauthor)
+      .andWhere('user_id', `${auth.user?.id}`)
+      .update({ author: newauthor })
+
+    if (illustrationQuery.length < 1) {
+      return response.status(204).send({ message: 'no results found' })
+    }
+
+    return response.ok({ message: `Author updated from ${theauthor} to ${newauthor}` })
+  }
 }

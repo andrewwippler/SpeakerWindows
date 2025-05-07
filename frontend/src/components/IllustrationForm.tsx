@@ -65,10 +65,10 @@ export default function IllustrationForm({
       return;
     }
     setFile(true);
-    console.log({
-      illustration_image: uploadedFile,
-      illustration_id: illustration?.id,
-    });
+    // console.log({
+    //   illustration_image: uploadedFile,
+    //   illustration_id: illustration?.id,
+    // });
 
     api
       .postMultipart(

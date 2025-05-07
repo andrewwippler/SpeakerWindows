@@ -60,6 +60,7 @@ router.group(() =>{
   router.delete('/illustration/:id', [IllustrationsController, 'destroy'])
 
   router.get('/author/:name', [AuthorsController, 'show'])
+  router.put('/author/:name', [AuthorsController, 'update'])
 
   router.get('/settings', [SettingsController,'index'])
   router.post('/settings', [SettingsController,'update'])

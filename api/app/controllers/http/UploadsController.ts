@@ -24,7 +24,7 @@ export default class UploadsController {
     })
 
     if (!sentFile) {
-      console.log(sentFile)
+      // console.log(sentFile)
       return response.badRequest({ message: "No file uploaded" })
     }
 

@@ -74,7 +74,7 @@ export default function IllustrationWrapper() {
         );
         router.replace("/");
       } else {
-        console.log(data);
+        // console.log(data);
         setData(data);
         setLoading(false);
         dispatch(setUpdateUI(false));
