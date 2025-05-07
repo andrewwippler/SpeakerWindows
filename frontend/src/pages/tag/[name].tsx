@@ -32,18 +32,13 @@ export default function Tag() {
   let name = _.get(router.query, "name", "").replace(/-/g, " ");
 
   const [data, setData] = useState([]);
-  const [isLoading, setLoading] = useState(false);
   const [editTag, setEditTag] = useState(false);
 
   useEffect(() => {
     if (!user?.token) dispatch(setRedirect(`/tag/${router.query.name}`));
-    if (!name) {
-      setLoading(true);
-    }
     // add - for data fetching
     api.get(`/tag/${router.query.name}`, "", user?.token).then((data) => {
       setData(data); // illustrations
-      setLoading(false);
     });
   }, [name, user, dispatch, router.query.name]);
 
@@ -84,13 +79,6 @@ export default function Tag() {
   };
 
   if (!user?.token) return;
-  if (isLoading)
-    return (
-      <Layout>
-        <div>Loading...</div>
-      </Layout>
-    );
-
   return (
     <Layout>
       <Head>
@@ -143,17 +131,19 @@ export default function Tag() {
       </div>
 
       <ul role="list">
-        {data.illustrations ? (
+        {!data.illustrations ? (
+          <div>Loading...</div>
+        ) : data.illustrations.length > 0 ? (
           data.illustrations.map((d, i) => (
             <li key={i} className="group/item hover:bg-slate-200">
               <Link
-                className="block pb-1 group-hover/item:underline"
-                href={`/illustration/${d.id}`}
+          className="block pb-1 group-hover/item:underline"
+          href={`/illustration/${d.id}`}
               >
-                {d.title}
+          {d.title}
               </Link>
               <div className="invisible h-0 group-hover/item:h-auto group-hover/item:visible">
-                {d.content ? (d.content.slice(0, 256) + "...") : ( "No Content" )}
+          {d.content ? d.content.slice(0, 256) + "..." : "No Content"}
               </div>
             </li>
           ))
