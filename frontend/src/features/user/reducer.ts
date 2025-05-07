@@ -15,6 +15,7 @@ const initialState: UserState = {
   settings: {
     place: '',
     location: '',
+    count: 0,
   }
 }
 
@@ -30,7 +31,7 @@ export const userReducer = createSlice({
       state.apitoken = actions.payload
     },
     setSettings: (state, actions) => {
-      state.settings = actions.payload[0] // comes in with an array
+      state.settings = actions.payload
     },
   },
 })
@@ -45,7 +46,7 @@ export const getThunkSettings =
     (token: string | undefined) : AppThunk =>
     async (dispatch, getState) => {
       const currentValue = getSettings(getState())
-      if (currentValue.place == '' && !!token) {
+      if (currentValue && currentValue.place == '' && !!token) {
         const settings = await api.get("/settings", '', token)
         dispatch(setSettings(settings))
       }

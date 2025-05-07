@@ -52,6 +52,7 @@ export default function Settings() {
     };
   };
   if (!user?.token) return;
+
   return (
     <Layout>
       {settings && (
@@ -88,7 +89,27 @@ export default function Settings() {
                 </div>
               </div>
             </div>
-
+            <div className="mt-10 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
+              <div className="sm:col-span-6 justify-center">
+                <label
+                  htmlFor="Api-Key"
+                  className="block text-sm font-medium leading-6 text-gray-900"
+                >
+                  Uncategorized Illustrations
+                </label>
+                <div className="mt-2 ">
+                  {settings && (settings.count ?? 0) > 0 ? (
+                    <span className="text-sm text-gray-500">
+                      {settings.count}
+                    </span>
+                  ) : (
+                    <span className="text-sm text-gray-500">
+                      No uncategorized illustrations
+                    </span>
+                  )}
+                </div>
+              </div>
+            </div>
             <div className="mt-10 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
               <div className="sm:col-span-3">
                 <label
