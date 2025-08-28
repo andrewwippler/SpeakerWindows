@@ -3,7 +3,6 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"io"
 	"os"
 	"regexp"
 	"strings"
@@ -138,7 +137,6 @@ func main() {
 			fmt.Println("Error making request:", err)
 			continue
 		}
-		io.Copy(io.Discard, resp.Body)
 		fmt.Printf("Posted illustration: %s (status %s)\n", ill.Title, resp.Status)
 		resp.Body.Close()
 	}
