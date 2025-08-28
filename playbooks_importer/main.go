@@ -114,6 +114,20 @@ func main() {
 		illustrations = append(illustrations, ill)
 	})
 
+	// Deduplicate illustrations before posting
+	unique := make(map[string]bool)
+	var deduped []Illustration
+	for _, ill := range illustrations {
+		key := ill.Content + "::" + ill.Source
+		if !unique[key] {
+			unique[key] = true
+			deduped = append(deduped, ill)
+		}
+	}
+
+	fmt.Printf("Found %d highlights, reduced to %d after deduplication\n",
+		len(illustrations), len(deduped))
+
 	// Post to API
 	apiToken := os.Getenv("API_TOKEN")
 	if apiToken == "" {
@@ -121,7 +135,7 @@ func main() {
 		return
 	}
 
-	for _, ill := range illustrations {
+	for _, ill := range deduped {
 		jsonData, _ := json.Marshal(ill)
 		req, err := http.NewRequest("POST", "https://sw-api.wplr.rocks/illustration", strings.NewReader(string(jsonData)))
 		if err != nil {
