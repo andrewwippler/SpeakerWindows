@@ -50,7 +50,7 @@ test.group('Contact', (group) => {
     // get here
     const verify = await client.get(`/settings`).bearerToken(token)
     verify.assertStatus(200)
-    verify.assertBodyContains([{ location: 'Home'}])
+    verify.assertBodyContains({ location: 'Home'})
   })
 
 })
