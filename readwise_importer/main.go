@@ -19,8 +19,14 @@ type Illustration struct {
 }
 
 func main() {
+
+	if len(os.Args) < 2 {
+		fmt.Println("Usage: ./readwise-import-script <path-to-html-file>")
+		return
+	}
+	csvFile := os.Args[1]
 	// Open CSV file
-	file, err := os.Open("data.csv")
+	file, err := os.Open(csvFile)
 	if err != nil {
 		fmt.Println("Error opening file:", err)
 		return
