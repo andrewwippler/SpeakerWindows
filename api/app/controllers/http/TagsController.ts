@@ -19,28 +19,28 @@ export default class TagsController {
     return await Tag.query().where('user_id', `${auth.user?.id}`).orderBy('name')
   }
 
-    /**
-   * search tags.
-   * GET tags/:name
-   *
-   * @param {object} ctx
-   * @param {Request} ctx.request
-   * @param {Response} ctx.response
-   * @param {View} ctx.view
-   */
+  /**
+ * search tags.
+ * GET tags/:name
+ *
+ * @param {object} ctx
+ * @param {Request} ctx.request
+ * @param {Response} ctx.response
+ * @param {View} ctx.view
+ */
   public async search({ params, auth, response }: HttpContext) {
 
     const tag = _.get(params, 'name', '')
-     const user_id = `${auth.user?.id}`
+    const user_id = `${auth.user?.id}`
 
     // assuming bad data can be sent here. Raw should parameterize input
     // https://security.stackexchange.com/q/172297/35582
     // @ts-ignore
-    const tagQuery = await Tag.query().where('name', 'LIKE', `${tag}%`).andWhere('user_id', user_id).orderBy('name').limit(10)
+    const tagQuery = await Tag.query().where('name', 'ILIKE', `${tag}%`).andWhere('user_id', user_id).orderBy('name').limit(10)
 
     // console.log({
     //   message: 'debug', user_id, searchString: tag, data: tagQuery
-    //   , data2: tagQuery2
+    //   , data2: tagQuery
     // })
     if (tagQuery.length < 1) {
       return response.status(204).send({ message: 'no results found' })
@@ -49,20 +49,20 @@ export default class TagsController {
     return tagQuery
   }
 
-   /**
-   * Illustrations for tag.
-   * GET tag/:name
-   *
-   * @param {object} ctx
-   * @param {Request} ctx.request
-   * @param {Response} ctx.response
-   * @param {View} ctx.view
-   */
-   public async illustrations({ params, auth }: HttpContext) {
+  /**
+  * Illustrations for tag.
+  * GET tag/:name
+  *
+  * @param {object} ctx
+  * @param {Request} ctx.request
+  * @param {Response} ctx.response
+  * @param {View} ctx.view
+  */
+  public async illustrations({ params, auth }: HttpContext) {
 
     const thetag = _.get(params, 'name', '')
 
-     //@tag.illustrations
+    //@tag.illustrations
     const tag = await Tag.findByOrFail('name', thetag);
     const tagQuery = await tag.related('illustrations').query().where('user_id', `${auth.user?.id}`).orderBy('title')
 
@@ -73,10 +73,10 @@ export default class TagsController {
       }
     }
 
-     const returnTags = {
-       id: tag.id,
-       name: tag.name,
-       illustrations: tagQuery,
+    const returnTags = {
+      id: tag.id,
+      name: tag.name,
+      illustrations: tagQuery,
     }
 
 
@@ -92,39 +92,38 @@ export default class TagsController {
    * @param {Response} ctx.response
    */
   public async update({ auth, bouncer, params, request, response }: HttpContext) {
-
     const { name } = request.all()
 
     try {
-      await request.validateUsing(
-        TagValidator,
-        {
-          meta: {
-            userId: auth.user!.id
-          }
-        }
-      )
-      } catch (error) {
-      // console.log(error)
-     return response.status(400).send(error.messages)
-   }
-    // places are on their own URI. Tags can be in the illustration post
+      await request.validateUsing(TagValidator, {
+        meta: { userId: auth.user!.id }
+      })
+    } catch (error) {
+      return response.status(400).send(error.messages)
+    }
 
     let tag = await Tag.findOrFail(params.id)
 
     if (await bouncer.denies(editTag, tag)) {
-      return response.forbidden({message: 'E_AUTHORIZATION_FAILURE: Not authorized to perform this action'})
+      return response.forbidden({ message: 'E_AUTHORIZATION_FAILURE: Not authorized to perform this action' })
     }
 
+    // Check if another tag with the same name already exists for this user
+    const existingTag = await Tag.query()
+      .where('slug', name + '-' + auth.user!.id)
+      .first()
 
+    if (existingTag) {
+      return response.status(400).send([{ message: 'Cannot update tag with the same name of an existing tag' }])
+    }
+    // Safe to update
     tag.name = name
-    tag.slug = '' // empty to redo the slug
-
+    tag.slug = '' // trigger slug regeneration
     await tag.save()
 
-    return response.send({message: 'Updated successfully'})
-
+    return response.send({ message: 'Updated successfully' })
   }
+
 
   /**
    * Delete a tag with id.
@@ -143,7 +142,7 @@ export default class TagsController {
     }
 
     await tag.delete()
-    return response.send({message: `Deleted tag id: ${tag.id}`})
+    return response.send({ message: `Deleted tag id: ${tag.id}` })
   }
 
 }

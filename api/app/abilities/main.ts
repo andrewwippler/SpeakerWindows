@@ -28,7 +28,7 @@ export const editUser = Bouncer.ability(() => {
 })
 
 export const editTag = Bouncer.ability((user: User, tag: Tag) => {
-  return __.toInteger(user.id) === _.toInteger(tag.user_id)
+  return _.toInteger(user.id) === _.toInteger(tag.user_id)
 })
 
 export const editIllustration = Bouncer.ability((user: User, illustration: Illustration) => {
