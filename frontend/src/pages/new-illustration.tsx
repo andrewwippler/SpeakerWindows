@@ -1,21 +1,23 @@
 import React, { useState } from "react";
-import useUser from "@/library/useUser";
 import Layout from "@/components/Layout";
 import IllustrationForm from "@/components/IllustrationForm";
-import { setRedirect } from "@/features/ui/reducer";
 import { useAppDispatch } from "@/hooks";
 import { useEffect } from "react";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/router";
 
 export default function Login() {
-  const { user } = useUser({
-    redirectTo: "/login",
-  });
+  const { data: session, status } = useSession();
+    const router = useRouter();
 
   const dispatch = useAppDispatch();
+  // Redirect unauthenticated users to homepage
   useEffect(() => {
-    if (!user?.token) dispatch(setRedirect(`/new-illustration`));
-  }, [user, dispatch]);
-  if (!user?.token) return;
+    if (status === "unauthenticated") {
+      router.replace("/"); // sitewide redirect
+    }
+  }, [status, router]);
+  if (!session?.accessToken) return;
   return (
     <Layout>
       <IllustrationForm />

@@ -38,7 +38,7 @@ export default class UsersController {
         settings = settingsSelect
       }
 
-      return { token: token.value!.release(), settings }
+      return { id: token.value!.release(), settings, name: user.username, email: user.email, uid: user.uid }
     } catch (error) {
       console.log("login error: ", error)
       await locallimit.increment(throttleKey)

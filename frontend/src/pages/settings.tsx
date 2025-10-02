@@ -1,5 +1,4 @@
 import React, { FormEvent, useEffect, useState } from "react";
-import useUser from "@/library/useUser";
 import Layout from "@/components/Layout";
 import { useAppDispatch, useAppSelector } from "@/hooks";
 import { setFlashMessage } from "@/features/flash/reducer";
@@ -15,25 +14,29 @@ import {
   ClipboardDocumentListIcon,
 } from "@heroicons/react/24/solid";
 import { setRedirect } from "@/features/ui/reducer";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/router";
 
 export default function Settings() {
-  const { user } = useUser({
-    redirectTo: "/login",
-  });
+  const { data: session, status } = useSession();
+  const router = useRouter();
 
   const dispatch = useAppDispatch();
-  dispatch(getThunkSettings(user?.token));
+  dispatch(getThunkSettings(session?.accessToken));
   const settings = useAppSelector(getSettings);
 
   useEffect(() => {
-    if (!user?.token) dispatch(setRedirect(`/settings`));
-  }, [user, dispatch]);
+        if (status === "unauthenticated") {
+      router.replace("/login"); // sitewide redirect
+    }
+    if (!session?.accessToken) dispatch(setRedirect(`/settings`));
+  }, [status, dispatch]);
 
   const onSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     let form = grabAndReturnObject(event.currentTarget);
 
-    api.post(`/settings`, form, user?.token).then((data) => {
+    api.post(`/settings`, form, session?.accessToken).then((data) => {
       if (data.message != "Settings saved!") {
         dispatch(
           setFlashMessage({ severity: "danger", message: data.message })
@@ -51,7 +54,7 @@ export default function Settings() {
       location: form.location.value.trim(),
     };
   };
-  if (!user?.token) return;
+  if (!session?.accessToken) return;
 
   return (
     <Layout>
@@ -70,8 +73,8 @@ export default function Settings() {
                   Api Key
                 </label>
                 <div className="mt-2 ">
-                  {user?.token}
-                  {user?.token && (
+                  {session?.accessToken}
+                  {session?.accessToken && (
                     <button
                       type="button"
                       data-toggle="tooltip"
@@ -79,7 +82,7 @@ export default function Settings() {
                       title="Copy API token to clipboard"
                       className=" px-2 py-2 ml-2 bg-gray-300 hover:bg-gray-500 text-white rounded-md shadow-sm"
                       onClick={() => {
-                        navigator.clipboard.writeText(user.token);
+                        navigator.clipboard.writeText(session?.accessToken || "");
                       }}
                     >
                       <ClipboardDocumentListIcon className="h-4 w-4" />

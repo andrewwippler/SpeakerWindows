@@ -1,5 +1,4 @@
 import React, { FormEvent, useState } from "react";
-import useUser from "@/library/useUser";
 import Layout from "@/components/Layout";
 import Link from "next/link";
 import { useAppDispatch } from "@/hooks";
@@ -11,6 +10,8 @@ import { placeType } from "@/library/placeType";
 import { MagnifyingGlassCircleIcon } from "@heroicons/react/20/solid";
 import { setRedirect } from "@/features/ui/reducer";
 import { useEffect } from "react";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/router";
 
 type dataReturn = {
   illustrations: any;
@@ -20,17 +21,18 @@ type dataReturn = {
 };
 
 export default function Search() {
-  const { user } = useUser({
-    redirectTo: "/login",
-  });
-
   const dispatch = useAppDispatch();
   const [data, setData] = useState<dataReturn | null>(null);
   const [searched, setSearched] = useState("");
+  const { data: session, status } = useSession();
+  const router = useRouter();
 
   useEffect(() => {
-    if (!user?.token) dispatch(setRedirect(`/search`));
-  }, [user, dispatch]);
+    if (status === "unauthenticated") {
+      router.replace("/login"); // sitewide redirect
+    }
+    if (!session?.accessToken) dispatch(setRedirect(`/search`));
+  }, [status, dispatch]);
 
   const onSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -38,7 +40,7 @@ export default function Search() {
       search: event.currentTarget.search.value.trim(),
     };
 
-    api.post(`/search`, form, user?.token).then((data) => {
+    api.post(`/search`, form, session?.accessToken).then((data) => {
       if (data.message != "success") {
         dispatch(
           setFlashMessage({ severity: "danger", message: data.message })
@@ -49,7 +51,7 @@ export default function Search() {
       setSearched(form.search);
     });
   };
-  if (!user?.token) return;
+  if (!session?.accessToken) return;
   // The UI does not allow the saving of an illustration without tags.
   // If it does, then we need to have a listing of those illustrations here.
   return (

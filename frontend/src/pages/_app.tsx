@@ -3,10 +3,14 @@ import type { AppProps } from "next/app";
 import { SWRConfig } from "swr";
 import { Provider } from "react-redux";
 import fetchJson from "@/library/fetchJson";
+import { SessionProvider } from "next-auth/react";
 
 import store from "../store";
 
-export default function MyApp({ Component, pageProps }: AppProps) {
+export default function MyApp({
+  Component,
+  pageProps: { session, ...pageProps },
+}: AppProps) {
   return (
     <SWRConfig
       value={{
@@ -16,9 +20,11 @@ export default function MyApp({ Component, pageProps }: AppProps) {
         },
       }}
     >
-      <Provider store={store}>
-        <Component {...pageProps} />
-      </Provider>
+      <SessionProvider session={session}>
+        <Provider store={store}>
+          <Component {...pageProps} />
+        </Provider>
+      </SessionProvider>
     </SWRConfig>
   );
 }

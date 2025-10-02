@@ -1,5 +1,4 @@
 import Link from "next/link";
-import useUser from "@/library/useUser";
 import { useRouter } from "next/router";
 import { useState } from "react";
 import Image from "next/image";
@@ -7,9 +6,11 @@ import { Bars3Icon, XMarkIcon } from "@heroicons/react/24/outline";
 import { Dialog } from "@headlessui/react";
 import fetchJson from "@/library/fetchJson";
 import { PlusIcon } from "@heroicons/react/24/solid";
+import { useSession } from "next-auth/react";
+import LoginBtn from "./LoginBtn";
 
 export default function Header() {
-  const { user, mutateUser } = useUser();
+  const { data: session } = useSession();
   const router = useRouter();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -43,7 +44,7 @@ export default function Header() {
             </button>
           </div>
           <div className="hidden lg:flex lg:gap-x-12">
-            {user?.isLoggedIn === true && (
+            {session && (
               <>
                 <Link
                   href="/"
@@ -79,35 +80,7 @@ export default function Header() {
             )}
           </div>
           <div className="hidden lg:flex lg:flex-1 lg:justify-end">
-            {user?.isLoggedIn === false && (
-              <div className="-mx-3 block rounded-lg py-2.5 px-3 text-base font-semibold leading-7 text-sky-100 hover:bg-sky-900">
-                <Link
-                  href="/login"
-                  className="text-sm font-semibold leading-6 text-sky-100"
-                >
-                  Login <span aria-hidden="true">&rarr;</span>
-                </Link>
-              </div>
-            )}
-            {user?.isLoggedIn === true && (
-              <>
-                <div className="-mx-3 block rounded-lg py-2.5 px-3 text-base font-semibold leading-7 text-sky-100 hover:bg-sky-900">
-                  <Link
-                    href="/api/logout"
-                    onClick={async (e) => {
-                      e.preventDefault();
-                      mutateUser(
-                        await fetchJson("/api/logout", { method: "POST" }),
-                        false
-                      );
-                      router.push("/login");
-                    }}
-                  >
-                    Logout
-                  </Link>
-                </div>
-              </>
-            )}
+            <LoginBtn />
           </div>
         </nav>
         <Dialog
@@ -134,7 +107,7 @@ export default function Header() {
             <div className="mt-6 flow-root">
               <div className="-my-6 divide-y divide-gray-500/10">
                 <div className="space-y-2 py-6">
-                  {user?.isLoggedIn === true && (
+                  {session && (
                     <>
                       <Link
                         href="/"
@@ -170,37 +143,8 @@ export default function Header() {
                   )}
                 </div>
                 <div className="py-6">
-                  {user?.isLoggedIn === false && (
-                    <div className="-mx-3 block rounded-lg py-2.5 px-3 text-base font-semibold leading-7 text-sky-300 hover:bg-sky-900">
-                      <Link
-                        href="/login"
-                        className="text-sm font-semibold leading-6 text-sky-300"
-                      >
-                        Login
-                      </Link>
-                    </div>
-                  )}
-                  {user?.isLoggedIn === true && (
-                    <>
-                      <div className="-mx-3 block rounded-lg py-2.5 px-3 text-base font-semibold leading-7 text-sky-300 hover:bg-sky-900">
-                        <Link
-                          href="/api/logout"
-                          onClick={async (e) => {
-                            e.preventDefault();
-                            mutateUser(
-                              await fetchJson("/api/logout", {
-                                method: "POST",
-                              }),
-                              false
-                            );
-                            router.push("/login");
-                          }}
-                        >
-                          Logout
-                        </Link>
-                      </div>
-                    </>
-                  )}
+                  <LoginBtn />
+
                 </div>
               </div>
             </div>

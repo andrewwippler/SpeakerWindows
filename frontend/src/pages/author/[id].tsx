@@ -4,7 +4,7 @@ import * as _ from "lodash";
 import api from '@/library/api';
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import useUser from '@/library/useUser';
+
 import Layout from '@/components/Layout';
 import Head from 'next/head';
 import { setRedirect } from '@/features/ui/reducer';
@@ -15,13 +15,13 @@ import {
   TrashIcon,
 } from "@heroicons/react/24/solid";
 import { setFlashMessage } from "@/features/flash/reducer";
+import { useSession } from "next-auth/react";
 
 export default function Author() {
   const router = useRouter()
+  const { data: session, status } = useSession();
   const dispatch = useAppDispatch()
-  const { user } = useUser({
-    redirectTo: '/login',
-  })
+
   // remove - for visual representation
   let name = _.get(router.query, 'id', '')
 
@@ -31,26 +31,26 @@ export default function Author() {
   const [editAuthor, setEditAuthor] = useState(false);
 
   useEffect(() => {
-    if (!user?.token) dispatch(setRedirect(`/author/${name}`))
+    if (!session?.accessToken) dispatch(setRedirect(`/author/${name}`))
     if (!name) {
       setLoading(true)
       return
     }
     // add - for data fetching
-    api.get(`/author/${name}`, '', user?.token)
+    api.get(`/author/${name}`, '', session?.accessToken)
       .then(data => {
         // console.log(data)
         setData(data); // illustrations
         setLoading(false)
     });
-  }, [name, dispatch, user?.token]);
+  }, [name, status, dispatch, session?.accessToken]);
 
     const handleSave = (event: FormEvent<HTMLFormElement>) => {
       event.preventDefault();
       const newname = event.currentTarget.author.value.trim();
 
       // update author
-      api.put(`/author/${name}`, { author: newname }, user?.token).then((data) => {
+      api.put(`/author/${name}`, { author: newname }, session?.accessToken).then((data) => {
         if (data.message != `Author updated from ${name} to ${newname}`) {
           dispatch(
             setFlashMessage({ severity: "danger", message: data.message })
@@ -69,7 +69,7 @@ export default function Author() {
     };
 
 
-  if (!user?.token) return
+  if (!session?.accessToken) return
   if (isLoading) return (
     <Layout>
       <div>Loading...</div>

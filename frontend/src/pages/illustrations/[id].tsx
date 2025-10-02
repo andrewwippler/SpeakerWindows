@@ -2,33 +2,35 @@ import { useRouter } from "next/router";
 import * as _ from "lodash";
 import api from "@/library/api";
 import { useState, useEffect } from "react";
-import useUser from "@/library/useUser";
 import Layout from "@/components/Layout";
 import Link from "next/link";
 
 import { useAppDispatch } from "@/hooks";
 import { setFlashMessage } from "@/features/flash/reducer";
 import { illustrationType } from "@/library/illustrationType";
+import { useSession } from "next-auth/react";
 
 // Note: Function to redirect old URLs to the new format.
 export default function LegacyIllustration() {
   const router = useRouter();
+  const { data: session, status } = useSession();
   const dispatch = useAppDispatch();
   const [isLoading, setLoading] = useState(false);
   const [data, setData] = useState<illustrationType>();
-  const { user } = useUser({
-    redirectTo: "/login",
-  });
 
   const id = _.get(router.query, "id", "");
 
   useEffect(() => {
+    if (status === "unauthenticated") {
+      router.replace("/login"); // sitewide redirect
+    }
+
     if (!id) {
       setLoading(true);
       return;
     }
 
-    api.get(`/illustrations/${id}`, "", user?.token).then((data) => {
+    api.get(`/illustrations/${id}`, "", session?.accessToken).then((data) => {
       setData(data);
       dispatch(
         setFlashMessage({
@@ -40,7 +42,7 @@ export default function LegacyIllustration() {
       router.replace(`/illustration/${data.id}`);
       setLoading(false);
     });
-  }, [id, dispatch, router, user?.token]);
+  }, [id, dispatch, router, status, session?.accessToken]);
 
   if (isLoading)
     return (

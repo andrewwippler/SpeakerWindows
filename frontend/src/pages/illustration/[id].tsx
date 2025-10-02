@@ -4,7 +4,6 @@ import api from "@/library/api";
 import { useState, useEffect, FormEvent, use } from "react";
 import Link from "next/link";
 import Layout from "@/components/Layout";
-import useUser from "@/library/useUser";
 import {
   ClipboardDocumentListIcon,
   ArrowLeftIcon,
@@ -29,19 +28,17 @@ import {
   setUpdateUI,
   setRedirect,
 } from "@/features/ui/reducer";
-import format from "date-fns/format";
+import { format } from "date-fns/format";
 import { placeType } from "@/library/placeType";
 import Head from "next/head";
 import { getSettings, getThunkSettings } from "@/features/user/reducer";
 import Image from "next/image";
+import { useSession } from "next-auth/react";
 
 export default function IllustrationWrapper() {
   const router = useRouter();
+  const { data: session, status } = useSession();
   const dispatch = useAppDispatch();
-
-  const { user } = useUser({
-    redirectTo: "/login",
-  });
 
   const editIllustration = useAppSelector(selectIllustrationEdit);
   const refreshUI = useAppSelector(selectUpdateUI);
@@ -52,14 +49,17 @@ export default function IllustrationWrapper() {
   const [isLoading, setLoading] = useState(false);
 
   useEffect(() => {
+    if (status === "unauthenticated") {
+      router.replace("/login"); // sitewide redirect
+    }
     setLoading(true);
-    if (!user?.token) dispatch(setRedirect(`/illustration/${router.query.id}`));
-    if (!router.query.id || !user?.token) {
+    if (!session?.accessToken) dispatch(setRedirect(`/illustration/${router.query.id}`));
+    if (!router.query.id || !session?.accessToken) {
       return;
     }
-    dispatch(getThunkSettings(user.token));
+    dispatch(getThunkSettings(session?.accessToken));
 
-    api.get(`/illustration/${router.query.id}`, "", user.token).then((data) => {
+    api.get(`/illustration/${router.query.id}`, "", session?.accessToken).then((data) => {
       // You do not have permission to access this resource
       if (
         data.message == "You do not have permission to access this resource" ||
@@ -80,7 +80,7 @@ export default function IllustrationWrapper() {
         dispatch(setUpdateUI(false));
       }
     });
-  }, [router.query.id, refreshUI, user, userSettings, dispatch, router]);
+  }, [router.query.id, refreshUI, status, userSettings, dispatch, router]);
 
   if (isLoading) return <Layout>Loading...</Layout>;
 
@@ -102,10 +102,10 @@ export default function IllustrationWrapper() {
     let form = {
       place: userSettings.place ? userSettings.place : "",
       location: userSettings.location ? userSettings.location : "",
-      used: format(new Date(), "yyyy-MM-dd")
-    }
+      used: format(new Date(), "yyyy-MM-dd"),
+    };
 
-    api.post(`/places/${illustration?.id}`, form, user?.token).then((data) => {
+    api.post(`/places/${illustration?.id}`, form, session?.accessToken).then((data) => {
       if (data.message != "Created successfully") {
         dispatch(
           setFlashMessage({ severity: "danger", message: data.message })
@@ -151,7 +151,7 @@ export default function IllustrationWrapper() {
   const handlePlaceAdd = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     let form = grabAndReturnObject(event.currentTarget);
-    api.post(`/places/${illustration?.id}`, form, user?.token).then((data) => {
+    api.post(`/places/${illustration?.id}`, form, session?.accessToken).then((data) => {
       if (data.message != "Created successfully") {
         dispatch(
           setFlashMessage({ severity: "danger", message: data.message })
@@ -175,7 +175,7 @@ export default function IllustrationWrapper() {
       used: form.Used.value.trim(),
     };
   };
-  if (!user?.token) return;
+  if (!session?.accessToken) return;
   if (!illustration || !userSettings) return <Layout>Loading...</Layout>;
   return (
     <Layout>

@@ -4,7 +4,6 @@ import * as _ from "lodash";
 import api from "@/library/api";
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import useUser from "@/library/useUser";
 import Layout from "@/components/Layout";
 import {
   PencilSquareIcon,
@@ -21,13 +20,12 @@ import {
   setThingToDelete,
 } from "@/features/modal/reducer";
 import { setFlashMessage } from "@/features/flash/reducer";
-
+import { useSession } from "next-auth/react";
 export default function Tag() {
   const router = useRouter();
+  const { data: session, status } = useSession();
   const dispatch = useAppDispatch();
-  const { user } = useUser({
-    redirectTo: "/login",
-  });
+
   // remove - for visual representation
   let name = _.get(router.query, "name", "").replace(/-/g, " ");
 
@@ -35,34 +33,42 @@ export default function Tag() {
   const [editTag, setEditTag] = useState(false);
 
   useEffect(() => {
-    if (!user?.token) dispatch(setRedirect(`/tag/${router.query.name}`));
+    if (status === "unauthenticated") {
+      router.replace("/login"); // sitewide redirect
+    }
+    if (!session?.accessToken)
+      dispatch(setRedirect(`/tag/${router.query.name}`));
     // add - for data fetching
-    api.get(`/tag/${router.query.name}`, "", user?.token).then((data) => {
-      setData(data); // illustrations
-    });
-  }, [name, user, dispatch, router.query.name]);
+    api
+      .get(`/tag/${router.query.name}`, "", session?.accessToken)
+      .then((data) => {
+        setData(data); // illustrations
+      });
+  }, [name, dispatch, status, router.query.name]);
 
   const handleSave = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const newname = event.currentTarget.tag.value.trim();
 
     // update tag
-    api.put(`/tags/${data.id}`, { name: newname }, user?.token).then((data) => {
-      if (data.message != "Updated successfully") {
+    api
+      .put(`/tags/${data.id}`, { name: newname }, session?.accessToken)
+      .then((data) => {
+        if (data.message != "Updated successfully") {
+          dispatch(
+            setFlashMessage({ severity: "danger", message: data.message })
+          );
+          return;
+        }
         dispatch(
-          setFlashMessage({ severity: "danger", message: data.message })
+          setFlashMessage({
+            severity: "success",
+            message: `Tag "${name}" was renamed to ${newname}.`,
+          })
         );
-        return;
-      }
-      dispatch(
-        setFlashMessage({
-          severity: "success",
-          message: `Tag "${name}" was renamed to ${newname}.`,
-        })
-      );
-      setEditTag(false);
-      router.replace(`/tag/${newname}`);
-    });
+        setEditTag(false);
+        router.replace(`/tag/${newname}`);
+      });
   };
 
   const handleDelete = () => {
@@ -78,7 +84,7 @@ export default function Tag() {
     dispatch(setModal(true));
   };
 
-  if (!user?.token) return;
+  if (!session?.accessToken) return;
   return (
     <Layout>
       <Head>
@@ -137,13 +143,13 @@ export default function Tag() {
           data.illustrations.map((d, i) => (
             <li key={i} className="group/item hover:bg-slate-200">
               <Link
-          className="block pb-1 group-hover/item:underline"
-          href={`/illustration/${d.id}`}
+                className="block pb-1 group-hover/item:underline"
+                href={`/illustration/${d.id}`}
               >
-          {d.title}
+                {d.title}
               </Link>
               <div className="invisible h-0 group-hover/item:h-auto group-hover/item:visible">
-          {d.content ? d.content.slice(0, 256) + "..." : "No Content"}
+                {d.content ? d.content.slice(0, 256) + "..." : "No Content"}
               </div>
             </li>
           ))

@@ -3,29 +3,27 @@ import { ArrowLeftIcon, TrashIcon, PhotoIcon } from "@heroicons/react/24/solid";
 import api from "@/library/api";
 import { useAppSelector, useAppDispatch } from "@/hooks";
 import { setFlashMessage } from "@/features/flash/reducer";
-import useUser from "@/library/useUser";
 import { useRouter } from "next/router";
 import { illustrationType, UploadType } from "@/library/illustrationType";
 import { setIllustrationEdit, setUpdateUI } from "@/features/ui/reducer";
 import TagSelect from "./TagSelect";
 import { getFormattedTags } from "@/features/tags/reducer";
-import { User } from "@/pages/api/user";
 import Link from "next/link";
 import { setModal, setThingToDelete } from "@/features/modal/reducer";
 import ConfirmDialog from "./ConfirmDialog";
 import Image from "next/image";
+import { useSession } from "next-auth/react";
 
 export default function IllustrationForm({
   illustration,
 }: {
   illustration?: illustrationType;
-}) {
+  }) {
+    const { data: session, status } = useSession();
   const router = useRouter();
   const dispatch = useAppDispatch();
   const formattedTags = useAppSelector(getFormattedTags);
-  const { user } = useUser({
-    redirectTo: "/login",
-  });
+
   let edit = false;
   if (illustration) {
     edit = true;
@@ -74,7 +72,7 @@ export default function IllustrationForm({
       .postMultipart(
         `/upload`,
         { illustration_image: uploadedFile, illustration_id: illustration?.id },
-        user?.token
+        session?.accessToken
       )
       .then((data) => {
         if (data.message != "File uploaded successfully") {
@@ -103,7 +101,7 @@ export default function IllustrationForm({
     let form = grabAndReturnObject(event.currentTarget);
     // update illustration
     api
-      .put(`/illustration/${illustration?.id}`, form, user?.token)
+      .put(`/illustration/${illustration?.id}`, form, session?.accessToken)
       .then((data) => {
         if (data.message != "Updated successfully") {
           dispatch(
@@ -126,7 +124,7 @@ export default function IllustrationForm({
   const handleNewSave = (event: FormEvent<HTMLFormElement>) => {
     let form = grabAndReturnObject(event.currentTarget);
 
-    api.post(`/illustration`, form, user?.token).then((data) => {
+    api.post(`/illustration`, form, session?.accessToken).then((data) => {
       if (data.message != "Created successfully") {
         dispatch(
           setFlashMessage({ severity: "danger", message: data.message })
@@ -307,7 +305,7 @@ export default function IllustrationForm({
                     Tags
                   </label>
                   <TagSelect
-                    token={user?.token}
+                    token={session?.accessToken}
                     defaultValue={edit && illustration ? illustration.tags : ""}
                   />
                 </div>
