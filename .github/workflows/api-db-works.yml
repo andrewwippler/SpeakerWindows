@@ -14,13 +14,13 @@ jobs:
 
     runs-on: ubuntu-latest
     services:
-      mariadb:
-        image: mariadb:10
+      pg:
+        image: postgres:17
         ports:
-          - 3306:3306
+          - 5432:5432
         env:
-          MYSQL_DATABASE: testing
-          MYSQL_ROOT_PASSWORD: adonis
+          POSTGRES_DB: testing
+          POSTGRES_PASSWORD: adonis
       redis:
         image: redis:5-alpine
         ports:
@@ -51,5 +51,5 @@ jobs:
       working-directory: ./api
       env:
         CI: true
-        MYSQL_PORT: ${{ job.services.mariadb.ports[3306] }}
+        PG_PORT: ${{ job.services.pg.ports[5432] }}
         REDIS_PORT: ${{ job.services.redis.ports[6379] }}
