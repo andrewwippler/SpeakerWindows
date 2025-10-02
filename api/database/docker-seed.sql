@@ -1,1 +1,1 @@
-create database if not exists testing;
+CREATE DATABASE testing;

@@ -6,15 +6,15 @@ services:
       - 6379:6379
 
   db:
-    image: mysql:8
+    image: postgres:17
     volumes:
-      - ./tmp/db:/var/lib/mysql
+      - ./tmp/db:/var/lib/postgresql/data
       - ./api/database/docker-seed.sql:/docker-entrypoint-initdb.d/docker-seed.sql
     environment:
-      MYSQL_ROOT_PASSWORD: adonis
-      MYSQL_DATABASE: speaker_illus
+      POSTGRES_PASSWORD: adonis
+      POSTGRES_DB: speaker_illus
     ports:
-      - 3306:3306
+      - 5432:5432
   # typesense:
   #   image: typesense/typesense:28.0
   #   ports:

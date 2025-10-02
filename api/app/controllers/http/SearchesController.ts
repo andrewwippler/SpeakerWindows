@@ -13,12 +13,13 @@ export default class SearchesController {
     if (!search) {
       return response.noContent()
     }
-
+    // Full text search using PostgreSQL tsvector
+   // https://www.postgresql.org/docs/current/textsearch.html#TEXTSEARCH-TSVECTOR-OPERATORS
     const illustrations = await Illustration.query()
       .where((query) => {
         query
           .where('title', 'LIKE', `%${search}%`)
-          .orWhere('content', 'LIKE', `%${search}%`)
+          .orWhereRaw(`content_tsv @@ plainto_tsquery('english', ?)`, [search])
           .orWhere('author', 'LIKE', `%${search}%`)
       })
       .andWhere('user_id', auth.user?.id)

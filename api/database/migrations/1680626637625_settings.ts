@@ -6,7 +6,7 @@ export default class extends BaseSchema {
   public async up () {
     this.schema.createTable(this.tableName, (table) => {
       table.increments('id')
-      table.integer('user_id').unsigned().index('user_id').unique()
+      table.integer('user_id').unsigned().unique()
       table.foreign('user_id').references('users.id').onDelete('cascade')
 
       table.string('place').defaultTo('Service')
