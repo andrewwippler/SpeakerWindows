@@ -1,5 +1,5 @@
 # source: https://github.com/vercel/next.js/blob/7cc4159561f6591140ff669c4ac3c74a049c783b/examples/with-docker/Dockerfile
-FROM node:20-alpine AS base
+FROM node:22-alpine AS base
 
 # Install dependencies only when needed
 FROM base AS deps
@@ -28,7 +28,7 @@ COPY . .
 # Uncomment the following line in case you want to disable telemetry during the build.
 # ENV NEXT_TELEMETRY_DISABLED 1
 
-RUN yarn build
+RUN npm run build
 
 # If using npm comment out above and use below instead
 # RUN npm run build
