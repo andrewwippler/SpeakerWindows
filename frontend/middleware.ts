@@ -2,8 +2,17 @@ import { getToken } from "next-auth/jwt";
 import { NextResponse } from "next/server";
 
 export async function middleware(req: any) {
-  // Don't enforce session for API routes (they should return JSON/errors)
-  if (req.nextUrl.pathname.startsWith('/api')) {
+  // Allow public and auth-related routes to pass through without redirect
+  const publicPaths = [
+    '/',
+    '/login',
+  ];
+
+  if (
+    req.nextUrl.pathname.startsWith('/api') ||
+    publicPaths.includes(req.nextUrl.pathname) ||
+    req.nextUrl.pathname.startsWith('/api/auth')
+  ) {
     return NextResponse.next();
   }
 
