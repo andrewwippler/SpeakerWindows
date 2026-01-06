@@ -86,6 +86,24 @@ test.group('Illustrations', (group) => {
     verify.assertBodyContains(illustration)
   })
 
+  test('Duplicate illustration cannot be imported', async ({ client, assert }) => {
+    const loggedInUser = await client.post('/login').json({ email: goodUser.email, password: 'oasssadfasdf' })
+
+    const illustration =  {
+      author: 'dup author',
+      title: 'Dup Post',
+      source: 'dup-source',
+      content: 'this shall be unique',
+    }
+
+    const first = await client.post('/illustration').bearerToken(loggedInUser.body().token).json(illustration)
+    first.assertStatus(200)
+
+    const second = await client.post('/illustration').bearerToken(loggedInUser.body().token).json(illustration)
+    second.assertStatus(409)
+    assert.equal(second.body().message, 'Duplicate illustration')
+  })
+
   test('Create illustrations with legacy_id', async ({ client, assert }) => {
     const loggedInUser = await client.post('/login').json({ email: goodUser.email, password: 'oasssadfasdf' })
 

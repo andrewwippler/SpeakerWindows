@@ -56,7 +56,9 @@ test.group('Authors', (group) => {
     const one = await client.get('/illustration/authors').bearerToken(secondLoggedInUser.body().token)
 
     both.assertStatus(200)
-    assert.equal(both.body().length, 2)
+    // With duplicate prevention (source+content), the second post with identical content
+    // won't be created for the same user, so only one author should exist for loggedInUser
+    assert.equal(both.body().length, 1)
 
     one.assertStatus(200)
     assert.equal(one.body().length, 1)
