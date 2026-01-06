@@ -1,6 +1,7 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import TagSlugSanitizer from '#app/helpers/tag'
 import Illustration from '#models/illustration'
+import crypto from 'crypto'
 import Place from '#models/place'
 import Tag from '#models/tag'
 import _ from 'lodash'
@@ -23,10 +24,18 @@ export default class IllustrationsController {
    * @param {View} ctx.view
    */
   public async show({ params, auth, response }: HttpContext) {
+    // validate id to avoid DB errors on out-of-range values
+    const rawId = _.get(params, 'id', 0)
+    const id = parseInt(rawId, 10) || 0
+    if (id > 2147483647 || id < -2147483648) {
+      return response.status(500).send({ message: 'Invalid id' })
+    }
 
-    const illustrationQuery = await Illustration.query()
-      .where('id', _.get(params, 'id', 0))
-      .andWhere('user_id', `${auth.user!.id}`)
+    let illustrationQuery
+    try {
+      illustrationQuery = await Illustration.query()
+        .where('id', id)
+        .andWhere('user_id', `${auth.user!.id}`)
       .preload('tags', (builder) => {
         builder.orderBy('name', 'asc')
       })
@@ -43,6 +52,9 @@ export default class IllustrationsController {
         return illustration
       }
       return response.status(403).send({ message: 'You do not have permission to access this resource' })
+    } catch (err) {
+      return response.status(500).send({ message: 'Database error' })
+    }
 
 
   }
@@ -58,10 +70,17 @@ export default class IllustrationsController {
    * @param {View} ctx.view
    */
     public async showOld({ params, auth, response }: HttpContext) {
+      const rawId = _.get(params, 'id', 0)
+      const id = parseInt(rawId, 10) || 0
+      if (id > 2147483647 || id < -2147483648) {
+        return response.status(500).send({ message: 'Invalid id' })
+      }
 
-      const illustrationQuery = await Illustration.query()
-        .where('legacy_id', _.get(params, 'id', 0))
-        .andWhere('user_id', `${auth.user?.id}`)
+      let illustrationQuery
+      try {
+        illustrationQuery = await Illustration.query()
+          .where('legacy_id', id)
+          .andWhere('user_id', `${auth.user?.id}`)
         .preload('tags', (builder) => {
           builder.orderBy('name', 'asc')
         })
@@ -78,6 +97,9 @@ export default class IllustrationsController {
           return illustration
         }
         return response.status(403).send({ message: 'You do not have permission to access this resource' })
+      } catch (err) {
+        return response.status(500).send({ message: 'Database error' })
+      }
 
 
     }
@@ -114,7 +136,23 @@ export default class IllustrationsController {
       create_data.content = 'No description'
     }
 
-    // console.log(create_data)
+    // normalize content and compute hash for duplicate detection
+    const normalizedContent = (create_data.content || '').toString().trim().replace(/\s+/g, ' ').toLowerCase()
+    const content_hash = crypto.createHash('sha256').update(normalizedContent).digest('hex')
+    // check for duplicates for this user and source
+    const existing = await Illustration.query()
+      .where('user_id', user_id)
+      .andWhere('source', create_data.source)
+      .andWhere('content_hash', content_hash)
+      .first()
+
+    if (existing) {
+      return response.status(409).send({ message: 'Duplicate illustration', id: existing.id })
+    }
+
+    // include hash in create payload
+    // @ts-ignore
+    create_data.content_hash = content_hash
 
     const illustration = await Illustration.create(create_data)
     if (tags && tags.length > 0) {

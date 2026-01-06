@@ -315,7 +315,35 @@ func main() {
 			fmt.Println("Error making request:", err)
 			continue
 		}
-		fmt.Printf("Posted illustration: %s (status %s)\n", ill.Title, resp.Status)
+
+		bodyBytes, _ := io.ReadAll(resp.Body)
 		resp.Body.Close()
+
+		// handle duplicate (409)
+		if resp.StatusCode == 409 {
+			var respBody map[string]interface{}
+			if err := json.Unmarshal(bodyBytes, &respBody); err == nil {
+				if id, ok := respBody["id"]; ok {
+					fmt.Printf("Skipped duplicate: %s (id: %v)\n", ill.Title, id)
+					continue
+				}
+			}
+			fmt.Printf("Skipped duplicate: %s (status %d)\n", ill.Title, resp.StatusCode)
+			continue
+		}
+
+		if resp.StatusCode >= 200 && resp.StatusCode < 300 {
+			var respBody map[string]interface{}
+			if err := json.Unmarshal(bodyBytes, &respBody); err == nil {
+				if id, ok := respBody["id"]; ok {
+					fmt.Printf("Created illustration: %s (id: %v)\n", ill.Title, id)
+					continue
+				}
+			}
+			fmt.Printf("Posted illustration: %s (status %s)\n", ill.Title, resp.Status)
+			continue
+		}
+
+		fmt.Printf("Error posting %s: status %d body: %s\n", ill.Title, resp.StatusCode, string(bodyBytes))
 	}
 }

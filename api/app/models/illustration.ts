@@ -26,6 +26,9 @@ export default class Illustration extends BaseModel {
   declare content: string
 
   @column()
+  declare content_hash?: string
+
+  @column()
   declare user_id: number
 
   @column()
