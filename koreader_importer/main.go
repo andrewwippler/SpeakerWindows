@@ -19,110 +19,106 @@ type Illustration struct {
 	Tags    []string `json:"tags"`
 }
 
+// OneBook represents the structure of one.json
+// Book represents a document/book (used for both one.json and all.json entries)
+type Book struct {
+	Author        string  `json:"author"`
+	Title         string  `json:"title"`
+	NumberOfPages int     `json:"number_of_pages,omitempty"`
+	CreatedOn     int64   `json:"created_on,omitempty"`
+	File          string  `json:"file"`
+	Entries       []Entry `json:"entries,omitempty"`
+	Version       string  `json:"version,omitempty"`
+	MD5Sum        string  `json:"md5sum,omitempty"`
+}
+
+type Entry struct {
+	Drawer  string `json:"drawer"`
+	Time    int64  `json:"time"`
+	Color   string `json:"color"`
+	Sort    string `json:"sort"`
+	Chapter string `json:"chapter"`
+	Page    int    `json:"page"`
+	Text    string `json:"text"`
+}
+
+// AllBooks represents the structure of all.json
+type AllBooks struct {
+	CreatedOn int64  `json:"created_on"`
+	Version   string `json:"version"`
+	Documents []Book `json:"documents"`
+}
+
 func tidyText(s string) string {
 	re := regexp.MustCompile(`\s+`)
 	return strings.TrimSpace(re.ReplaceAllString(s, " "))
 }
 
-// try to extract a string value from many common keys
-func pickString(m map[string]interface{}, keys []string) string {
-	for _, k := range keys {
-		if v, ok := m[k]; ok && v != nil {
-			switch t := v.(type) {
-			case string:
-				return tidyText(t)
-			}
-		}
+func getDocType(data []byte) string {
+
+	// Try to parse JSON into a generic map to detect structure.
+	var raw map[string]interface{}
+
+	if err := json.Unmarshal(data, &raw); err != nil {
+		// Not valid JSON, just print raw
+		fmt.Println(string(data))
+		return "Raw"
 	}
-	return ""
+
+	// Heuristic: presence of top-level "documents" -> AllBooks
+	if _, ok := raw["documents"]; ok {
+		var ab AllBooks
+		if err := json.Unmarshal(data, &ab); err == nil {
+			fmt.Println("AllBooks")
+			return "AllBooks"
+		}
+		fmt.Println("AllBooks-like JSON (failed to decode into AllBooks)")
+		return "Unknown"
+	}
+
+	// Presence of top-level "entries" -> Book
+	if _, ok := raw["entries"]; ok {
+		var b Book
+		if err := json.Unmarshal(data, &b); err == nil {
+			fmt.Println("Book")
+			return "Book"
+		}
+		fmt.Println("Book-like JSON (failed to decode into Book)")
+		return "Unknown"
+	}
+
+	fmt.Println("Unknown JSON structure")
+	return "Unknown"
 }
 
-func parseKoreaderFile(path string) ([]Illustration, error) {
-	data, err := os.ReadFile(path)
-	if err != nil {
-		return nil, err
-	}
+func bookToIllustrations(b Book) []Illustration {
+	var illustrations []Illustration
+	for _, entry := range b.Entries {
 
-	var root interface{}
-	if err := json.Unmarshal(data, &root); err != nil {
-		return nil, err
-	}
-
-	var out []Illustration
-
-	// recursive collector: walk the JSON tree and extract any object that looks like a highlight
-	var collect func(interface{})
-	collect = func(node interface{}) {
-		switch v := node.(type) {
-		case []interface{}:
-			for _, e := range v {
-				collect(e)
-			}
-		case map[string]interface{}:
-			// If this map itself contains highlight text, treat it as a highlight
-			content := pickString(v, []string{"text", "highlight", "content", "annotation"})
-			content = tidyText(content)
-			if content != "" {
-				title := content
-				if len(title) > 100 {
-					title = title[:100]
-				}
-				author := pickString(v, []string{"author", "bookAuthor", "book_author"})
-				bookTitle := pickString(v, []string{"title", "bookTitle", "book_title", "file", "book"})
-				locationType := pickString(v, []string{"locationType", "location_type"})
-				location := pickString(v, []string{"location", "page", "position"})
-				source := fmt.Sprintf("%s %s %s", bookTitle, locationType, location)
-
-				amazonID := pickString(v, []string{"amazonID", "amazon_book_id", "amazon"})
-				color := pickString(v, []string{"color", "highlightColor"})
-				tags := []string{amazonID, color, "To Fix"}
-				if len(content) < 150 {
-					tags = append(tags, "Quotes")
-				}
-				out = append(out, Illustration{Title: title, Author: author, Source: source, Content: content, Tags: tags})
-				// continue traversal to find nested highlights as well
-			}
-
-			// If this map has a "highlights" array, process those specifically
-			if h, ok := v["highlights"].([]interface{}); ok {
-				// book-level metadata
-				bookTitle := pickString(v, []string{"title", "bookTitle", "book_title", "file", "book"})
-				author := pickString(v, []string{"author", "bookAuthor", "book_author"})
-				for _, hh := range h {
-					if hm, ok := hh.(map[string]interface{}); ok {
-						content := pickString(hm, []string{"text", "highlight", "content", "annotation"})
-						content = tidyText(content)
-						if content == "" {
-							continue
-						}
-						t := content
-						if len(t) > 100 {
-							t = t[:100]
-						}
-						source := bookTitle
-						color := pickString(hm, []string{"color", "highlightColor"})
-						tags := []string{color, "To Fix"}
-						if len(content) < 150 {
-							tags = append(tags, "Quotes")
-						}
-						out = append(out, Illustration{Title: t, Author: author, Source: source, Content: content, Tags: tags})
-					} else {
-						// recurse in case highlights array contains nested structures
-						collect(hh)
-					}
-				}
-			}
-
-			// recurse into child values
-			for _, child := range v {
-				collect(child)
-			}
+		source := b.Title
+		if entry.Page != 0 {
+			source += fmt.Sprintf(" p. %d", entry.Page)
 		}
+
+		title := entry.Text
+		if len(title) > 100 {
+			title = title[:100]
+		}
+		tags := []string{entry.Color, "To-Fix"}
+		if len(entry.Text) < 150 {
+			tags = append(tags, "Quotes")
+		}
+
+		ill := Illustration{
+			Title:   b.Title,
+			Author:  b.Author,
+			Source:  source,
+			Content: tidyText(entry.Text),
+			Tags:    tags,
+		}
+		illustrations = append(illustrations, ill)
 	}
-
-	collect(root)
-
-	return out, nil
+	return illustrations
 }
 
 func main() {
@@ -130,42 +126,70 @@ func main() {
 		fmt.Printf("Usage: %s <koreader-json-file> [--print]\n", filepath.Base(os.Args[0]))
 		return
 	}
-
-	path := os.Args[1]
 	printOnly := len(os.Args) > 2 && os.Args[2] == "--print"
 
-	ills, err := parseKoreaderFile(path)
+	path := os.Args[1]
+
+	data, err := os.ReadFile(path)
 	if err != nil {
-		fmt.Println("Error parsing file:", err)
-		return
+		fmt.Fprintf(os.Stderr, "Error reading file '%s': %v\n", path, err)
+		os.Exit(1)
 	}
 
-	// dedupe by content+source
-	unique := make(map[string]bool)
-	var deduped []Illustration
-	for _, ill := range ills {
-		key := tidyText(ill.Content) + "::" + tidyText(ill.Source)
-		if !unique[key] {
-			unique[key] = true
-			deduped = append(deduped, ill)
+	bookType := getDocType(data)
+
+	fmt.Printf("Detected document type: %s\n", bookType)
+
+	// Further processing can be added here based on the detected type
+	// if unknown or raw, exit with error
+	var illustrations []Illustration
+	switch bookType {
+	case "AllBooks":
+		var ab AllBooks
+		if err := json.Unmarshal(data, &ab); err != nil {
+			fmt.Fprintf(os.Stderr, "Error decoding AllBooks JSON: %v\n", err)
+			os.Exit(1)
 		}
+		fmt.Printf("AllBooks contains %d documents\n", len(ab.Documents))
+		for _, doc := range ab.Documents {
+			fmt.Printf("- Title: %s, Author: %s, Entries: %d\n", doc.Title, doc.Author, len(doc.Entries))
+			illustrations = append(illustrations, bookToIllustrations(doc)...)
+		}
+	case "Book":
+		var b Book
+		if err := json.Unmarshal(data, &b); err != nil {
+			fmt.Fprintf(os.Stderr, "Error decoding Book JSON: %v\n", err)
+			os.Exit(1)
+		}
+		fmt.Printf("Book title: %s, author: %s, entries: %d\n", b.Title, b.Author, len(b.Entries))
+		illustrations = bookToIllustrations(b)
+	default:
+		fmt.Fprintf(os.Stderr, "Unhandled document type: %s\n", bookType)
+		os.Exit(1)
 	}
 
-	fmt.Printf("Found %d entries, reduced to %d after deduplication\n", len(ills), len(deduped))
+	// dedupe illustrations and print summary
+	dedupIllustrations := make(map[string]Illustration)
+	for _, ill := range illustrations {
+		key := ill.Content + "::" + ill.Source
+		dedupIllustrations[key] = ill
+	}
+	fmt.Printf("Total unique illustrations: %d\n", len(dedupIllustrations))
 
 	if printOnly {
-		data, _ := json.MarshalIndent(deduped, "", "  ")
+		data, _ := json.MarshalIndent(dedupIllustrations, "", "  ")
 		fmt.Println(string(data))
 		return
 	}
 
+	// Post to API
 	apiToken := os.Getenv("API_TOKEN")
 	if apiToken == "" {
 		fmt.Println("API_TOKEN environment variable not set")
 		return
 	}
 
-	for _, ill := range deduped {
+	for _, ill := range dedupIllustrations {
 		jsonData, _ := json.Marshal(ill)
 		req, err := http.NewRequest("POST", "https://sw-api.wplr.rocks/illustration", strings.NewReader(string(jsonData)))
 		if err != nil {
@@ -185,6 +209,7 @@ func main() {
 		bodyBytes, _ := io.ReadAll(resp.Body)
 		resp.Body.Close()
 
+		// handle duplicate (409)
 		if resp.StatusCode == 409 {
 			var respBody map[string]interface{}
 			if err := json.Unmarshal(bodyBytes, &respBody); err == nil {
@@ -205,10 +230,11 @@ func main() {
 					continue
 				}
 			}
-			fmt.Printf("Posted illustration: %s (status %d)\n", ill.Title, resp.StatusCode)
+			fmt.Printf("Posted illustration: %s (status %s)\n", ill.Title, resp.Status)
 			continue
 		}
 
 		fmt.Printf("Error posting %s: status %d body: %s\n", ill.Title, resp.StatusCode, string(bodyBytes))
 	}
+	fmt.Println("Processing completed.")
 }
