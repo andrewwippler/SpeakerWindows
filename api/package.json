@@ -59,7 +59,7 @@
     "@adonisjs/validator": "^13.0.2",
     "@vinejs/vine": "^3.0.1",
     "bcrypt": "^5.1.1",
-    "lodash": "^4.17.21",
+    "lodash": "^4.17.23",
     "luxon": "^3.5.0",
     "mysql2": "^3.13.0",
     "pg": "^8.16.3",
