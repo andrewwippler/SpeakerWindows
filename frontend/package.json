@@ -19,7 +19,7 @@
     "date-fns": "^4.1.0",
     "eslint": "9.39.2",
     "eslint-config-next": "15.5.9",
-    "lodash": "^4.17.21",
+    "lodash": "^4.17.23",
     "next": "16.1.6",
     "next-auth": "^4.24.12",
     "next-redux-wrapper": "^8.1.0",
