@@ -1,0 +1,16 @@
+# Project Architecture
+
+This is an AdonisJS application with:
+
+- Controllers in `/app/controllers`
+- Models in `/app/models`
+- Services in `/app/services`
+- Middleware in `/app/middleware`
+- Routes in `/start/routes.ts`
+- Database migrations in `/database/migrations`
+
+## Coding Standards
+
+- Use TypeScript for all new files
+- Follow the existing naming conventions
+- Write tests for all new features

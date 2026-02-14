@@ -6,6 +6,8 @@ import Tag from './tag.js'
 import User from './user.js'
 import Upload from './upload.js'
 import type { ManyToMany, BelongsTo, HasMany } from '@adonisjs/lucid/types/relations'
+import hybridSearchService from '#services/hybrid_search_service'
+import { RankingService } from '#services/ranking_service'
 
 export default class Illustration extends BaseModel {
   @column({ isPrimary: true })
@@ -57,5 +59,54 @@ export default class Illustration extends BaseModel {
     foreignKey: 'illustration_id',
   })
   declare uploads: HasMany<typeof Upload>
+
+  private static ranker = new RankingService()
+
+  /**
+   * Retrieve candidate illustrations based on hybrid search
+   * Returns raw candidate ranks from all 4 methods
+   * No scoring or ranking applied at this stage
+   */
+  static async retrieveCandidates(query: string, embedding: number[]) {
+    return await hybridSearchService.retrieve(query, embedding)
+  }
+
+  /**
+   * High-level search API
+   * Orchestrates: retrieval -> ranking -> fetching
+   * Returns fully ranked Illustration records
+   */
+  static async search(
+    query: string,
+    embedding: number[] = Array(1536).fill(0),
+    options: { limit?: number; includeScores?: boolean } = {}
+  ) {
+    const { limit = 50, includeScores = false } = options
+
+    // Step 1: Retrieve candidates with ranks
+    const candidates = await this.retrieveCandidates(query, embedding)
+
+    if (candidates.length === 0) {
+      return []
+    }
+
+    // Step 2: Fetch illustration records
+    const illustrations = await Illustration.query()
+      .whereIn('id', candidates.map(c => c.illustrationId))
+
+    const illustrationMap = new Map(illustrations.map(il => [il.id, il]))
+
+    // Step 3: Rank with RRF + boosting
+    const ranked = await Illustration.ranker.rank(candidates, illustrationMap)
+
+    // Step 4: Return top-K results
+    const results = ranked.slice(0, limit)
+
+    if (includeScores) {
+      return results
+    }
+
+    return results.map(r => r.illustration)
+  }
 
 }

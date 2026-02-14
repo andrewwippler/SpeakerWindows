@@ -37,7 +37,7 @@ export default function Search() {
   const onSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     let form = {
-      search: event.currentTarget.search.value.trim(),
+      query: event.currentTarget.search.value.trim(),
     };
 
     api.post(`/search`, form, session?.accessToken).then((data) => {
@@ -48,7 +48,7 @@ export default function Search() {
         return;
       }
       setData(data.data);
-      setSearched(form.search);
+      setSearched(form.query);
     });
   };
   if (!session?.accessToken) return;

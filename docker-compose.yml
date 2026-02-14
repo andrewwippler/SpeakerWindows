@@ -6,7 +6,7 @@ services:
       - 6379:6379
 
   db:
-    image: postgres:17
+    image: pgvector/pgvector:pg17
     volumes:
       - ./tmp/db:/var/lib/postgresql/data
       - ./api/database/docker-seed.sql:/docker-entrypoint-initdb.d/docker-seed.sql
