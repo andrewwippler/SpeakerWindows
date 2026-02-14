@@ -69,7 +69,7 @@ export default function TagSelect({
     if (event.key === "Tab") {
       // so then no tabbing to content? :(
       event.preventDefault();
-      if (inputRef.current) {
+      if (inputRef.current && filteredTags && filteredTags.length > 0) {
         // @ts-ignore
         handleTagAdd(filteredTags[0].name);
       }

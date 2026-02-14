@@ -31,7 +31,7 @@ const AuthorsController = () => import('#controllers/http/AuthorsController')
 const SettingsController = () => import('#controllers/http/SettingsController')
 const TagsController = () => import('#controllers/http/TagsController')
 const PlacesController = () => import('#controllers/http/PlacesController')
-const SearchesController = () => import('#controllers/http/SearchesController')
+const HybridSearchController = () => import('#controllers/http/HybridSearchController')
 const UploadsController = () => import('#controllers/http/UploadsController')
 const ContactsController = () => import('#controllers/http/ContactsController')
 
@@ -80,7 +80,7 @@ router.group(() =>{
   router.delete('/places/:id', [PlacesController, 'destroy'])
 
   //search
-  router.post('/search', [SearchesController, 'search'])
+  router.post('/search', [HybridSearchController, 'search'])
 
   // Images
   router.post('/upload', [UploadsController, 'store'])

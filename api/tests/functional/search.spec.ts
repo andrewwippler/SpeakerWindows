@@ -4,6 +4,7 @@ import PlaceFactory from '#database/factories/PlaceFactory'
 import UserFactory from '#database/factories/UserFactory'
 import TagFactory from '#database/factories/TagFactory'
 import db from '@adonisjs/lucid/services/db'
+import { SearchIndexingService } from '#services/search_indexing_service'
 let goodUser
 
 test.group('Search', (group) => {
@@ -19,6 +20,14 @@ test.group('Search', (group) => {
     const tag = await TagFactory.merge({ name: 'Search Tag', user_id: goodUser.id }).create()
 
     // console.log(illustration.toJSON(),place.toJSON(),tag.toJSON())
+    // Ensure the hybrid index is populated for tests by indexing the created illustration
+    try {
+      const mockEmbeddingProvider = { embed: async (text: string) => Array(1536).fill(0) }
+      const indexingService = new SearchIndexingService(mockEmbeddingProvider)
+      await indexingService.indexIllustration(illustration.id)
+    } catch (err) {
+      console.error('Test indexing failed:', err)
+    }
   })
 
   group.teardown(async () => {
@@ -27,22 +36,23 @@ test.group('Search', (group) => {
 
   test('Can search for all', async ({ client }) => {
     const loggedInUser = await client.post('/login').json({ email: goodUser.email, password: 'oasssadfasdf' })
-    const response = await client.post(`/search`).json({ search: 'Search' }).bearerToken(loggedInUser.body().token)
+    const response = await client.post(`/search`).json({ query: 'Search' }).bearerToken(loggedInUser.body().token)
     // console.log(response.body())
     response.assertStatus(200)
     response.assertBodyContains({message: "success"})
     response.assertBodyContains({ searchString: "Search" })
-    // not working :(
-    // response.assertBodyContains({ data: { illustrations: [{title: 'Search Test',}] } })
-    // response.assertBodyContains({ data: { tags: [{name: 'Search Tag',}] } })
-    // response.assertBodyContains({ data: { places: [{place: 'Search Place',}] } })
+
+    response.assertBodyContains({ data: { illustrations: [{ title: 'Search Test', }] } })
+    response.assertBodyContains({ data: { tags: [{name: 'Search-Tag',}] } })
+    response.assertBodyContains({ data: { places: [{place: 'Search Place',}] } })
   })
 
   test('No seach string', async ({ client }) => {
     const loggedInUser = await client.post('/login').json({ email: goodUser.email, password: 'oasssadfasdf' })
 
     const response = await client.post(`/search`).json({}).bearerToken(loggedInUser.body().token)
-    response.assertStatus(204)
+    // Validation now requires `query`, expect 422 Unprocessable Entity
+    response.assertStatus(422)
   })
 
 })

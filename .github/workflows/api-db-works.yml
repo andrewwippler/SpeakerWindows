@@ -15,7 +15,7 @@ jobs:
     runs-on: ubuntu-latest
     services:
       pg:
-        image: postgres:17
+        image: pgvector/pgvector:pg17
         ports:
           - 5432:5432
         env:
@@ -25,18 +25,9 @@ jobs:
         image: redis:5-alpine
         ports:
           - 6379:6379
-      typesense:
-        image: typesense/typesense:28.0
-        ports:
-          - 8108:8108
-        env:
-          TYPESENSE_API_KEY: 0c4d2e1a-3b8f-4b5f-8a6c-7d9e0f1a2b3c
-          TYPESENSE_DATA_DIR: /data
-        volumes:
-          - typesense-data:/data
     strategy:
       matrix:
-        node-version: [20.x]
+        node-version: [22.x]
 
     steps:
     - uses: actions/checkout@v2

@@ -4,6 +4,7 @@ import Illustration from '#models/illustration'
 import crypto from 'crypto'
 import Place from '#models/place'
 import Tag from '#models/tag'
+import { SearchIndexingService } from '#services/search_indexing_service'
 import _ from 'lodash'
 import { DateTime } from 'luxon'
 import { editIllustration } from '#app/abilities/main'
@@ -177,6 +178,15 @@ export default class IllustrationsController {
       })
     }
 
+    // Trigger immediate indexing so hybrid search index is available for subsequent requests/tests
+    try {
+      const mockEmbeddingProvider = { embed: async (text: string) => Array(1536).fill(0) }
+      const indexingService = new SearchIndexingService(mockEmbeddingProvider)
+      await indexingService.indexIllustration(illustration.id)
+    } catch (err) {
+      console.error('Indexing failed for new illustration:', err)
+    }
+
     return response.send({message: 'Created successfully', id: illustration.id})
   }
 
@@ -219,6 +229,15 @@ export default class IllustrationsController {
     const returnValue = await illustration.toJSON()
     returnValue.tags = await tags
 
+    // Re-index updated illustration to refresh hybrid index
+    try {
+      const mockEmbeddingProvider = { embed: async (text: string) => Array(1536).fill(0) }
+      const indexingService = new SearchIndexingService(mockEmbeddingProvider)
+      await indexingService.indexIllustration(illustration.id)
+    } catch (err) {
+      console.error('Indexing failed for updated illustration:', err)
+    }
+
     return response.send({message: 'Updated successfully', illustration: returnValue})
   }
 
@@ -246,7 +265,61 @@ export default class IllustrationsController {
 
     await illustration[0].related('tags').detach()
     await illustration[0].delete()
+    try {
+      const mockEmbeddingProvider = { embed: async (text: string) => Array(1536).fill(0) }
+      const indexingService = new SearchIndexingService(mockEmbeddingProvider)
+      await indexingService.deleteIndex(id)
+    } catch (err) {
+      console.error('Failed to delete search index for illustration', id, err)
+    }
     return response.send({message: `Deleted illustration id: ${illustration[0].id}`})
+  }
+
+  /**
+   * Search illustrations using hybrid search
+   * POST /illustrations/search
+   *
+   * Query parameters:
+   * - q: search query (required)
+   * - embedding: vector embedding (optional, defaults to zero vector)
+   * - limit: max results (optional, default: 50)
+   * - details: include scoring breakdown (optional, default: false)
+   */
+  public async search({ request, auth, response }: HttpContext) {
+    const query = request.input('q')
+    const embedding = request.input('embedding', Array(1536).fill(0))
+    const limit = request.input('limit', 50)
+    const includeDetails = request.input('details', false)
+
+    if (!query || typeof query !== 'string' || query.trim().length === 0) {
+      return response.badRequest({ error: 'Query parameter "q" is required' })
+    }
+
+    try {
+      const results = await Illustration.search(query.trim(), embedding, {
+        limit,
+        includeScores: includeDetails
+      })
+
+      // Filter to only user's illustrations
+      const userResults = Array.isArray(results)
+        ? results.filter((r: any) => {
+            const ill = r.illustration || r
+            return ill.user_id === auth.user?.id
+          })
+        : results
+
+      return response.ok({
+        results: userResults,
+        total: userResults.length
+      })
+    } catch (error) {
+      console.error('Search error:', error)
+      return response.internalServerError({
+        error: 'Search failed',
+        message: (error as any).message
+      })
+    }
   }
 
 }
