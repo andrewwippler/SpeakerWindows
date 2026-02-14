@@ -58,6 +58,7 @@
     "@adonisjs/redis": "^9.2.0",
     "@adonisjs/validator": "^13.0.2",
     "@vinejs/vine": "^3.0.1",
+    "argon2": "^0.43.1",
     "bcrypt": "^6.0.0",
     "lodash": "^4.17.23",
     "luxon": "^3.7.2",
