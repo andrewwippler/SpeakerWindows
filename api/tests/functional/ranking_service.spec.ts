@@ -3,6 +3,7 @@ import IllustrationFactory from '#database/factories/IllustrationFactory'
 import { RankingService } from '#services/ranking_service'
 import { CandidateRank } from '#services/hybrid_search_service'
 import Illustration from '#models/illustration'
+import { DateTime } from 'luxon'
 
 test.group('RankingService', (group) => {
   group.each.setup(async () => {
@@ -14,7 +15,7 @@ test.group('RankingService', (group) => {
     const ilModel = await Illustration.findOrFail(ill.id)
 
     // make illustration very recent
-    ilModel.createdAt = new Date()
+    ilModel.createdAt = DateTime.now()
     await ilModel.save()
 
     const ranker = new RankingService({ boostFactors: { enabled: true, recency: 2.0, userAffinity: 3.0 } })
@@ -43,7 +44,7 @@ test.group('RankingService', (group) => {
     const ill = (await IllustrationFactory.create()).toJSON() as any
     const ilModel = await Illustration.findOrFail(ill.id)
 
-    ilModel.createdAt = new Date()
+    ilModel.createdAt = DateTime.now()
     await ilModel.save()
 
     const ranker = new RankingService({ boostFactors: { enabled: true, recency: 1.5, userAffinity: 2.0 } })
