@@ -78,6 +78,8 @@ export default class GenerateSearchIndex extends BaseCommand {
 
     const embedding: number[] = Array(1536).fill(0)
 
+    const embeddingStr = '[' + embedding.join(',') + ']::vector'
+
     const sql = `
     INSERT INTO document_search (
       document_id,
@@ -85,14 +87,13 @@ export default class GenerateSearchIndex extends BaseCommand {
       body_tsv,
       title_trigram,
       embedding,
-      created_at,
-      updated_at
+      created_at
     ) VALUES (
       ?,
       to_tsvector('english', ?),
       to_tsvector('english', ?),
       ?,
-      ?,
+      ${embeddingStr},
       ?,
       ?
     )
@@ -105,9 +106,7 @@ export default class GenerateSearchIndex extends BaseCommand {
       illustration.title || '',
       illustration.content || '',
       titleTrigram,
-      embedding,             // Pass the array directly
       illustration.created_at,
-      new Date(),
     ])
   }
 
