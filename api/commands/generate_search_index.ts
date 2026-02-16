@@ -74,35 +74,41 @@ export default class GenerateSearchIndex extends BaseCommand {
   }
 
   private async indexIllustration(illustration: any): Promise<void> {
-    const titleTsv = this.buildTSVectorSQL('english', illustration.title || '')
-    const bodyTsv = this.buildTSVectorSQL('english', illustration.content || '')
     const titleTrigram = illustration.title || ''
 
-    const embedding = Array(1536).fill(0)
-
-    const embeddingStr = '[' + embedding.join(',') + ']'
+    const embedding: number[] = Array(1536).fill(0)
 
     const sql = `
-      INSERT INTO document_search (
-        document_id,
-        title_tsv,
-        body_tsv,
-        title_trigram,
-        embedding,
-        created_at,
-        updated_at
-      ) VALUES (?, ${titleTsv}, ${bodyTsv}, ?, ${embeddingStr}::vector, ?, ?)
-      ON CONFLICT (document_id) DO NOTHING
-    `
+    INSERT INTO document_search (
+      document_id,
+      title_tsv,
+      body_tsv,
+      title_trigram,
+      embedding,
+      created_at,
+      updated_at
+    ) VALUES (
+      ?,
+      to_tsvector('english', ?),
+      to_tsvector('english', ?),
+      ?,
+      ?,
+      ?,
+      ?
+    )
+    ON CONFLICT (document_id) DO NOTHING
+  `
 
-    await db.rawQuery(sql, [illustration.id, titleTrigram, illustration.created_at, new Date()])
+    // Pass the embedding array as a parameter; pgvector will accept it
+    await db.rawQuery(sql, [
+      illustration.id,
+      illustration.title || '',
+      illustration.content || '',
+      titleTrigram,
+      embedding,             // Pass the array directly
+      illustration.created_at,
+      new Date(),
+    ])
   }
 
-  private buildTSVectorSQL(language: string, text: string): string {
-    if (!text) {
-      return `to_tsvector('${language}', '')`
-    }
-    const escaped = text.replace(/'/g, "''")
-    return `to_tsvector('${language}', '${escaped}')`
-  }
 }
