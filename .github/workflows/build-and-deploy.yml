@@ -9,6 +9,10 @@ env:
   REPOSITORY: speakerwindows
   REGISTRY: d.wplr.rocks
 
+permissions:
+  contents: read
+  packages: write
+
 jobs:
   build-and-deploy:
     name: Deploy
