@@ -3,7 +3,7 @@ import { BaseSchema } from '@adonisjs/lucid/schema'
 export default class extends BaseSchema {
   protected tableName = 'illustrations'
 
-  public async up () {
+  public async up() {
     this.schema.raw(`
       ALTER TABLE illustrations ADD COLUMN content_tsv tsvector;
     `)
@@ -21,7 +21,7 @@ export default class extends BaseSchema {
     `)
   }
 
-  public async down () {
+  public async down() {
     this.schema.raw(`DROP TRIGGER tsvectorupdate ON illustrations;`)
     this.schema.raw(`DROP INDEX illustrations_content_tsv_idx;`)
     this.schema.raw(`ALTER TABLE illustrations DROP COLUMN content_tsv;`)

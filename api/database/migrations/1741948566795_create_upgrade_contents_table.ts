@@ -14,6 +14,5 @@ export default class extends BaseSchema {
     this.schema.alterTable(this.tableName, (table) => {
       table.text('content').alter()
     })
-
   }
 }

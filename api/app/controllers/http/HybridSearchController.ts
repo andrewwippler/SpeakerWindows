@@ -51,11 +51,7 @@ export default class HybridSearchController {
   async search({ auth, request, response }: HttpContext) {
     const validated = await request.validateUsing(HybridSearchValidator)
 
-    const {
-      query,
-      embedding: userEmbedding,
-      limit = 50,
-    } = validated
+    const { query, embedding: userEmbedding, limit = 50 } = validated
 
     try {
       // Step 1: Retrieve candidates independently from all methods
@@ -71,35 +67,43 @@ export default class HybridSearchController {
           data: {
             illustrations: [],
             places: [],
-            tags: []
-          }
+            tags: [],
+          },
         })
       }
 
       // Step 2: Load illustrations for ranking and response
       // Step 2: Load illustrations for ranking and response
       const illustrations = await Illustration.query()
-        .whereIn('id', candidates.map((c: any) => c.illustrationId))
+        .whereIn(
+          'id',
+          candidates.map((c: any) => c.illustrationId)
+        )
         .where('user_id', auth.user?.id)
 
       // Create map for ranking - use String keys to match Lucid serialization
-      const illustrationMap = new Map(illustrations.map(il => [String(il.id), il]))
+      const illustrationMap = new Map(illustrations.map((il) => [String(il.id), il]))
 
       // Step 3: Rank illustrations with RRF + boosting
       const rankedResults = await this.ranker.rank(candidates, illustrationMap)
 
-      // Step 4: Limit ranked results
-      const limitedIllustrations = rankedResults.slice(0, limit).map(r => r.illustration)
+      // Step 4: Sort by title match first (search string in title), then alphabetically
+      const sortedResults = this.ranker.sortByTitleMatchFirst(rankedResults, query)
+
+      // Step 5: Limit ranked results
+      const limitedIllustrations = sortedResults.slice(0, limit).map((r) => r.illustration)
 
       // Step 5: Fetch tags (case-insensitive)
       const tagSanitizedSearch = _.kebabCase(query) + '-' + (auth.user?.id || '0')
       const qLower = query.toLowerCase()
       const tagSlugLower = tagSanitizedSearch.toLowerCase()
-      const tags = await Tag.query().where((builder) => {
-        builder
-          .whereRaw('LOWER(name) LIKE ?', [`%${qLower}%`])
-          .orWhereRaw('LOWER(slug) LIKE ?', [`%${tagSlugLower}%`])
-      }).andWhere('user_id', `${auth.user?.id}`)
+      const tags = await Tag.query()
+        .where((builder) => {
+          builder
+            .whereRaw('LOWER(name) LIKE ?', [`%${qLower}%`])
+            .orWhereRaw('LOWER(slug) LIKE ?', [`%${tagSlugLower}%`])
+        })
+        .andWhere('user_id', `${auth.user?.id}`)
 
       // Step 6: Fetch places
       const places = await Place.query()
@@ -113,14 +117,14 @@ export default class HybridSearchController {
         data: {
           illustrations: limitedIllustrations,
           places,
-          tags
-        }
+          tags,
+        },
       })
     } catch (error) {
       console.error('Hybrid search error:', error)
       return response.internalServerError({
         error: 'Search failed',
-        message: (error as any).message
+        message: (error as any).message,
       })
     }
   }
@@ -140,21 +144,23 @@ export default class HybridSearchController {
 
       if (candidates.length === 0) {
         return response.ok({
-          results: []
+          results: [],
         })
       }
 
-      const illustrations = await Illustration.query()
-        .whereIn('id', candidates.map((c: any) => c.illustrationId))
+      const illustrations = await Illustration.query().whereIn(
+        'id',
+        candidates.map((c: any) => c.illustrationId)
+      )
 
       return response.ok({
-        results: illustrations
+        results: illustrations,
       })
     } catch (error) {
       console.error('Text search error:', error)
       return response.internalServerError({
         error: 'Search failed',
-        message: (error as any).message
+        message: (error as any).message,
       })
     }
   }
@@ -178,13 +184,13 @@ export default class HybridSearchController {
 
       return response.ok({
         candidates,
-        totalCandidates: candidates.length
+        totalCandidates: candidates.length,
       })
     } catch (error) {
       console.error('Get candidates error:', error)
       return response.internalServerError({
         error: 'Failed to retrieve candidates',
-        message: (error as any).message
+        message: (error as any).message,
       })
     }
   }

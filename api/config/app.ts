@@ -7,8 +7,8 @@
 
 import proxyAddr from 'proxy-addr'
 import env from '#start/env'
-import { ValidatorConfig } from "@adonisjs/validator/types";
-import { defineConfig } from "@adonisjs/core/http";
+import { ValidatorConfig } from '@adonisjs/validator/types'
+import { defineConfig } from '@adonisjs/core/http'
 
 /*
 |--------------------------------------------------------------------------

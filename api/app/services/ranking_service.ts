@@ -74,15 +74,15 @@ export class RankingService {
         fts_title: config.weights?.fts_title ?? 1.2,
         fts_body: config.weights?.fts_body ?? 0.6,
         fuzzy: config.weights?.fuzzy ?? 0.4,
-        semantic: config.weights?.semantic ?? 1.0
+        semantic: config.weights?.semantic ?? 1.0,
       },
       k: config.k ?? 60,
       boostFactors: {
         enabled: config.boostFactors?.enabled ?? true,
         recency: config.boostFactors?.recency ?? 1.2,
         userAffinity: config.boostFactors?.userAffinity ?? 1.5,
-        popularity: config.boostFactors?.popularity ?? 1.1
-      }
+        popularity: config.boostFactors?.popularity ?? 1.1,
+      },
     }
   }
 
@@ -91,7 +91,10 @@ export class RankingService {
    *
    * RRF = Σ weight / (k + rank) for each retrieval method where rank is defined
    */
-  private computeRRF(candidate: CandidateRank): { score: number; breakdown: Record<string, number> } {
+  private computeRRF(candidate: CandidateRank): {
+    score: number
+    breakdown: Record<string, number>
+  } {
     const breakdown: Record<string, number> = {}
     let score = 0
     const weights = this.config.weights
@@ -144,7 +147,7 @@ export class RankingService {
     const boosts = {
       recency: this.computeRecencyBoost(illustration.createdAt),
       userAffinity: this.config.boostFactors.userAffinity,
-      popularity: 1.0 // Can be extended with view_count if available
+      popularity: 1.0, // Can be extended with view_count if available
     }
 
     const score = rrfScore * boosts.recency * boosts.userAffinity * boosts.popularity
@@ -170,6 +173,39 @@ export class RankingService {
 
     // Linear interpolation
     return 1.0 + (recencyFactor - 1.0) * (1 - days / maxDays)
+  }
+
+  /**
+   * Sort illustrations with search string in title first (alphabetically),
+   * then remaining illustrations (alphabetically)
+   *
+   * @param rankedResults - Already ranked illustrations
+   * @param searchString - The search query to match against titles
+   * @returns Sorted RankedIllustration[] with title matches first
+   */
+  sortByTitleMatchFirst(
+    rankedResults: RankedIllustration[],
+    searchString: string
+  ): RankedIllustration[] {
+    const normalizedSearch = searchString.toLowerCase().trim()
+
+    const titleMatch: RankedIllustration[] = []
+    const noTitleMatch: RankedIllustration[] = []
+
+    for (const result of rankedResults) {
+      const titleLower = result.illustration.title.toLowerCase()
+      if (titleLower.includes(normalizedSearch)) {
+        titleMatch.push(result)
+      } else {
+        noTitleMatch.push(result)
+      }
+    }
+
+    titleMatch.sort((a, b) => a.illustration.title.localeCompare(b.illustration.title))
+
+    noTitleMatch.sort((a, b) => a.illustration.title.localeCompare(b.illustration.title))
+
+    return [...titleMatch, ...noTitleMatch]
   }
 
   /**
@@ -213,11 +249,11 @@ export class RankingService {
           fts_title: rrfBreakdown.fts_title ?? 0,
           fts_body: rrfBreakdown.fts_body ?? 0,
           fuzzy: rrfBreakdown.fuzzy ?? 0,
-          semantic: rrfBreakdown.semantic ?? 0
+          semantic: rrfBreakdown.semantic ?? 0,
         },
         boostedScore,
         boosts,
-        finalScore: boostedScore
+        finalScore: boostedScore,
       })
     }
 

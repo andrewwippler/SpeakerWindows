@@ -1,9 +1,6 @@
 {
   "all": true,
-  "include": [
-    "app/**",
-    "providers/**"
-  ],
+  "include": ["app/**", "providers/**"],
   "exclude": [
     "node_modules/**",
     "build/**",
@@ -20,11 +17,7 @@
     "server.ts",
     "app/**/Handler.ts"
   ],
-  "reporter": [
-    "html",
-    "text",
-    "text-summary"
-  ],
+  "reporter": ["html", "text", "text-summary"],
   "lines": 90,
   "branches": 65,
   "statements": 90,

@@ -13,14 +13,12 @@ Current CI failure:
 Coverage for lines (86.36%) does not meet global threshold (90%)
 Coverage for statements (86.36%) does not meet global threshold (90%)
 
-
 Primary uncovered file:
 
 app/services/illustration_search_ranker.ts
 0% statements
 0% branches
 206 uncovered lines
-
 
 This file implements:
 
@@ -43,7 +41,6 @@ Raise:
 illustration_search_ranker.ts ≥ 90% statement coverage
 illustration_search_ranker.ts ≥ 80% branch coverage
 
-
 WITHOUT:
 
 mocking ranking logic
@@ -57,7 +54,6 @@ REQUIRED TEST SCENARIOS
 Create:
 
 tests/unit/illustration_search_ranker.spec.ts
-
 
 Test:
 
@@ -74,7 +70,6 @@ When:
 ftsTitleRank = null
 semanticRank = present
 
-
 Ensure:
 
 score still calculated
@@ -85,7 +80,6 @@ Increasing:
 
 semanticWeight
 
-
 should promote semantic-only candidate above lexical-only candidate.
 
 k smoothing
@@ -93,7 +87,6 @@ k smoothing
 Changing:
 
 k from 60 to 10
-
 
 must change ordering.
 
@@ -117,7 +110,6 @@ Ensure:
 
 rank([])
 
-
 returns empty array.
 
 Deterministic ordering
@@ -129,6 +121,5 @@ OUTPUT
 Generate only:
 
 tests/unit/illustration_search_ranker.spec.ts
-
 
 Do not modify application code.

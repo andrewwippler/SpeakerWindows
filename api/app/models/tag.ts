@@ -32,16 +32,15 @@ export default class Tag extends BaseModel {
   declare updatedAt: DateTime
 
   @manyToMany(() => Illustration, {
-    pivotTimestamps: true
+    pivotTimestamps: true,
   })
   declare illustrations: ManyToMany<typeof Illustration>
 
   @beforeSave()
   public static async createSlug(tag: Tag) {
     if (!tag.slug) {
-      tag.slug = (tag.name || 'default-name') + '-' + (tag.user_id || '0');
+      tag.slug = (tag.name || 'default-name') + '-' + (tag.user_id || '0')
     }
-    tag.slug = TagSlugSanitizer(tag.slug);
+    tag.slug = TagSlugSanitizer(tag.slug)
   }
-
 }

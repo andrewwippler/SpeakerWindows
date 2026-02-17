@@ -1,4 +1,4 @@
-import { defineConfig } from "@adonisjs/core/app"
+import { defineConfig } from '@adonisjs/core/app'
 
 export default defineConfig({
   /*
@@ -14,7 +14,6 @@ export default defineConfig({
     () => import('@adonisjs/core/commands'),
     () => import('@adonisjs/lucid/commands'),
     () => import('@adonisjs/bouncer/commands'),
-
   ],
   /*
   |--------------------------------------------------------------------------
@@ -28,7 +27,7 @@ export default defineConfig({
     () => import('./start/routes.js'),
     () => import('./start/kernel.js'),
     () => import('./start/limiter.js'),
-    () => import('#start/validator')
+    () => import('#start/validator'),
   ],
   /*
   |--------------------------------------------------------------------------
@@ -44,7 +43,7 @@ export default defineConfig({
     () => import('@adonisjs/lucid/database_provider'),
     () => import('@adonisjs/core/providers/app_provider'),
     () => import('@adonisjs/core/providers/hash_provider'),
-    { "file": () => import('@adonisjs/core/providers/repl_provider'), "environment": ["repl", "test"] },
+    { file: () => import('@adonisjs/core/providers/repl_provider'), environment: ['repl', 'test'] },
     () => import('@adonisjs/auth/auth_provider'),
     () => import('@adonisjs/redis/redis_provider'),
     () => import('@adonisjs/bouncer/bouncer_provider'),
@@ -62,14 +61,12 @@ export default defineConfig({
   |
   */
   tests: {
-    "suites": [
+    suites: [
       {
-        "name": "functional",
-        "files": [
-          "tests/functional/**/*.spec(.ts|.js)"
-        ],
-        "timeout": 60000
-      }
-    ]
-  }
+        name: 'functional',
+        files: ['tests/functional/**/*.spec(.ts|.js)'],
+        timeout: 60000,
+      },
+    ],
+  },
 })

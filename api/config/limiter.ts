@@ -9,7 +9,7 @@ const limiterConfig = defineConfig({
     redis: stores.redis({}),
 
     database: stores.database({
-      tableName: 'rate_limits'
+      tableName: 'rate_limits',
     }),
 
     memory: stores.memory({}),

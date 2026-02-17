@@ -1,8 +1,7 @@
-import { BaseSchema } from "@adonisjs/lucid/schema";
+import { BaseSchema } from '@adonisjs/lucid/schema'
 
 export default class extends BaseSchema {
-
-  public async up () {
+  public async up() {
     this.schema.table('ill_tags', (table) => {
       table.dropColumn('created_at')
       table.dropColumn('updated_at')
@@ -19,6 +18,5 @@ export default class extends BaseSchema {
     })
   }
 
-  public async down () {
-  }
+  public async down() {}
 }

@@ -43,57 +43,60 @@ router.post('contact', [ContactsController, 'store'])
 router.post('register', [UsersController, 'store'])
 router.post('login', [UsersController, 'login'])
 router.get('/healthz', [HealthChecksController])
+router.get('users/:uid', [UsersController, 'show']).use([
+  middleware.auth({
+    guards: ['api'],
+  }),
+])
+
 router
-  .get('users/:uid', [UsersController, 'show'])
-  .use([middleware.auth({
-    guards: ['api']
-  })])
+  .group(() => {
+    // illustrations
+    router.get('/illustrations', [IllustrationsController, 'index'])
+    router.post('/illustration', [IllustrationsController, 'store'])
+    router.get('/illustration/authors', [AuthorsController, 'index'])
+    router.get('/illustration/:id', [IllustrationsController, 'show'])
+    router.get('/illustrations/:id', [IllustrationsController, 'showOld'])
+    router.put('/illustration/:id', [IllustrationsController, 'update'])
+    router.delete('/illustration/:id', [IllustrationsController, 'destroy'])
 
-router.group(() =>{
-  // illustrations
-  router.get('/illustrations', [IllustrationsController, 'index'])
-  router.post('/illustration', [IllustrationsController, 'store'])
-  router.get('/illustration/authors', [AuthorsController, 'index'])
-  router.get('/illustration/:id', [IllustrationsController, 'show'])
-  router.get('/illustrations/:id', [IllustrationsController, 'showOld'])
-  router.put('/illustration/:id', [IllustrationsController, 'update'])
-  router.delete('/illustration/:id', [IllustrationsController, 'destroy'])
+    router.get('/author/:name', [AuthorsController, 'show'])
+    router.put('/author/:name', [AuthorsController, 'update'])
 
-  router.get('/author/:name', [AuthorsController, 'show'])
-  router.put('/author/:name', [AuthorsController, 'update'])
+    router.get('/settings', [SettingsController, 'index'])
+    router.post('/settings', [SettingsController, 'update'])
 
-  router.get('/settings', [SettingsController,'index'])
-  router.post('/settings', [SettingsController,'update'])
+    //tags
+    //are created on new illustrations only
+    router.get('/tags', [TagsController, 'index'])
+    router.get('/tags/:name', [TagsController, 'search'])
+    router.get('/tag/:name', [TagsController, 'illustrations'])
+    router.put('/tags/:id', [TagsController, 'update'])
+    router.delete('/tags/:id', [TagsController, 'destroy'])
 
-  //tags
-  //are created on new illustrations only
-  router.get('/tags', [TagsController, 'index'])
-  router.get('/tags/:name', [TagsController, 'search'])
-  router.get('/tag/:name', [TagsController, 'illustrations'])
-  router.put('/tags/:id', [TagsController, 'update'])
-  router.delete('/tags/:id', [TagsController, 'destroy'])
+    // places
+    router.get('/places/:illustration_id', [PlacesController, 'show'])
+    router.post('/places/:illustration_id', [PlacesController, 'store'])
+    router.put('/places/:id', [PlacesController, 'update'])
+    router.delete('/places/:id', [PlacesController, 'destroy'])
 
-  // places
-  router.get('/places/:illustration_id', [PlacesController, 'show'])
-  router.post('/places/:illustration_id', [PlacesController, 'store'])
-  router.put('/places/:id', [PlacesController, 'update'])
-  router.delete('/places/:id', [PlacesController, 'destroy'])
+    //search
+    router.post('/search', [HybridSearchController, 'search'])
 
-  //search
-  router.post('/search', [HybridSearchController, 'search'])
-
-  // Images
-  router.post('/upload', [UploadsController, 'store'])
-  router.delete('/upload/:id', [UploadsController, 'destroy'])
-
-}).use([middleware.auth({
-  guards: ['api']
-})])
+    // Images
+    router.post('/upload', [UploadsController, 'store'])
+    router.delete('/upload/:id', [UploadsController, 'destroy'])
+  })
+  .use([
+    middleware.auth({
+      guards: ['api'],
+    }),
+  ])
 
 //public
 router.get('/uploads/*', ({ request, response }) => {
   const pathEnv = env.get('NODE_ENV')
-  const filePath = join(pathEnv,request.param('*').join(sep))
+  const filePath = join(pathEnv, request.param('*').join(sep))
   // console.log(filePath.toString(), request.param('*'))
   const normalizedPath = normalize(filePath)
 

@@ -2,10 +2,9 @@ import type { HttpContext } from '@adonisjs/core/http'
 import User from '#models/user'
 import { CreateUserValidator } from '#validators/CreateUserValidator'
 import Setting from '#models/setting'
-import limiter from "@adonisjs/limiter/services/main";
+import limiter from '@adonisjs/limiter/services/main'
 
 export default class UsersController {
-
   public async login({ auth, request, response }: HttpContext) {
     const { email, password } = request.all()
 
@@ -18,11 +17,12 @@ export default class UsersController {
     })
 
     if (await locallimit.isBlocked(throttleKey)) {
-      return response.tooManyRequests({message: "Too many requests. Please wait 30 minutes and try again."})
+      return response.tooManyRequests({
+        message: 'Too many requests. Please wait 30 minutes and try again.',
+      })
     }
 
     try {
-
       const user = await User.verifyCredentials(email, password)
       const token = await User.accessTokens.create(user)
 
@@ -40,15 +40,20 @@ export default class UsersController {
 
       const sharedToken = token.value!.release()
 
-      return { id: sharedToken, token:sharedToken, settings, name: user.username, email: user.email, uid: user.uid }
+      return {
+        id: sharedToken,
+        token: sharedToken,
+        settings,
+        name: user.username,
+        email: user.email,
+        uid: user.uid,
+      }
     } catch (error) {
-      console.log("login error: ", error)
+      console.log('login error: ', error)
       await locallimit.increment(throttleKey)
     }
 
-    return response.status(401).send({message: "Username or password is incorrect"})
-
-
+    return response.status(401).send({ message: 'Username or password is incorrect' })
   }
 
   public show({ auth, params, response }: HttpContext) {
@@ -68,7 +73,6 @@ export default class UsersController {
 
     const user = await User.create({ email, password })
 
-    return response.send({message: 'Created successfully', uid: user.uid})
+    return response.send({ message: 'Created successfully', uid: user.uid })
   }
-
 }

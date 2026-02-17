@@ -1,5 +1,5 @@
-import { ApplicationService } from "@adonisjs/core/types";
-import LocalEmbeddingProvider from "#services/local_embedding_provider";
+import { ApplicationService } from '@adonisjs/core/types'
+import LocalEmbeddingProvider from '#services/local_embedding_provider'
 
 export default class AppProvider {
   constructor(protected app: ApplicationService) {}
@@ -18,9 +18,7 @@ export default class AppProvider {
     }
   }
 
-  public async ready() {
-  }
+  public async ready() {}
 
-  public async shutdown() {
-  }
+  public async shutdown() {}
 }

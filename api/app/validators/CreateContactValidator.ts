@@ -1,21 +1,14 @@
 import { schema, rules } from '@adonisjs/validator'
 import type { HttpContext } from '@adonisjs/core/http'
-import { CustomMessages } from "@adonisjs/validator/types";
+import { CustomMessages } from '@adonisjs/validator/types'
 
 export default class CreateContactValidator {
   constructor(protected ctx: HttpContext) {}
 
   public schema = schema.create({
-    email: schema.string({ trim: true },[
-      rules.email(),
-      rules.required(),
-    ]),
-    reason: schema.string({ trim: true }, [
-      rules.required(),
-    ]),
-    message: schema.string({ trim: true }, [
-      rules.required(),
-    ]),
+    email: schema.string({ trim: true }, [rules.email(), rules.required()]),
+    reason: schema.string({ trim: true }, [rules.required()]),
+    message: schema.string({ trim: true }, [rules.required()]),
   })
 
   public messages: CustomMessages = {

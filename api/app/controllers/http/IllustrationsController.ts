@@ -15,7 +15,6 @@ import fs from 'fs/promises'
 import env from '#start/env'
 
 export default class IllustrationsController {
-
   /**
    * Displays places associated to an illustration.
    * GET illustration/:illustration_id
@@ -38,51 +37,6 @@ export default class IllustrationsController {
       illustrationQuery = await Illustration.query()
         .where('id', id)
         .andWhere('user_id', `${auth.user!.id}`)
-      .preload('tags', (builder) => {
-        builder.orderBy('name', 'asc')
-      })
-      .preload('places', (builder) => {
-        builder.orderBy('used', 'asc')
-      })
-      .preload('uploads', (builder) => {
-        builder.orderBy('name', 'asc')
-      })
-
-      // console.log(auth.user!.id,!!illustrationQuery[0],!illustrationQuery[0])
-      if (!!illustrationQuery[0]) {
-        const illustration = illustrationQuery[0].toJSON();
-        return illustration
-      }
-      return response.status(403).send({ message: 'You do not have permission to access this resource' })
-    } catch (err) {
-      return response.status(500).send({ message: 'Database error' })
-    }
-
-
-  }
-
-    /**
-   * Displays illustration associated with the old system.
-   * (Backwards compatibility)
-   * GET illustrations/:illustration_id
-   *
-   * @param {object} ctx
-   * @param {Request} ctx.request
-   * @param {Response} ctx.response
-   * @param {View} ctx.view
-   */
-    public async showOld({ params, auth, response }: HttpContext) {
-      const rawId = _.get(params, 'id', 0)
-      const id = parseInt(rawId, 10) || 0
-      if (id > 2147483647 || id < -2147483648) {
-        return response.status(500).send({ message: 'Invalid id' })
-      }
-
-      let illustrationQuery
-      try {
-        illustrationQuery = await Illustration.query()
-          .where('legacy_id', id)
-          .andWhere('user_id', `${auth.user?.id}`)
         .preload('tags', (builder) => {
           builder.orderBy('name', 'asc')
         })
@@ -93,20 +47,65 @@ export default class IllustrationsController {
           builder.orderBy('name', 'asc')
         })
 
-        // console.log(_.get(params, 'id', 0),auth.user?.id,!!illustrationQuery[0],!illustrationQuery[0])
-        if (!!illustrationQuery[0]) {
-          const illustration = illustrationQuery[0].toJSON();
-          return illustration
-        }
-        return response.status(403).send({ message: 'You do not have permission to access this resource' })
-      } catch (err) {
-        return response.status(500).send({ message: 'Database error' })
+      // console.log(auth.user!.id,!!illustrationQuery[0],!illustrationQuery[0])
+      if (!!illustrationQuery[0]) {
+        const illustration = illustrationQuery[0].toJSON()
+        return illustration
       }
+      return response
+        .status(403)
+        .send({ message: 'You do not have permission to access this resource' })
+    } catch (err) {
+      return response.status(500).send({ message: 'Database error' })
+    }
+  }
 
-
+  /**
+   * Displays illustration associated with the old system.
+   * (Backwards compatibility)
+   * GET illustrations/:illustration_id
+   *
+   * @param {object} ctx
+   * @param {Request} ctx.request
+   * @param {Response} ctx.response
+   * @param {View} ctx.view
+   */
+  public async showOld({ params, auth, response }: HttpContext) {
+    const rawId = _.get(params, 'id', 0)
+    const id = parseInt(rawId, 10) || 0
+    if (id > 2147483647 || id < -2147483648) {
+      return response.status(500).send({ message: 'Invalid id' })
     }
 
-    /**
+    let illustrationQuery
+    try {
+      illustrationQuery = await Illustration.query()
+        .where('legacy_id', id)
+        .andWhere('user_id', `${auth.user?.id}`)
+        .preload('tags', (builder) => {
+          builder.orderBy('name', 'asc')
+        })
+        .preload('places', (builder) => {
+          builder.orderBy('used', 'asc')
+        })
+        .preload('uploads', (builder) => {
+          builder.orderBy('name', 'asc')
+        })
+
+      // console.log(_.get(params, 'id', 0),auth.user?.id,!!illustrationQuery[0],!illustrationQuery[0])
+      if (!!illustrationQuery[0]) {
+        const illustration = illustrationQuery[0].toJSON()
+        return illustration
+      }
+      return response
+        .status(403)
+        .send({ message: 'You do not have permission to access this resource' })
+    } catch (err) {
+      return response.status(500).send({ message: 'Database error' })
+    }
+  }
+
+  /**
    * Create/save a new illustration.
    * POST /illustration
    *
@@ -116,15 +115,14 @@ export default class IllustrationsController {
    * @param {View} ctx.view
    */
   public async store({ request, bouncer, auth, response }: HttpContext) {
-
-     const { author, title, source, content, tags, places, legacy_id } = request.all()
+    const { author, title, source, content, tags, places, legacy_id } = request.all()
     const user_id = auth.user!.id
 
-    let create_data = {author, title, source, content, user_id}
+    let create_data = { author, title, source, content, user_id }
     if (!!legacy_id) {
       // keep the old ID
       // @ts-ignore
-      create_data = {author, title, source, content, user_id, legacy_id}
+      create_data = { author, title, source, content, user_id, legacy_id }
     }
 
     // checks if create data items are empty and inserts default values
@@ -139,7 +137,11 @@ export default class IllustrationsController {
     }
 
     // normalize content and compute hash for duplicate detection
-    const normalizedContent = (create_data.content || '').toString().trim().replace(/\s+/g, ' ').toLowerCase()
+    const normalizedContent = (create_data.content || '')
+      .toString()
+      .trim()
+      .replace(/\s+/g, ' ')
+      .toLowerCase()
     const content_hash = crypto.createHash('sha256').update(normalizedContent).digest('hex')
     // check for duplicates for this user and source
     const existing = await Illustration.query()
@@ -158,15 +160,25 @@ export default class IllustrationsController {
 
     const illustration = await Illustration.create(create_data)
     if (tags && tags.length > 0) {
-      const newTags = [...new Set(tags)].map(tag => {
-        return { slug: TagSlugSanitizer(tag+'-'+auth.user?.id), name: tag, user_id: auth.user?.id }
+      const newTags = [...new Set(tags)].map((tag) => {
+        return {
+          slug: TagSlugSanitizer(tag + '-' + auth.user?.id),
+          name: tag,
+          user_id: auth.user?.id,
+        }
       })
       // console.log(newTags)
       // @ts-ignore
       const allTags = await Tag.fetchOrCreateMany('slug', newTags)
       await illustration.related('tags').saveMany(await allTags)
     } else {
-      const newTags = [{ slug: TagSlugSanitizer('untitled-' + auth.user?.id), name: 'untitled', user_id: auth.user?.id }]
+      const newTags = [
+        {
+          slug: TagSlugSanitizer('untitled-' + auth.user?.id),
+          name: 'untitled',
+          user_id: auth.user?.id,
+        },
+      ]
       // @ts-ignore
       const allTags = await Tag.fetchOrCreateMany('slug', newTags)
       await illustration.related('tags').saveMany(await allTags)
@@ -174,9 +186,22 @@ export default class IllustrationsController {
     // console.log(illustration)
 
     if (places && places.length > 0) {
-      places.map(async (place: Partial<{ id: number; user_id: number; createdAt: DateTime<boolean>; updatedAt: DateTime<boolean>; illustration_id: number; place: string; location: string; used: DateTime<boolean> }>) => {
-        await Place.create({...place, illustration_id: illustration.id, user_id})
-      })
+      places.map(
+        async (
+          place: Partial<{
+            id: number
+            user_id: number
+            createdAt: DateTime<boolean>
+            updatedAt: DateTime<boolean>
+            illustration_id: number
+            place: string
+            location: string
+            used: DateTime<boolean>
+          }>
+        ) => {
+          await Place.create({ ...place, illustration_id: illustration.id, user_id })
+        }
+      )
     }
 
     // Trigger immediate indexing so hybrid search index is available for subsequent requests/tests
@@ -187,10 +212,10 @@ export default class IllustrationsController {
       console.error('Indexing failed for new illustration:', err)
     }
 
-    return response.send({message: 'Created successfully', id: illustration.id})
+    return response.send({ message: 'Created successfully', id: illustration.id })
   }
 
-    /**
+  /**
    * Update illustration details.
    * PUT or PATCH illustration/:id
    *
@@ -198,14 +223,16 @@ export default class IllustrationsController {
    * @param {Request} ctx.request
    * @param {Response} ctx.response
    */
-    public async update({ params, auth, bouncer, request, response }: HttpContext) {
+  public async update({ params, auth, bouncer, request, response }: HttpContext) {
     const { author, title, source, content, tags } = request.all()
     // places are on their own URI. Tags can be in the illustration post
 
     let illustration = await Illustration.findByOrFail('id', _.get(params, 'id', 0))
 
     if (await bouncer.denies(editIllustration, illustration)) {
-      return response.forbidden({message: 'E_AUTHORIZATION_FAILURE: Not authorized to perform this action'})
+      return response.forbidden({
+        message: 'E_AUTHORIZATION_FAILURE: Not authorized to perform this action',
+      })
     }
 
     illustration.author = author
@@ -216,8 +243,12 @@ export default class IllustrationsController {
     await illustration.save()
 
     if (tags && tags.length > 0) {
-      const newTags = [...new Set(tags)].map(tag => {
-        return { slug: TagSlugSanitizer(tag+'-'+auth.user?.id), name: tag, user_id: auth.user?.id }
+      const newTags = [...new Set(tags)].map((tag) => {
+        return {
+          slug: TagSlugSanitizer(tag + '-' + auth.user?.id),
+          name: tag,
+          user_id: auth.user?.id,
+        }
       })
       // console.log(newTags)
       // @ts-ignore
@@ -237,10 +268,10 @@ export default class IllustrationsController {
       console.error('Indexing failed for updated illustration:', err)
     }
 
-    return response.send({message: 'Updated successfully', illustration: returnValue})
+    return response.send({ message: 'Updated successfully', illustration: returnValue })
   }
 
-    /**
+  /**
    * Delete a illustration with id.
    * DELETE illustration/:id
    *
@@ -249,17 +280,23 @@ export default class IllustrationsController {
    * @param {Response} ctx.response
    */
   public async destroy({ params, auth, response }: HttpContext) {
-
     let id = _.get(params, 'id', 0)
-    let illustration = await Illustration.query().where('id',id)
+    let illustration = await Illustration.query().where('id', id)
 
     if (illustration[0].user_id != auth.user?.id) {
-      return response.status(403).send({ message: 'You do not have permission to access this resource' })
+      return response
+        .status(403)
+        .send({ message: 'You do not have permission to access this resource' })
     }
 
     await Place.query().where('illustration_id', id).delete()
     await Upload.query().where('illustration_id', id).delete()
-    const uploadsPath = app.makePath('uploads', env.get("NODE_ENV"), auth.user?.id.toString(), id.toString()) // delete just the illustration folder
+    const uploadsPath = app.makePath(
+      'uploads',
+      env.get('NODE_ENV'),
+      auth.user?.id.toString(),
+      id.toString()
+    ) // delete just the illustration folder
     await fs.rm(uploadsPath, { recursive: true, force: true })
 
     await illustration[0].related('tags').detach()
@@ -270,7 +307,7 @@ export default class IllustrationsController {
     } catch (err) {
       console.error('Failed to delete search index for illustration', id, err)
     }
-    return response.send({message: `Deleted illustration id: ${illustration[0].id}`})
+    return response.send({ message: `Deleted illustration id: ${illustration[0].id}` })
   }
 
   /**
@@ -296,7 +333,7 @@ export default class IllustrationsController {
     try {
       const results = await Illustration.search(query.trim(), embedding, {
         limit,
-        includeScores: includeDetails
+        includeScores: includeDetails,
       })
 
       // Filter to only user's illustrations
@@ -309,15 +346,14 @@ export default class IllustrationsController {
 
       return response.ok({
         results: userResults,
-        total: userResults.length
+        total: userResults.length,
       })
     } catch (error) {
       console.error('Search error:', error)
       return response.internalServerError({
         error: 'Search failed',
-        message: (error as any).message
+        message: (error as any).message,
       })
     }
   }
-
 }

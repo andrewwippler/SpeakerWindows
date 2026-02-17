@@ -2,6 +2,7 @@
 # Hybrid Search - Quick Reference
 
 ## 🚀 Core Concept
+
 **Fast candidate retrieval in SQL + Intelligent ranking in application**
 
 ---
@@ -9,6 +10,7 @@
 ## 📡 API Endpoints
 
 ### Search with all 4 methods
+
 ```
 POST /api/search/hybrid
 {
@@ -20,6 +22,7 @@ POST /api/search/hybrid
 ```
 
 ### Text-only search (no embedding)
+
 ```
 POST /api/search/text-only
 {
@@ -29,6 +32,7 @@ POST /api/search/text-only
 ```
 
 ### Debug: See retrieval stage
+
 ```
 POST /api/search/candidates
 {
@@ -40,12 +44,12 @@ POST /api/search/candidates
 
 ## 🔍 The 4 Search Methods
 
-| Method | Index | Best For | Latency |
-|--------|-------|----------|---------|
-| **FTS Title** | GIN (tsvector) | Phrase match in title | 10ms |
-| **FTS Body** | GIN (tsvector) | Phrase match in content | 10ms |
-| **Fuzzy** | GIN (pg_trgm) | Typos, variations | 15ms |
-| **Semantic** | IVFFlat (pgvector) | Meaning-based | 30ms |
+| Method        | Index              | Best For                | Latency |
+| ------------- | ------------------ | ----------------------- | ------- |
+| **FTS Title** | GIN (tsvector)     | Phrase match in title   | 10ms    |
+| **FTS Body**  | GIN (tsvector)     | Phrase match in content | 10ms    |
+| **Fuzzy**     | GIN (pg_trgm)      | Typos, variations       | 15ms    |
+| **Semantic**  | IVFFlat (pgvector) | Meaning-based           | 30ms    |
 
 All 4 run in **parallel** → candidiates merged → top-100 returned
 
@@ -84,7 +88,9 @@ Popularity: Log(views) → [1.0, 1.1]
 ## ⚙️ Services
 
 ### HybridSearchService
+
 **Independent retrieval only**
+
 ```typescript
 const candidates = await hybridSearch.retrieve(query, embedding)
 // Returns: [{ document_id, rank_fts_title?, rank_fts_body?, ... }]
@@ -92,7 +98,9 @@ const candidates = await hybridSearch.retrieve(query, embedding)
 ```
 
 ### RankingService
+
 **RRF + Boosting + Optional reranking**
+
 ```typescript
 const ranker = new RankingService(config)
 const results = await ranker.rank(candidates, illustrations)
@@ -100,7 +108,9 @@ const results = await ranker.rank(candidates, illustrations)
 ```
 
 ### SearchIndexingService
+
 **Async indexing (triggered on document change)**
+
 ```typescript
 await indexingService.indexIllustration(id)
 // Computes embedding + FTS vectors + upserts document_search
@@ -111,18 +121,21 @@ await indexingService.indexIllustration(id)
 ## 🎯 Integration Steps
 
 1. **Run migrations**
+
    ```bash
    node ace migration:run
    ```
 
 2. **Choose embedding provider**
+
    ```typescript
-   new OllamaEmbeddingProvider()        // Free, local
-   new OpenAIEmbeddingProvider(key)     // Proprietary
-   new HuggingFaceEmbeddingProvider(k)  // Balanced
+   new OllamaEmbeddingProvider() // Free, local
+   new OpenAIEmbeddingProvider(key) // Proprietary
+   new HuggingFaceEmbeddingProvider(k) // Balanced
    ```
 
 3. **Hook illustrations**
+
    ```typescript
    @afterCreate()
    static async afterCreate(model: Illustration) {
@@ -131,6 +144,7 @@ await indexingService.indexIllustration(id)
    ```
 
 4. **Register routes**
+
    ```typescript
    router.post('/search/hybrid', 'HybridSearchController.search')
    ```
@@ -145,14 +159,17 @@ await indexingService.indexIllustration(id)
 ## 💾 Database
 
 ### Extensions Required
+
 - `pgvector` - Vector similarity
 - `pg_trgm` - Trigram fuzzy match
 
 ### Tables
+
 - `illustrations` - Source of truth (mutable)
 - `document_search` - Search index (async-updated)
 
 ### Indexes
+
 - GIN on title_tsv
 - GIN on body_tsv
 - GIN on title_trigram
@@ -163,12 +180,14 @@ await indexingService.indexIllustration(id)
 ## 🧪 Test Queries
 
 ### Text search (immediate)
+
 ```bash
 curl -X POST http://localhost:3333/api/search/text-only \
   -d '{"query": "neural networks"}'
 ```
 
 ### Full hybrid (with embedding)
+
 ```bash
 curl -X POST http://localhost:3333/api/search/hybrid \
   -d '{"query": "neural networks", "embedding": [...]}'
@@ -178,10 +197,10 @@ curl -X POST http://localhost:3333/api/search/hybrid \
 
 ## ⚡ Performance Targets
 
-| Operation | Time | Notes |
-|-----------|------|-------|
-| Retrieval | 50-150ms | 4 parallel queries |
-| Ranking | <10ms | RRF + boosting |
+| Operation | Time      | Notes              |
+| --------- | --------- | ------------------ |
+| Retrieval | 50-150ms  | 4 parallel queries |
+| Ranking   | <10ms     | RRF + boosting     |
 | Embedding | 100-500ms | Provider-dependent |
 | **Total** | 150-700ms | Typical end-to-end |
 
@@ -192,17 +211,20 @@ FTS only: **50-100ms** (no embedding)
 ## 🎛️ Configuration Examples
 
 ### Default (Conservative)
+
 ```typescript
 weights: { fts_title: 1.2, fts_body: 0.6, fuzzy: 0.4, semantic: 1.0 }
 boostFactors: { recency: 1.2, affinity: 1.5, popularity: 1.1 }
 ```
 
 ### Semantic Search
+
 ```typescript
 weights: { fts_title: 0.8, fts_body: 0.4, fuzzy: 0.2, semantic: 2.0 }
 ```
 
 ### Typo-Tolerant
+
 ```typescript
 weights: { fts_title: 0.8, fts_body: 0.4, fuzzy: 1.5, semantic: 1.0 }
 ```
@@ -211,24 +233,26 @@ weights: { fts_title: 0.8, fts_body: 0.4, fuzzy: 1.5, semantic: 1.0 }
 
 ## ❌ Never Violate These
 
-| Don't | Why |
-|------|-----|
-| Compute RRF in SQL | Not all candidates available |
-| Apply boosting in query | Requires app context |
-| Combine scores in SQL | Breaks modularity |
-| Compute embeddings in trigger | Blocks document creation |
-| Rank full table | Unscalable |
+| Don't                         | Why                          |
+| ----------------------------- | ---------------------------- |
+| Compute RRF in SQL            | Not all candidates available |
+| Apply boosting in query       | Requires app context         |
+| Combine scores in SQL         | Breaks modularity            |
+| Compute embeddings in trigger | Blocks document creation     |
+| Rank full table               | Unscalable                   |
 
 ---
 
 ## 🐛 Debugging
 
 ### Check if index is populated
+
 ```sql
 SELECT COUNT(*) FROM document_search;
 ```
 
 ### Check index sizes
+
 ```sql
 SELECT
   indexname,
@@ -237,6 +261,7 @@ FROM pg_indexes WHERE tablename = 'document_search';
 ```
 
 ### See retrieval breakdown
+
 ```bash
 curl -X POST /api/search/candidates \
   -d '{"query": "test"}' \
@@ -244,6 +269,7 @@ curl -X POST /api/search/candidates \
 ```
 
 ### Check embedding availability
+
 ```sql
 SELECT COUNT(*) FROM document_search WHERE embedding IS NOT NULL;
 ```
@@ -277,12 +303,12 @@ api/
 
 ## 📚 Documentation
 
-| Doc | Contains |
-|-----|----------|
-| `HYBRID_SEARCH_SUMMARY.md` | High-level overview |
+| Doc                             | Contains                   |
+| ------------------------------- | -------------------------- |
+| `HYBRID_SEARCH_SUMMARY.md`      | High-level overview        |
 | `HYBRID_SEARCH_ARCHITECTURE.md` | Complete design + formulas |
-| `HYBRID_SEARCH_INTEGRATION.md` | Setup guide |
-| `HYBRID_SEARCH_EXAMPLES.ts` | 10 working examples |
+| `HYBRID_SEARCH_INTEGRATION.md`  | Setup guide                |
+| `HYBRID_SEARCH_EXAMPLES.ts`     | 10 working examples        |
 
 ---
 
@@ -313,5 +339,4 @@ api/
 ---
 
 **Ready to search!** 🎉
-
 ````

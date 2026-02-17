@@ -52,7 +52,7 @@ export class SearchIndexingService {
       title_trigram: illustration.title,
       embedding,
       created_at: illustration.createdAt,
-      updated_at: new Date()
+      updated_at: new Date(),
     })
   }
 
@@ -75,10 +75,7 @@ export class SearchIndexingService {
    * Delete search index for an illustration
    */
   async deleteIndex(illustrationId: number): Promise<void> {
-    await db.rawQuery(
-      'DELETE FROM document_search WHERE document_id = ?',
-      [illustrationId]
-    )
+    await db.rawQuery('DELETE FROM document_search WHERE document_id = ?', [illustrationId])
   }
 
   /**
@@ -121,12 +118,7 @@ export class SearchIndexingService {
         updated_at = EXCLUDED.updated_at
     `
 
-    await db.rawQuery(sql, [
-      documentId,
-      data.title_trigram,
-      data.created_at,
-      data.updated_at
-    ])
+    await db.rawQuery(sql, [documentId, data.title_trigram, data.created_at, data.updated_at])
   }
 
   /**
@@ -146,12 +138,8 @@ export class SearchIndexingService {
    * Combines title, content, and author info
    */
   private prepareEmbeddingText(illustration: Illustration): string {
-    const parts = [
-      illustration.title,
-      illustration.content,
-      illustration.author || ''
-    ]
-    return parts.filter(p => p && p.trim()).join(' ')
+    const parts = [illustration.title, illustration.content, illustration.author || '']
+    return parts.filter((p) => p && p.trim()).join(' ')
   }
 
   /**
