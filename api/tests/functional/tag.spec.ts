@@ -290,4 +290,71 @@ test.group('Tag', (group) => {
     assert.isTrue(relatedIllustrations.some((ill) => ill.id === illustration1.id))
     assert.isTrue(relatedIllustrations.some((ill) => ill.id === illustration2.id))
   })
+
+  test('Can remove illustrations from my tag', async ({ client, assert }) => {
+    const loggedInUser = await client
+      .post('/login')
+      .json({ email: goodUser.email, password: 'oasssadfasdf' })
+
+    const tag = await Tag.create({ name: 'Remove-Test-Tag', user_id: goodUser.id })
+    const illustration1 = await IllustrationFactory.merge({
+      title: 'Illustration to Remove 1',
+      user_id: goodUser.id,
+    }).create()
+    const illustration2 = await IllustrationFactory.merge({
+      title: 'Illustration to Remove 2',
+      user_id: goodUser.id,
+    }).create()
+
+    await illustration1.related('tags').attach([tag.id])
+    await illustration2.related('tags').attach([tag.id])
+
+    const response = await client
+      .delete(`/tags/${tag.id}/illustrations`)
+      .bearerToken(loggedInUser.body().token)
+      .json({ illustration_ids: [illustration1.id, illustration2.id] })
+
+    response.assertStatus(200)
+    response.assertBodyContains({ message: 'Removed 2 illustrations from tag' })
+
+    const updatedTag = await Tag.findOrFail(tag.id)
+    const relatedIllustrations = await updatedTag.related('illustrations').query()
+    assert.equal(relatedIllustrations.length, 0)
+  })
+
+  test('Cannot remove illustrations from tag without auth', async ({ client }) => {
+    const tag = await Tag.create({ name: 'No-Auth-Tag', user_id: goodUser.id })
+    const illustration = await IllustrationFactory.merge({
+      title: 'Test Illustration',
+      user_id: goodUser.id,
+    }).create()
+    await illustration.related('tags').attach([tag.id])
+
+    const response = await client
+      .delete(`/tags/${tag.id}/illustrations`)
+      .json({ illustration_ids: [illustration.id] })
+
+    response.assertStatus(401)
+  })
+
+  test('Cannot remove illustrations from another users tag', async ({ client }) => {
+    const loggedInUser = await client
+      .post('/login')
+      .json({ email: badUser.email, password: 'oasssadfasdf' })
+
+    const tag = await Tag.create({ name: 'Other-User-Tag', user_id: goodUser.id })
+    const illustration = await IllustrationFactory.merge({
+      title: 'Other User Illustration',
+      user_id: goodUser.id,
+    }).create()
+    await illustration.related('tags').attach([tag.id])
+
+    const response = await client
+      .delete(`/tags/${tag.id}/illustrations`)
+      .bearerToken(loggedInUser.body().token)
+      .json({ illustration_ids: [illustration.id] })
+
+    response.assertStatus(403)
+    response.assertBodyContains({ message: 'You do not have permission to access this resource' })
+  })
 })
