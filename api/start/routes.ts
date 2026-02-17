@@ -73,6 +73,7 @@ router
     router.get('/tag/:name', [TagsController, 'illustrations'])
     router.put('/tags/:id', [TagsController, 'update'])
     router.delete('/tags/:id', [TagsController, 'destroy'])
+    router.delete('/tags/:id/illustrations', [TagsController, 'removeIllustrations'])
 
     // places
     router.get('/places/:illustration_id', [PlacesController, 'show'])

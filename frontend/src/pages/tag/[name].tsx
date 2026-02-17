@@ -9,6 +9,7 @@ import {
   PencilSquareIcon,
   CheckCircleIcon,
   TrashIcon,
+  MinusCircleIcon,
 } from "@heroicons/react/24/solid";
 import { FormEvent } from "react";
 import Head from "next/head";
@@ -31,6 +32,16 @@ export default function Tag() {
 
   const [data, setData] = useState([]);
   const [editTag, setEditTag] = useState(false);
+  const [showBulkRemove, setShowBulkRemove] = useState(false);
+  const [selectedIllustrations, setSelectedIllustrations] = useState<number[]>([]);
+
+  const refreshData = () => {
+    api
+      .get(`/tag/${router.query.name}`, "", session?.accessToken)
+      .then((data) => {
+        setData(data);
+      });
+  };
 
   useEffect(() => {
     if (status === "unauthenticated") {
@@ -38,12 +49,7 @@ export default function Tag() {
     }
     if (!session?.accessToken)
       dispatch(setRedirect(`/tag/${router.query.name}`));
-    // add - for data fetching
-    api
-      .get(`/tag/${router.query.name}`, "", session?.accessToken)
-      .then((data) => {
-        setData(data); // illustrations
-      });
+    refreshData();
   }, [name, dispatch, status, router.query.name]);
 
   const handleSave = (event: FormEvent<HTMLFormElement>) => {
@@ -82,6 +88,46 @@ export default function Tag() {
       })
     );
     dispatch(setModal(true));
+  };
+
+  const handleToggleSelect = (id: number) => {
+    setSelectedIllustrations((prev) =>
+      prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id]
+    );
+  };
+
+  const handleBulkRemove = () => {
+    if (selectedIllustrations.length === 0) return;
+
+    api
+      .delete(`/tags/${data.id}/illustrations`, { illustration_ids: selectedIllustrations }, session?.accessToken)
+      .then((response) => {
+        dispatch(
+          setFlashMessage({
+            severity: "success",
+            message: response.message,
+          })
+        );
+        setSelectedIllustrations([]);
+        setShowBulkRemove(false);
+        refreshData();
+      })
+      .catch((err) => {
+        dispatch(
+          setFlashMessage({
+            severity: "danger",
+            message: err.message || "Failed to remove illustrations",
+          })
+        );
+      });
+  };
+
+  const toggleAll = () => {
+    if (selectedIllustrations.length === data.illustrations?.length) {
+      setSelectedIllustrations([]);
+    } else {
+      setSelectedIllustrations(data.illustrations?.map((ill: any) => ill.id) || []);
+    }
   };
 
   if (!session?.accessToken) return;
@@ -132,9 +178,48 @@ export default function Tag() {
               <TrashIcon className="h-4 w-4 mr-2" />
               Delete Tag
             </button>
+            {!showBulkRemove && (
+              <button
+                onClick={() => setShowBulkRemove(true)}
+                className="hidden md:inline-flex px-4 py-2 mr-4 mt-2 font-semibold text-sm bg-orange-300 hover:bg-orange-500 text-white rounded-full shadow-sm items-center"
+              >
+                <MinusCircleIcon className="h-4 w-4 mr-2" />
+                Remove Illustrations
+              </button>
+            )}
           </>
         )}
       </div>
+
+      {showBulkRemove && (
+        <div className="pb-4">
+          <button
+            onClick={toggleAll}
+            className="mr-4 text-sm text-sky-600 hover:text-sky-800"
+          >
+            {selectedIllustrations.length === data.illustrations?.length
+              ? "Deselect All"
+              : "Select All"}
+          </button>
+          <button
+            onClick={handleBulkRemove}
+            disabled={selectedIllustrations.length === 0}
+            className="px-4 py-2 mr-4 mt-2 font-semibold text-sm bg-red-300 hover:bg-red-500 text-white rounded-full shadow-sm inline-flex items-center disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <TrashIcon className="h-4 w-4 mr-2" />
+            Remove Selected ({selectedIllustrations.length})
+          </button>
+          <button
+            onClick={() => {
+              setShowBulkRemove(false);
+              setSelectedIllustrations([]);
+            }}
+            className="px-4 py-2 mr-4 mt-2 font-semibold text-sm bg-gray-300 hover:bg-gray-500 text-white rounded-full shadow-sm inline-flex items-center"
+          >
+            Cancel
+          </button>
+        </div>
+      )}
 
       <ul role="list">
         {!data.illustrations ? (
@@ -142,6 +227,14 @@ export default function Tag() {
         ) : data.illustrations.length > 0 ? (
           data.illustrations.map((d, i) => (
             <li key={i} className="group/item hover:bg-slate-200">
+              {showBulkRemove && (
+                <input
+                  type="checkbox"
+                  className="mr-3 h-4 w-4 rounded border-gray-300 text-sky-600 focus:ring-sky-500"
+                  checked={selectedIllustrations.includes(d.id)}
+                  onChange={() => handleToggleSelect(d.id)}
+                />
+              )}
               <Link
                 className="block pb-1 group-hover/item:underline"
                 href={`/illustration/${d.id}`}

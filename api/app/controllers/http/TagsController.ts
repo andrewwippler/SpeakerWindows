@@ -152,4 +152,38 @@ export default class TagsController {
     await tag.delete()
     return response.send({ message: `Deleted tag id: ${tag.id}` })
   }
+
+  /**
+   * Remove illustrations from a tag.
+   * DELETE tags/:id/illustrations
+   *
+   * @param {object} ctx
+   * @param {Request} ctx.request
+   * @param {Response} ctx.response
+   */
+  public async removeIllustrations({ params, auth, bouncer, request, response }: HttpContext) {
+    const tag = await Tag.findOrFail(params.id)
+
+    if (await bouncer.denies(editTag, tag)) {
+      return response.status(403).send({
+        message: 'You do not have permission to access this resource',
+      })
+    }
+
+    const { illustration_ids } = request.only(['illustration_ids'])
+
+    if (!Array.isArray(illustration_ids) || illustration_ids.length === 0) {
+      return response.status(400).send({
+        message: 'illustration_ids must be a non-empty array',
+      })
+    }
+
+    const illustrations = await tag.related('illustrations').query().whereIn('illustrations.id', illustration_ids)
+
+    await tag.related('illustrations').detach(illustrations.map((i) => i.id))
+
+    return response.send({
+      message: `Removed ${illustrations.length} illustrations from tag`,
+    })
+  }
 }
