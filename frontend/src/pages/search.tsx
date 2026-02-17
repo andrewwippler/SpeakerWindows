@@ -7,7 +7,7 @@ import api from "@/library/api";
 import { tagType } from "@/library/tagtype";
 import { illustrationType } from "@/library/illustrationType";
 import { placeType } from "@/library/placeType";
-import { MagnifyingGlassCircleIcon } from "@heroicons/react/20/solid";
+import { MagnifyingGlassCircleIcon, MagnifyingGlassIcon } from "@heroicons/react/20/solid";
 import { setRedirect } from "@/features/ui/reducer";
 import { useEffect } from "react";
 import { useSession } from "next-auth/react";
@@ -56,7 +56,8 @@ export default function Search() {
   // If it does, then we need to have a listing of those illustrations here.
   return (
     <Layout>
-      <div className="text-xl font-bold pb-4 text-sky-900">
+      <div className="text-xl font-bold pb-4 text-sky-900 flex items-center">
+        <MagnifyingGlassIcon className="h-6 w-6 mr-2" />
         <span className="mr-4">Search</span>
       </div>
       <form className="space-y-6" onSubmit={onSubmit}>

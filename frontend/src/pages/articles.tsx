@@ -4,7 +4,7 @@ import Link from "next/link";
 import Layout from "@/components/Layout";
 import { useAppSelector, useAppDispatch } from "@/hooks";
 import { selectRecentlyViewed, clear } from "@/features/recentlyViewed";
-import { TrashIcon } from "@heroicons/react/24/solid";
+import { TrashIcon, BookOpenIcon } from "@heroicons/react/24/solid";
 import { useSession } from "next-auth/react";
 import Head from "next/head";
 
@@ -60,7 +60,10 @@ export default function Articles() {
         <title>SW | Articles</title>
       </Head>
       <div className="flex items-center justify-between pb-4">
-        <div className="text-xl font-bold text-sky-900">Articles</div>
+        <div className="text-xl font-bold text-sky-900 flex items-center">
+          <BookOpenIcon className="h-6 w-6 mr-2" />
+          Articles
+        </div>
         {illustrations.length > 0 && (
           <button
             onClick={() => dispatch(clear())}

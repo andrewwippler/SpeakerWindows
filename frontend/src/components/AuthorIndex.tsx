@@ -5,6 +5,7 @@ import api from "@/library/api";
 import { useState, useEffect } from "react";
 
 import { useAppDispatch } from "@/hooks";
+import { UserGroupIcon } from "@heroicons/react/24/solid";
 
 function Author({ token }: { token: string | undefined }) {
   const dispatch = useAppDispatch();
@@ -32,7 +33,10 @@ function Author({ token }: { token: string | undefined }) {
   let columnThreeData = _.takeRight(data, data.length - rows_per_column * 2);
   return (
     <>
-      <div className="text-xl font-bold text-sky-900 pb-4">Authors</div>
+      <div className="text-xl font-bold text-sky-900 pb-4 flex items-center">
+        <UserGroupIcon className="h-6 w-6 mr-2" />
+        Authors
+      </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-3">
         <div>

@@ -5,6 +5,7 @@ import { useAppDispatch } from "@/hooks";
 import { useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
+import { PlusIcon } from "@heroicons/react/24/solid";
 
 export default function Login() {
   const { data: session, status } = useSession();

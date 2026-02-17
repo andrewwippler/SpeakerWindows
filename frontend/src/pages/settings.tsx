@@ -12,6 +12,7 @@ import router from "next/router";
 import {
   ArrowLeftIcon,
   ClipboardDocumentListIcon,
+  CogIcon,
 } from "@heroicons/react/24/solid";
 import { setRedirect } from "@/features/ui/reducer";
 import { useSession } from "next-auth/react";
@@ -60,7 +61,8 @@ export default function Settings() {
     <Layout>
       {settings && (
         <>
-          <div className="text-xl font-bold pb-4 text-sky-900">
+          <div className="text-xl font-bold pb-4 text-sky-900 flex items-center">
+            <CogIcon className="h-6 w-6 mr-2" />
             <span className="mr-4">Settings</span>
           </div>
           <form className="space-y-6" onSubmit={onSubmit}>
