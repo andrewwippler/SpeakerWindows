@@ -5,7 +5,7 @@ import Image from "next/image";
 import { Bars3Icon, XMarkIcon } from "@heroicons/react/24/outline";
 import { Dialog } from "@headlessui/react";
 import fetchJson from "@/library/fetchJson";
-import { PlusIcon } from "@heroicons/react/24/solid";
+import { PlusIcon, TagIcon, BookOpenIcon, UserGroupIcon, CogIcon, MagnifyingGlassIcon } from "@heroicons/react/24/solid";
 import { useSession } from "next-auth/react";
 import LoginBtn from "./LoginBtn";
 
@@ -48,32 +48,44 @@ export default function Header() {
               <>
                 <Link
                   href="/"
-                  className="text-sm font-semibold leading-6 text-sky-100 hover:text-sky-900"
+                  className="text-sm font-semibold leading-6 text-sky-100 hover:text-sky-900 flex items-center"
                 >
-                  Home
+                  <TagIcon className="h-5 w-5 mr-1.5" />
+                  Tags
                 </Link>
                 <Link
                   href="/new-illustration"
-                  className="text-sm font-semibold leading-6 text-sky-100 hover:text-sky-900"
+                  className="text-sm font-semibold leading-6 text-sky-100 hover:text-sky-900 flex items-center"
                 >
-                  New illustration
+                  <PlusIcon className="h-5 w-5 mr-1.5" />
+                  New Illustration
+                </Link>
+                <Link
+                  href="/articles"
+                  className="text-sm font-semibold leading-6 text-sky-100 hover:text-sky-900 flex items-center"
+                >
+                  <BookOpenIcon className="h-5 w-5 mr-1.5" />
+                  Articles
                 </Link>
                 <Link
                   href="/authors"
-                  className="text-sm font-semibold leading-6 text-sky-100 hover:text-sky-900"
+                  className="text-sm font-semibold leading-6 text-sky-100 hover:text-sky-900 flex items-center"
                 >
-                  List Authors
+                  <UserGroupIcon className="h-5 w-5 mr-1.5" />
+                  Authors
                 </Link>
                 <Link
                   href="/settings"
-                  className="text-sm font-semibold leading-6 text-sky-100 hover:text-sky-900"
+                  className="text-sm font-semibold leading-6 text-sky-100 hover:text-sky-900 flex items-center"
                 >
+                  <CogIcon className="h-5 w-5 mr-1.5" />
                   Settings
                 </Link>
                 <Link
                   href="/search"
-                  className="text-sm font-semibold leading-6 text-sky-100 hover:text-sky-900"
+                  className="text-sm font-semibold leading-6 text-sky-100 hover:text-sky-900 flex items-center"
                 >
+                  <MagnifyingGlassIcon className="h-5 w-5 mr-1.5" />
                   Search
                 </Link>
               </>
@@ -111,32 +123,44 @@ export default function Header() {
                     <>
                       <Link
                         href="/"
-                        className="-mx-3 block rounded-lg py-2 px-3 text-base font-semibold leading-7 text-sky-300 hover:bg-sky-900"
+                        className="-mx-3 flex items-center rounded-lg py-2 px-3 text-base font-semibold leading-7 text-sky-300 hover:bg-sky-900"
                       >
-                        Home
+                        <TagIcon className="h-5 w-5 mr-3" />
+                        Tags
                       </Link>
                       <Link
                         href="/new-illustration"
-                        className="-mx-3 block rounded-lg py-2 px-3 text-base font-semibold leading-7 text-sky-300 hover:bg-sky-900"
+                        className="-mx-3 flex items-center rounded-lg py-2 px-3 text-base font-semibold leading-7 text-sky-300 hover:bg-sky-900"
                       >
+                        <PlusIcon className="h-5 w-5 mr-3" />
                         New Illustration
                       </Link>
                       <Link
-                        href="/authors"
-                        className="-mx-3 block rounded-lg py-2 px-3 text-base font-semibold leading-7 text-sky-300 hover:bg-sky-900"
+                        href="/articles"
+                        className="-mx-3 flex items-center rounded-lg py-2 px-3 text-base font-semibold leading-7 text-sky-300 hover:bg-sky-900"
                       >
-                        List Authors
+                        <BookOpenIcon className="h-5 w-5 mr-3" />
+                        Articles
+                      </Link>
+                      <Link
+                        href="/authors"
+                        className="-mx-3 flex items-center rounded-lg py-2 px-3 text-base font-semibold leading-7 text-sky-300 hover:bg-sky-900"
+                      >
+                        <UserGroupIcon className="h-5 w-5 mr-3" />
+                        Authors
                       </Link>
                       <Link
                         href="/settings"
-                        className="-mx-3 block rounded-lg py-2 px-3 text-base font-semibold leading-7 text-sky-300 hover:bg-sky-900"
+                        className="-mx-3 flex items-center rounded-lg py-2 px-3 text-base font-semibold leading-7 text-sky-300 hover:bg-sky-900"
                       >
+                        <CogIcon className="h-5 w-5 mr-3" />
                         Settings
                       </Link>
                       <Link
                         href="/search"
-                        className="-mx-3 block rounded-lg py-2 px-3 text-base font-semibold leading-7 text-sky-300 hover:bg-sky-900"
+                        className="-mx-3 flex items-center rounded-lg py-2 px-3 text-base font-semibold leading-7 text-sky-300 hover:bg-sky-900"
                       >
+                        <MagnifyingGlassIcon className="h-5 w-5 mr-3" />
                         Search
                       </Link>
                     </>
