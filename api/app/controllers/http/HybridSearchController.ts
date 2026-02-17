@@ -77,12 +77,13 @@ export default class HybridSearchController {
       }
 
       // Step 2: Load illustrations for ranking and response
+      // Step 2: Load illustrations for ranking and response
       const illustrations = await Illustration.query()
         .whereIn('id', candidates.map((c: any) => c.illustrationId))
-        .where('user_id', `${auth.user?.id}`)
+        .where('user_id', auth.user?.id)
 
-      // Create map for ranking
-      const illustrationMap = new Map(illustrations.map(il => [il.id, il]))
+      // Create map for ranking - use String keys to match Lucid serialization
+      const illustrationMap = new Map(illustrations.map(il => [String(il.id), il]))
 
       // Step 3: Rank illustrations with RRF + boosting
       const rankedResults = await this.ranker.rank(candidates, illustrationMap)

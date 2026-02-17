@@ -181,12 +181,16 @@ export class RankingService {
    */
   async rank(
     candidates: CandidateRank[],
-    illustrations: Map<number, Illustration>
+    illustrations: Map<string | number, Illustration>
   ): Promise<RankedIllustration[]> {
     const rankedResults: RankedIllustration[] = []
 
     for (const candidate of candidates) {
-      const illustration = illustrations.get(candidate.illustrationId)
+      // Try both string and number keys to handle both test fixtures and production
+      let illustration = illustrations.get(String(candidate.illustrationId))
+      if (!illustration) {
+        illustration = illustrations.get(candidate.illustrationId as any)
+      }
       if (!illustration) continue
 
       // Step 1: Compute RRF
