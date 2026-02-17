@@ -5,9 +5,43 @@ import Image from "next/image";
 import { Bars3Icon, XMarkIcon } from "@heroicons/react/24/outline";
 import { Dialog } from "@headlessui/react";
 import fetchJson from "@/library/fetchJson";
-import { PlusIcon } from "@heroicons/react/24/solid";
+import { PlusIcon, TagIcon, BookOpenIcon, UserGroupIcon, CogIcon, MagnifyingGlassIcon } from "@heroicons/react/24/solid";
 import { useSession } from "next-auth/react";
 import LoginBtn from "./LoginBtn";
+
+function NavLink({ href, icon: Icon, children }: { href: string; icon: any; children: React.ReactNode }) {
+  const router = useRouter();
+  const isActive = router.pathname === href || (href !== '/' && router.pathname.startsWith(href));
+
+  return (
+    <Link
+      href={href}
+      className={`text-sm font-semibold leading-6 flex items-center ${
+        isActive ? 'text-sky-900' : 'text-sky-100 hover:text-sky-900'
+      }`}
+    >
+      <Icon className="h-5 w-5 mr-1.5" />
+      {children}
+    </Link>
+  );
+}
+
+function MobileNavLink({ href, icon: Icon, children }: { href: string; icon: any; children: React.ReactNode }) {
+  const router = useRouter();
+  const isActive = router.pathname === href || (href !== '/' && router.pathname.startsWith(href));
+
+  return (
+    <Link
+      href={href}
+      className={`-mx-3 flex items-center rounded-lg py-2 px-3 text-base font-semibold leading-7 ${
+        isActive ? 'bg-sky-900 text-white' : 'text-sky-300 hover:bg-sky-900'
+      }`}
+    >
+      <Icon className="h-5 w-5 mr-3" />
+      {children}
+    </Link>
+  );
+}
 
 export default function Header() {
   const { data: session } = useSession();
@@ -46,36 +80,12 @@ export default function Header() {
           <div className="hidden lg:flex lg:gap-x-12">
             {session && (
               <>
-                <Link
-                  href="/"
-                  className="text-sm font-semibold leading-6 text-sky-100 hover:text-sky-900"
-                >
-                  Home
-                </Link>
-                <Link
-                  href="/new-illustration"
-                  className="text-sm font-semibold leading-6 text-sky-100 hover:text-sky-900"
-                >
-                  New illustration
-                </Link>
-                <Link
-                  href="/authors"
-                  className="text-sm font-semibold leading-6 text-sky-100 hover:text-sky-900"
-                >
-                  List Authors
-                </Link>
-                <Link
-                  href="/settings"
-                  className="text-sm font-semibold leading-6 text-sky-100 hover:text-sky-900"
-                >
-                  Settings
-                </Link>
-                <Link
-                  href="/search"
-                  className="text-sm font-semibold leading-6 text-sky-100 hover:text-sky-900"
-                >
-                  Search
-                </Link>
+                <NavLink href="/" icon={TagIcon}>Tags</NavLink>
+                <NavLink href="/new-illustration" icon={PlusIcon}>New Illustration</NavLink>
+                <NavLink href="/articles" icon={BookOpenIcon}>Articles</NavLink>
+                <NavLink href="/authors" icon={UserGroupIcon}>Authors</NavLink>
+                <NavLink href="/settings" icon={CogIcon}>Settings</NavLink>
+                <NavLink href="/search" icon={MagnifyingGlassIcon}>Search</NavLink>
               </>
             )}
           </div>
@@ -109,36 +119,12 @@ export default function Header() {
                 <div className="space-y-2 py-6">
                   {session && (
                     <>
-                      <Link
-                        href="/"
-                        className="-mx-3 block rounded-lg py-2 px-3 text-base font-semibold leading-7 text-sky-300 hover:bg-sky-900"
-                      >
-                        Home
-                      </Link>
-                      <Link
-                        href="/new-illustration"
-                        className="-mx-3 block rounded-lg py-2 px-3 text-base font-semibold leading-7 text-sky-300 hover:bg-sky-900"
-                      >
-                        New Illustration
-                      </Link>
-                      <Link
-                        href="/authors"
-                        className="-mx-3 block rounded-lg py-2 px-3 text-base font-semibold leading-7 text-sky-300 hover:bg-sky-900"
-                      >
-                        List Authors
-                      </Link>
-                      <Link
-                        href="/settings"
-                        className="-mx-3 block rounded-lg py-2 px-3 text-base font-semibold leading-7 text-sky-300 hover:bg-sky-900"
-                      >
-                        Settings
-                      </Link>
-                      <Link
-                        href="/search"
-                        className="-mx-3 block rounded-lg py-2 px-3 text-base font-semibold leading-7 text-sky-300 hover:bg-sky-900"
-                      >
-                        Search
-                      </Link>
+                      <MobileNavLink href="/" icon={TagIcon}>Tags</MobileNavLink>
+                      <MobileNavLink href="/new-illustration" icon={PlusIcon}>New Illustration</MobileNavLink>
+                      <MobileNavLink href="/articles" icon={BookOpenIcon}>Articles</MobileNavLink>
+                      <MobileNavLink href="/authors" icon={UserGroupIcon}>Authors</MobileNavLink>
+                      <MobileNavLink href="/settings" icon={CogIcon}>Settings</MobileNavLink>
+                      <MobileNavLink href="/search" icon={MagnifyingGlassIcon}>Search</MobileNavLink>
                     </>
                   )}
                 </div>

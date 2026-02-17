@@ -5,6 +5,7 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 
 import api from "@/library/api";
+import { TagIcon } from "@heroicons/react/24/solid";
 
 interface Tag {
   id: string | number;
@@ -66,7 +67,10 @@ export default function Tags({ token }: TagsProps) {
 
   return (
     <div>
-      <div className="text-xl font-bold text-sky-900 pb-4">Tags</div>
+      <div className="text-xl font-bold text-sky-900 pb-4 flex items-center">
+        <TagIcon className="h-6 w-6 mr-2" />
+        Tags
+      </div>
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         {[columnOneData, columnTwoData, columnThreeData].map(
           (column, colIndex) => (

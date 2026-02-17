@@ -12,6 +12,7 @@ import router from "next/router";
 import {
   ArrowLeftIcon,
   ClipboardDocumentListIcon,
+  CogIcon,
 } from "@heroicons/react/24/solid";
 import { setRedirect } from "@/features/ui/reducer";
 import { useSession } from "next-auth/react";
@@ -60,7 +61,8 @@ export default function Settings() {
     <Layout>
       {settings && (
         <>
-          <div className="text-xl font-bold pb-4 text-sky-900">
+          <div className="text-xl font-bold pb-4 text-sky-900 flex items-center">
+            <CogIcon className="h-6 w-6 mr-2" />
             <span className="mr-4">Settings</span>
           </div>
           <form className="space-y-6" onSubmit={onSubmit}>
@@ -72,23 +74,26 @@ export default function Settings() {
                 >
                   Api Key
                 </label>
-                <div className="mt-2 ">
-                  {session?.accessToken}
-                  {session?.accessToken && (
-                    <button
-                      type="button"
-                      data-toggle="tooltip"
-                      data-placement="bottom"
-                      title="Copy API token to clipboard"
-                      className=" px-2 py-2 ml-2 bg-gray-300 hover:bg-gray-500 text-white rounded-md shadow-sm"
-                      onClick={() => {
-                        navigator.clipboard.writeText(session?.accessToken || "");
-                      }}
-                    >
-                      <ClipboardDocumentListIcon className="h-4 w-4" />
-                    </button>
-                  )}
-                  {/* TODO: regenerate API key */}
+                <div className="mt-2">
+                  {session?.accessToken ? (
+                    <>
+                      <span className="inline-block align-middle max-w-[150px] md:max-w-none truncate md:truncate-none">
+                        {session.accessToken}
+                      </span>
+                      <button
+                        type="button"
+                        data-toggle="tooltip"
+                        data-placement="bottom"
+                        title="Copy API token to clipboard"
+                        className=" px-2 py-2 ml-2 bg-gray-300 hover:bg-gray-500 text-white rounded-md shadow-sm"
+                        onClick={() => {
+                          navigator.clipboard.writeText(session?.accessToken || "");
+                        }}
+                      >
+                        <ClipboardDocumentListIcon className="h-4 w-4" />
+                      </button>
+                    </>
+                  ) : null}
                 </div>
               </div>
             </div>

@@ -1,5 +1,5 @@
 import { ChangeEvent, FormEvent, useState } from "react";
-import { ArrowLeftIcon, TrashIcon, PhotoIcon } from "@heroicons/react/24/solid";
+import { ArrowLeftIcon, TrashIcon, PhotoIcon, PlusIcon } from "@heroicons/react/24/solid";
 import api from "@/library/api";
 import { useAppSelector, useAppDispatch } from "@/hooks";
 import { setFlashMessage } from "@/features/flash/reducer";
@@ -167,7 +167,8 @@ export default function IllustrationForm({
 
   return (
     <>
-      <div className="mr-4 text-xl font-bold pb-4 text-sky-900">
+      <div className="mr-4 text-xl font-bold pb-4 text-sky-900 flex items-center">
+        <PlusIcon className="h-6 w-6 mr-2" />
         {edit ? "Edit" : "New"} Illustration
       </div>
 

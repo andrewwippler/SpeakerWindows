@@ -34,6 +34,7 @@ import Head from "next/head";
 import { getSettings, getThunkSettings } from "@/features/user/reducer";
 import Image from "next/image";
 import { useSession } from "next-auth/react";
+import { addIllustration } from "@/features/recentlyViewed";
 
 export default function IllustrationWrapper() {
   const router = useRouter();
@@ -78,6 +79,11 @@ export default function IllustrationWrapper() {
         setData(data);
         setLoading(false);
         dispatch(setUpdateUI(false));
+        dispatch(addIllustration({
+          id: data.id,
+          title: data.title,
+          content: data.content,
+        }));
       }
     });
   }, [router.query.id, refreshUI, status, userSettings, dispatch, router]);

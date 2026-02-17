@@ -5,6 +5,7 @@ import tagReducer from './features/tags/reducer'
 import modalReducer from './features/modal/reducer'
 import flashReducer from './features/flash/reducer'
 import uiReducer from './features/ui/reducer'
+import recentlyViewedReducer from './features/recentlyViewed/reducer'
 
 export function makeStore() {
   return configureStore({
@@ -14,6 +15,7 @@ export function makeStore() {
       modal: modalReducer,
       flash: flashReducer,
       ui: uiReducer,
+      recentlyViewed: recentlyViewedReducer,
     },
     devTools: true,
   })
