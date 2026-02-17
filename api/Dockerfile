@@ -1,8 +1,8 @@
 # From https://docs.adonisjs.com/cookbooks/dockerizing-adonis
-ARG NODE_IMAGE=node:20-alpine
+ARG NODE_IMAGE=node:22-bookworm-slim
 
 FROM $NODE_IMAGE AS base
-RUN apk --no-cache add dumb-init
+RUN apt-get update && apt-get install -y dumb-init && rm -rf /var/lib/apt/lists/*
 RUN mkdir -p /home/node/app && chown node:node /home/node/app
 WORKDIR /home/node/app
 USER node
