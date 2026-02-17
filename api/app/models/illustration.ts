@@ -78,7 +78,7 @@ export default class Illustration extends BaseModel {
    */
   static async search(
     query: string,
-    embedding: number[] = Array(1536).fill(0),
+    embedding: number[] = Array(384).fill(0),
     options: { limit?: number; includeScores?: boolean } = {}
   ) {
     const { limit = 50, includeScores = false } = options

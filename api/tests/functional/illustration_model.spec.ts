@@ -20,27 +20,27 @@ test.group('Illustration model search', (group) => {
     const sem = await IllustrationFactory.merge({ title: 'Semantic meaning', user_id: user.id, content: 'deep learning and vectors' }).create()
 
     // Index them using mock embedding provider so document_search is populated
-    const mockProvider = { embed: async (text: string) => Array(1536).fill(0.01) }
+    const mockProvider = { embed: async (text: string) => Array(384).fill(0.01) }
     const indexing = new SearchIndexingService(mockProvider)
     await indexing.indexIllustration(lex.id)
     await indexing.indexIllustration(fuzzy.id)
     await indexing.indexIllustration(sem.id)
 
     // Lexical search
-    const lexCandidates = await Illustration.retrieveCandidates('Lexical', Array(1536).fill(0))
+    const lexCandidates = await Illustration.retrieveCandidates('Lexical', Array(384).fill(0))
     assert.isAtLeast(lexCandidates.length, 1)
 
     // Fuzzy search: search for 'Fuzzy' (typo) should match fuzzy record
-    const fuzzyCandidates = await Illustration.retrieveCandidates('Fuzzy', Array(1536).fill(0))
+    const fuzzyCandidates = await Illustration.retrieveCandidates('Fuzzy', Array(384).fill(0))
     assert.isAtLeast(fuzzyCandidates.length, 1)
 
     // Semantic search: use semantic embedding similar to sem content
-    const semEmbedding = Array(1536).fill(0.01)
+    const semEmbedding = Array(384).fill(0.01)
     const semCandidates = await Illustration.retrieveCandidates('meaning', semEmbedding)
     assert.isAtLeast(semCandidates.length, 1)
 
     // Mixed query returns multiple
-    const mixed = await Illustration.search('Match', Array(1536).fill(0), { limit: 10 })
+    const mixed = await Illustration.search('Match', Array(384).fill(0), { limit: 10 })
     assert.isArray(mixed)
   })
 })

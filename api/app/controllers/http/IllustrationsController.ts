@@ -5,6 +5,7 @@ import crypto from 'crypto'
 import Place from '#models/place'
 import Tag from '#models/tag'
 import { SearchIndexingService } from '#services/search_indexing_service'
+import LocalEmbeddingProvider from '#services/local_embedding_provider'
 import _ from 'lodash'
 import { DateTime } from 'luxon'
 import { editIllustration } from '#app/abilities/main'
@@ -180,8 +181,7 @@ export default class IllustrationsController {
 
     // Trigger immediate indexing so hybrid search index is available for subsequent requests/tests
     try {
-      const mockEmbeddingProvider = { embed: async (text: string) => Array(1536).fill(0) }
-      const indexingService = new SearchIndexingService(mockEmbeddingProvider)
+      const indexingService = new SearchIndexingService(LocalEmbeddingProvider)
       await indexingService.indexIllustration(illustration.id)
     } catch (err) {
       console.error('Indexing failed for new illustration:', err)
@@ -231,8 +231,7 @@ export default class IllustrationsController {
 
     // Re-index updated illustration to refresh hybrid index
     try {
-      const mockEmbeddingProvider = { embed: async (text: string) => Array(1536).fill(0) }
-      const indexingService = new SearchIndexingService(mockEmbeddingProvider)
+      const indexingService = new SearchIndexingService(LocalEmbeddingProvider)
       await indexingService.indexIllustration(illustration.id)
     } catch (err) {
       console.error('Indexing failed for updated illustration:', err)
@@ -266,8 +265,7 @@ export default class IllustrationsController {
     await illustration[0].related('tags').detach()
     await illustration[0].delete()
     try {
-      const mockEmbeddingProvider = { embed: async (text: string) => Array(1536).fill(0) }
-      const indexingService = new SearchIndexingService(mockEmbeddingProvider)
+      const indexingService = new SearchIndexingService(LocalEmbeddingProvider)
       await indexingService.deleteIndex(id)
     } catch (err) {
       console.error('Failed to delete search index for illustration', id, err)
@@ -287,7 +285,7 @@ export default class IllustrationsController {
    */
   public async search({ request, auth, response }: HttpContext) {
     const query = request.input('q')
-    const embedding = request.input('embedding', Array(1536).fill(0))
+    const embedding = request.input('embedding', Array(384).fill(0))
     const limit = request.input('limit', 50)
     const includeDetails = request.input('details', false)
 

@@ -1,21 +1,26 @@
 import { ApplicationService } from "@adonisjs/core/types";
+import LocalEmbeddingProvider from "#services/local_embedding_provider";
 
 export default class AppProvider {
   constructor(protected app: ApplicationService) {}
 
   public register() {
-    // Register your own bindings
+    // No bindings needed - using direct imports with singleton pattern
   }
 
   public async boot() {
-    // IoC container is ready
+    // Warm up the embedding model on boot to avoid first-request delay
+    try {
+      await LocalEmbeddingProvider.warmUp()
+      console.log('Embedding model warmed up successfully')
+    } catch (error) {
+      console.error('Failed to warm up embedding model:', error)
+    }
   }
 
   public async ready() {
-    // App is ready
   }
 
   public async shutdown() {
-    // Cleanup, since app is going down
   }
 }
