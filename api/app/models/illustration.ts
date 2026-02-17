@@ -94,7 +94,7 @@ export default class Illustration extends BaseModel {
     const illustrations = await Illustration.query()
       .whereIn('id', candidates.map(c => c.illustrationId))
 
-    const illustrationMap = new Map(illustrations.map(il => [il.id, il]))
+    const illustrationMap = new Map(illustrations.map(il => [String(il.id), il]))
 
     // Step 3: Rank with RRF + boosting
     const ranked = await Illustration.ranker.rank(candidates, illustrationMap)

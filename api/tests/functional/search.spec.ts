@@ -14,7 +14,7 @@ test.group('Search API', (group) => {
     await db.beginGlobalTransaction()
     return () => db.rollbackGlobalTransaction()
   })
-  
+
   group.setup(async () => {
     goodUser = await UserFactory.merge({password: 'oasssadfasdf'}).create()
     const illustration = await IllustrationFactory.merge({ title: 'Search Test', user_id: goodUser.id }).create()
@@ -36,26 +36,28 @@ test.group('Search API', (group) => {
   test('Can search for all', async ({ client }) => {
     const loggedInUser = await client.post('/login').json({ email: goodUser.email, password: 'oasssadfasdf' })
     const response = await client.post(`/search`).json({ query: 'Search' }).bearerToken(loggedInUser.body().token)
-    
+
     response.assertStatus(200)
     response.assertBodyContains({message: "success"})
     response.assertBodyContains({ searchString: "Search" })
     response.assertBodyContains({ data: { illustrations: [{ title: 'Search Test', }] } })
     response.assertBodyContains({ data: { tags: [{name: 'Search-Tag',}] } })
-    response.assertBodyContains({ data: { places: [{place: 'Search Place',}] } })
+    response.assertBodyContains({ data: { places: [{ place: 'Search Place', }] } })
+    // const body = response.body()
+    // console.log('Search response body:', body.data.illustrations, body.data.tags, body.data.places)
   })
 
   test('No search string returns 422', async ({ client }) => {
     const loggedInUser = await client.post('/login').json({ email: goodUser.email, password: 'oasssadfasdf' })
     const response = await client.post(`/search`).json({}).bearerToken(loggedInUser.body().token)
-    
+
     response.assertStatus(422)
   })
 
   test('Empty search string returns 422', async ({ client }) => {
     const loggedInUser = await client.post('/login').json({ email: goodUser.email, password: 'oasssadfasdf' })
     const response = await client.post(`/search`).json({ query: '' }).bearerToken(loggedInUser.body().token)
-    
+
     response.assertStatus(422)
   })
 })

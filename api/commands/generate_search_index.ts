@@ -98,7 +98,7 @@ export default class GenerateSearchIndex extends BaseCommand {
         SELECT i.id, i.title, i.content, i.author, i.created_at, ds.embedding
         FROM illustrations i
         JOIN document_search ds ON ds.document_id = i.id
-        WHERE ds.embedding = '[]'::vector AND i.user_id = ?
+        WHERE ds.embedding IS NULL AND i.user_id = ?
         ORDER BY i.id
         LIMIT ?
       `
@@ -106,7 +106,7 @@ export default class GenerateSearchIndex extends BaseCommand {
         SELECT i.id, i.title, i.content, i.author, i.created_at, ds.embedding
         FROM illustrations i
         JOIN document_search ds ON ds.document_id = i.id
-        WHERE ds.embedding = '[]'::vector
+        WHERE ds.embedding IS NULL
         ORDER BY i.id
         LIMIT ?
       `
