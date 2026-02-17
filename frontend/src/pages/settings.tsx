@@ -72,23 +72,26 @@ export default function Settings() {
                 >
                   Api Key
                 </label>
-                <div className="mt-2 ">
-                  {session?.accessToken}
-                  {session?.accessToken && (
-                    <button
-                      type="button"
-                      data-toggle="tooltip"
-                      data-placement="bottom"
-                      title="Copy API token to clipboard"
-                      className=" px-2 py-2 ml-2 bg-gray-300 hover:bg-gray-500 text-white rounded-md shadow-sm"
-                      onClick={() => {
-                        navigator.clipboard.writeText(session?.accessToken || "");
-                      }}
-                    >
-                      <ClipboardDocumentListIcon className="h-4 w-4" />
-                    </button>
-                  )}
-                  {/* TODO: regenerate API key */}
+                <div className="mt-2">
+                  {session?.accessToken ? (
+                    <>
+                      <span className="inline-block align-middle max-w-[150px] md:max-w-none truncate md:truncate-none">
+                        {session.accessToken}
+                      </span>
+                      <button
+                        type="button"
+                        data-toggle="tooltip"
+                        data-placement="bottom"
+                        title="Copy API token to clipboard"
+                        className=" px-2 py-2 ml-2 bg-gray-300 hover:bg-gray-500 text-white rounded-md shadow-sm"
+                        onClick={() => {
+                          navigator.clipboard.writeText(session?.accessToken || "");
+                        }}
+                      >
+                        <ClipboardDocumentListIcon className="h-4 w-4" />
+                      </button>
+                    </>
+                  ) : null}
                 </div>
               </div>
             </div>
