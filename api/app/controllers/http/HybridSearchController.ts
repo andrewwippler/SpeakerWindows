@@ -135,7 +135,7 @@ export default class HybridSearchController {
     const { query } = validated
 
     try {
-      const candidates = await this.hybridSearch.retrieve(query, Array(1536).fill(0))
+      const candidates = await this.hybridSearch.retrieve(query, Array(384).fill(0))
 
       if (candidates.length === 0) {
         return response.ok({
@@ -190,9 +190,9 @@ export default class HybridSearchController {
 
   /**
    * Helper: Get default embedding for searches without semantic component
-   * Returns zero vector (1536 dimensions)
+   * Returns zero vector (384 dimensions)
    */
   private getDefaultEmbedding(): number[] {
-    return Array(1536).fill(0)
+    return Array(384).fill(0)
   }
 }

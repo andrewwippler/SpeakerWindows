@@ -15,7 +15,7 @@ test.group('IndexIllustrationJob', (group) => {
     const ill = await IllustrationFactory.merge({ user_id: user.id, title: 'Index Me' }).create()
 
     let embedCalled = false
-    const mockProvider = { embed: async (text: string) => { embedCalled = true; return Array(1536).fill(0.1) } }
+    const mockProvider = { embed: async (text: string) => { embedCalled = true; return Array(384).fill(0.1) } }
     const job = new IndexIllustrationJob(mockProvider)
 
     await job.handle({ illustrationId: ill.id })
