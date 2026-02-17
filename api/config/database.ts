@@ -7,8 +7,8 @@
 
 import env from '#start/env'
 import app from '@adonisjs/core/services/app'
-import { DatabaseConfig } from "@adonisjs/lucid/database";
-import { defineConfig } from "@adonisjs/lucid";
+import { DatabaseConfig } from '@adonisjs/lucid/database'
+import { defineConfig } from '@adonisjs/lucid'
 
 const databaseConfig = defineConfig({
   /*
@@ -43,7 +43,7 @@ const databaseConfig = defineConfig({
       pool: {
         afterCreate: (conn, cb) => {
           conn.run('PRAGMA foreign_keys=true', cb)
-        }
+        },
       },
       migrations: {
         naturalSort: true,
@@ -79,7 +79,6 @@ const databaseConfig = defineConfig({
       },
     },
 
-
     pg: {
       client: 'pg',
       connection: {
@@ -93,10 +92,8 @@ const databaseConfig = defineConfig({
         naturalSort: true,
       },
       debug: false,
-    }
-
-
-  }
+    },
+  },
 })
 
 export default databaseConfig

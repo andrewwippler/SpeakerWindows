@@ -8,10 +8,9 @@ import Tag from './tag.js'
 import Place from './place.js'
 import { v4 } from 'uuid'
 import Setting from './setting.js'
-import type { HasMany, HasOne } from "@adonisjs/lucid/types/relations"
+import type { HasMany, HasOne } from '@adonisjs/lucid/types/relations'
 import { DbAccessTokensProvider } from '@adonisjs/auth/access_tokens'
 import { withAuthFinder } from '@adonisjs/auth/mixins/lucid'
-
 
 const AuthFinder = withAuthFinder(() => hash.use('bcrypt'), {
   uids: ['email'],
@@ -73,7 +72,7 @@ export default class User extends compose(BaseModel, AuthFinder) {
   declare setting: HasOne<typeof Setting>
 
   @beforeSave()
-  public static async UidGen (user: User) {
+  public static async UidGen(user: User) {
     if (!user.uid || user.uid == '00000000-0000-0000-0000-000000000000') {
       user.uid = v4()
     }

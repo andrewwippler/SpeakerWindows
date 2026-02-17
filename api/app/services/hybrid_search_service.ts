@@ -28,7 +28,9 @@ export class HybridSearchService {
   /**
    * Full-text search on title
    */
-  private async retrieveFTS_Title(query: string): Promise<{ illustrationId: number; rank: number }[]> {
+  private async retrieveFTS_Title(
+    query: string
+  ): Promise<{ illustrationId: number; rank: number }[]> {
     const queryVector = this.toTsQuery(query)
 
     const results = await db.rawQuery(
@@ -50,7 +52,9 @@ export class HybridSearchService {
   /**
    * Full-text search on body
    */
-  private async retrieveFTS_Body(query: string): Promise<{ illustrationId: number; rank: number }[]> {
+  private async retrieveFTS_Body(
+    query: string
+  ): Promise<{ illustrationId: number; rank: number }[]> {
     const queryVector = this.toTsQuery(query)
 
     const results = await db.rawQuery(
@@ -92,7 +96,9 @@ export class HybridSearchService {
   /**
    * Vector similarity search (semantic)
    */
-  private async retrieveSemantic(embedding: number[]): Promise<{ illustrationId: number; rank: number }[]> {
+  private async retrieveSemantic(
+    embedding: number[]
+  ): Promise<{ illustrationId: number; rank: number }[]> {
     const embeddingStr = '[' + embedding.join(',') + ']'
 
     const results = await db.rawQuery(
@@ -120,7 +126,7 @@ export class HybridSearchService {
       this.retrieveFTS_Title(query),
       this.retrieveFTS_Body(query),
       this.retrieveFuzzy(query),
-      this.retrieveSemantic(embedding)
+      this.retrieveSemantic(embedding),
     ])
 
     // Build candidate map with per-method ranks
@@ -128,25 +134,33 @@ export class HybridSearchService {
 
     // Merge all retrieval results
     for (const result of fts_title) {
-      const candidate = candidateMap.get(result.illustrationId) || { illustrationId: result.illustrationId }
+      const candidate = candidateMap.get(result.illustrationId) || {
+        illustrationId: result.illustrationId,
+      }
       candidate.ftsTitleRank = result.rank
       candidateMap.set(result.illustrationId, candidate)
     }
 
     for (const result of fts_body) {
-      const candidate = candidateMap.get(result.illustrationId) || { illustrationId: result.illustrationId }
+      const candidate = candidateMap.get(result.illustrationId) || {
+        illustrationId: result.illustrationId,
+      }
       candidate.ftsBodyRank = result.rank
       candidateMap.set(result.illustrationId, candidate)
     }
 
     for (const result of fuzzy) {
-      const candidate = candidateMap.get(result.illustrationId) || { illustrationId: result.illustrationId }
+      const candidate = candidateMap.get(result.illustrationId) || {
+        illustrationId: result.illustrationId,
+      }
       candidate.fuzzyRank = result.rank
       candidateMap.set(result.illustrationId, candidate)
     }
 
     for (const result of semantic) {
-      const candidate = candidateMap.get(result.illustrationId) || { illustrationId: result.illustrationId }
+      const candidate = candidateMap.get(result.illustrationId) || {
+        illustrationId: result.illustrationId,
+      }
       candidate.semanticRank = result.rank
       candidateMap.set(result.illustrationId, candidate)
     }

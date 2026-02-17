@@ -1,17 +1,15 @@
 import vine from '@vinejs/vine'
 
-export const CreateUserValidator = vine
-  .compile(
+export const CreateUserValidator = vine.compile(
   vine.object({
-    email: vine.string().trim().email().unique(
-      async (db, value) => {
-        const user = await db
-          .from('users')
-          .where('email', value)
-          .first()
+    email: vine
+      .string()
+      .trim()
+      .email()
+      .unique(async (db, value) => {
+        const user = await db.from('users').where('email', value).first()
         return !user
-      }
-    ),
+      }),
     password: vine
       .string()
       .trim()

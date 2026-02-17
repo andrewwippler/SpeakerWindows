@@ -59,12 +59,11 @@ export class LocalEmbeddingProvider implements EmbeddingProvider {
       try {
         pipelineInstance = await pipeline('feature-extraction', 'Xenova/all-MiniLM-L6-v2', {
           quantized: false,
-          revision: 'main'
+          revision: 'main',
         })
       } catch (error) {
-        this.initializationError = error instanceof Error
-          ? error
-          : new Error('Failed to initialize embedding pipeline')
+        this.initializationError =
+          error instanceof Error ? error : new Error('Failed to initialize embedding pipeline')
         throw this.initializationError
       }
     })()

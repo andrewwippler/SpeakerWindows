@@ -1,8 +1,6 @@
-import { BaseSchema } from "@adonisjs/lucid/schema";
+import { BaseSchema } from '@adonisjs/lucid/schema'
 
 export default class extends BaseSchema {
-
-
   public async up() {
     // users
     this.schema.createTable('users', (table) => {
@@ -25,7 +23,7 @@ export default class extends BaseSchema {
     })
 
     //tags
-    this.schema.createTable('tags', table => {
+    this.schema.createTable('tags', (table) => {
       table.increments('id').primary()
       table.string('name').index('tag_name_index')
       table.timestamp('created_at', { useTz: true })
@@ -33,7 +31,7 @@ export default class extends BaseSchema {
     })
 
     //illustrations
-    this.schema.createTable('illustrations', t => {
+    this.schema.createTable('illustrations', (t) => {
       t.increments('id').primary()
       t.string('title').index('illustration_titles')
       t.string('author').index('illustration_authors')
@@ -44,7 +42,7 @@ export default class extends BaseSchema {
     })
 
     //places
-    this.schema.createTable('places', t => {
+    this.schema.createTable('places', (t) => {
       t.increments()
       t.integer('illustration_id')
       t.string('place')
@@ -55,7 +53,7 @@ export default class extends BaseSchema {
     })
 
     //ill_tags
-    this.schema.createTable('ill_tags', t => {
+    this.schema.createTable('ill_tags', (t) => {
       t.integer('illustration_id').unsigned().index('illustration_id')
       t.foreign('illustration_id').references('illustrations.id').onDelete('cascade')
       t.integer('tag_id').unsigned().index('tag_id')
@@ -65,7 +63,7 @@ export default class extends BaseSchema {
     })
   }
 
-  public async down () {
+  public async down() {
     this.schema.dropTable('users')
     this.schema.dropTable('tags')
     this.schema.dropTable('illustrations')

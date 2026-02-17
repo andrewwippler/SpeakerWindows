@@ -8,21 +8,18 @@ test.group('Contact', (group) => {
     return () => db.rollbackGlobalTransaction()
   })
 
-
   test('Can submit a contact form request', async ({ client }) => {
     const response = await client.post('/contact').json({
       email: 'test@test.com',
       reason: 'general',
-      message: 'stuff here'
+      message: 'stuff here',
     })
     response.assertStatus(200)
     await Contact.findOrFail(response.body().id)
-
   })
 
   test('Errors submit a contact form request', async ({ client }) => {
     const response = await client.post('/contact').json({})
     response.assertStatus(400)
   })
-
 })

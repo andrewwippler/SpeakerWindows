@@ -10,59 +10,63 @@ test.group('Users', (group) => {
     return () => db.rollbackGlobalTransaction()
   })
   test('Can create an account', async ({ client, assert }) => {
-
     const user = await UserFactory.make()
     let fixedUser = {
       email: user.email,
-      password: user.password+"1A!a",
-      password_confirmation: user.password+"1A!a"
+      password: user.password + '1A!a',
+      password_confirmation: user.password + '1A!a',
     }
 
     const response = await client.post('/register').json(fixedUser)
-    response.assertBodyContains({message: 'Created successfully'})
-    response.assertBodyContains({uid: response.body().uid})
+    response.assertBodyContains({ message: 'Created successfully' })
+    response.assertBodyContains({ uid: response.body().uid })
     response.assertStatus(200)
 
-    const loggedInUser = await client.post('/login').json({email: user.email, password: user.password+"1A!a"})
+    const loggedInUser = await client
+      .post('/login')
+      .json({ email: user.email, password: user.password + '1A!a' })
 
-    const verify = await client.get(`/users/${response.body().uid}`).bearerToken(loggedInUser.body().token)
+    const verify = await client
+      .get(`/users/${response.body().uid}`)
+      .bearerToken(loggedInUser.body().token)
     verify.assertStatus(200)
     const verify401 = await client.get(`/users/${response.body().uid}`)
     verify401.assertStatus(401)
-
   })
 
   test('Cannot see your profile', async ({ client, assert }) => {
-
     const user = await UserFactory.make()
     const userTwo = await UserFactory.make()
     let fixedUser = {
       email: user.email,
-      password: user.password+"1A!a",
-      password_confirmation: user.password+"1A!a"
+      password: user.password + '1A!a',
+      password_confirmation: user.password + '1A!a',
     }
     let fixedUser2 = {
       email: userTwo.email,
-      password: userTwo.password+"1A!a",
-      password_confirmation: userTwo.password+"1A!a"
+      password: userTwo.password + '1A!a',
+      password_confirmation: userTwo.password + '1A!a',
     }
 
     const userOne = await client.post('/register').json(fixedUser)
     const registeredTwo = await client.post('/register').json(fixedUser2)
 
-    const loggedInUser = await client.post('/login').json({email: user.email, password: user.password+"1A!a"})
+    const loggedInUser = await client
+      .post('/login')
+      .json({ email: user.email, password: user.password + '1A!a' })
 
-    const verify = await client.get(`/users/${registeredTwo.body().uid}`).bearerToken(loggedInUser.body().token)
+    const verify = await client
+      .get(`/users/${registeredTwo.body().uid}`)
+      .bearerToken(loggedInUser.body().token)
     verify.assertStatus(401)
     assert.equal(verify.body().message, "You cannot see someone else's profile")
-
   })
 
   test('Bad passwords', async ({ client, assert }) => {
     // no password
     const user = await UserFactory.make()
     let fixedUser = {
-      email: user.email
+      email: user.email,
     }
 
     const response = await client.post('/register').json(fixedUser)
@@ -77,7 +81,10 @@ test.group('Users', (group) => {
     const weak = await client.post('/register').json(fixedUser)
 
     weak.assertStatus(400)
-    assert.equal(weak.body()[0].message, 'The password field must be at least 8 characters with one of the following: a number, uppercase character, and lowercase character.')
+    assert.equal(
+      weak.body()[0].message,
+      'The password field must be at least 8 characters with one of the following: a number, uppercase character, and lowercase character.'
+    )
 
     // don't match
     fixedUser.password = 'Aa12345678'
@@ -89,13 +96,17 @@ test.group('Users', (group) => {
   })
 
   test('Bad emails', async ({ client, assert }) => {
-    await client.post('/register').json({ email: 'test@test.com', password: 'testING123!!', password_confirmation: 'testING123!!' })
+    await client.post('/register').json({
+      email: 'test@test.com',
+      password: 'testING123!!',
+      password_confirmation: 'testING123!!',
+    })
 
     const user = await UserFactory.make()
     let fixedUser = {
       email: user.email,
       password: user.password,
-      password_confirmation: user.password
+      password_confirmation: user.password,
     }
 
     // not valid
@@ -123,9 +134,7 @@ test.group('Users', (group) => {
     assert.equal(duplicate.body()[0].message, 'Email already exists')
   })
 
-
   test('Can log in and get API token', async ({ client, assert }) => {
-
     const user = await UserFactory.make()
 
     const userLogin = {
@@ -143,12 +152,12 @@ test.group('Users', (group) => {
     const user = await UserFactory.make()
     let goodUser = {
       email: user.email,
-      password: user.password
+      password: user.password,
     }
     const bd = await UserFactory.make()
     let baduser = {
       email: bd.email,
-      password: bd.password
+      password: bd.password,
     }
     await User.create(goodUser)
 
@@ -157,9 +166,7 @@ test.group('Users', (group) => {
     assert.equal(login.body().message, 'Username or password is incorrect')
   })
 
-
   test('User is locked out after 5 invalid attemps', async ({ client, assert }) => {
-
     const user = { email: 'test@test.com', password: 'badpassword' }
 
     await client.post('/login').json(user)
@@ -174,7 +181,5 @@ test.group('Users', (group) => {
     console.log(login.body())
     login.assertStatus(429)
     assert.equal(login.body().message, 'Too many requests. Please wait 30 minutes and try again.')
-
   })
-
 })

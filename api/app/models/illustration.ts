@@ -1,6 +1,6 @@
 import { DateTime } from 'luxon'
 import { BaseModel, column, hasMany, manyToMany, belongsTo } from '@adonisjs/lucid/orm'
-import _  from 'lodash'
+import _ from 'lodash'
 import Place from './place.js'
 import Tag from './tag.js'
 import User from './user.js'
@@ -43,12 +43,12 @@ export default class Illustration extends BaseModel {
   declare updatedAt: DateTime
 
   @hasMany(() => Place, {
-    foreignKey: 'illustration_id'
+    foreignKey: 'illustration_id',
   })
   declare places: HasMany<typeof Place>
 
   @manyToMany(() => Tag, {
-    pivotTimestamps: true
+    pivotTimestamps: true,
   })
   declare tags: ManyToMany<typeof Tag>
 
@@ -73,7 +73,7 @@ export default class Illustration extends BaseModel {
 
   /**
    * High-level search API
-   * Orchestrates: retrieval -> ranking -> fetching
+   * Orchestrates: retrieval -> ranking -> title-match sorting -> fetching
    * Returns fully ranked Illustration records
    */
   static async search(
@@ -91,22 +91,26 @@ export default class Illustration extends BaseModel {
     }
 
     // Step 2: Fetch illustration records
-    const illustrations = await Illustration.query()
-      .whereIn('id', candidates.map(c => c.illustrationId))
+    const illustrations = await Illustration.query().whereIn(
+      'id',
+      candidates.map((c) => c.illustrationId)
+    )
 
-    const illustrationMap = new Map(illustrations.map(il => [String(il.id), il]))
+    const illustrationMap = new Map(illustrations.map((il) => [String(il.id), il]))
 
     // Step 3: Rank with RRF + boosting
     const ranked = await Illustration.ranker.rank(candidates, illustrationMap)
 
-    // Step 4: Return top-K results
-    const results = ranked.slice(0, limit)
+    // Step 4: Sort by title match first (search string in title), then alphabetically
+    const sorted = Illustration.ranker.sortByTitleMatchFirst(ranked, query)
+
+    // Step 5: Return top-K results
+    const results = sorted.slice(0, limit)
 
     if (includeScores) {
       return results
     }
 
-    return results.map(r => r.illustration)
+    return results.map((r) => r.illustration)
   }
-
 }

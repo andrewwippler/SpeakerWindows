@@ -5,7 +5,6 @@ import { TagValidator } from '#validators/TagValidator'
 import { editTag } from '#app/abilities/main'
 
 export default class TagsController {
-
   /**
    * Show a list of all tags.
    * GET tags
@@ -20,23 +19,26 @@ export default class TagsController {
   }
 
   /**
- * search tags.
- * GET tags/:name
- *
- * @param {object} ctx
- * @param {Request} ctx.request
- * @param {Response} ctx.response
- * @param {View} ctx.view
- */
+   * search tags.
+   * GET tags/:name
+   *
+   * @param {object} ctx
+   * @param {Request} ctx.request
+   * @param {Response} ctx.response
+   * @param {View} ctx.view
+   */
   public async search({ params, auth, response }: HttpContext) {
-
     const tag = _.get(params, 'name', '')
     const user_id = `${auth.user?.id}`
 
     // assuming bad data can be sent here. Raw should parameterize input
     // https://security.stackexchange.com/q/172297/35582
     // @ts-ignore
-    const tagQuery = await Tag.query().where('name', 'ILIKE', `${tag}%`).andWhere('user_id', user_id).orderBy('name').limit(10)
+    const tagQuery = await Tag.query()
+      .where('name', 'ILIKE', `${tag}%`)
+      .andWhere('user_id', user_id)
+      .orderBy('name')
+      .limit(10)
 
     // console.log({
     //   message: 'debug', user_id, searchString: tag, data: tagQuery
@@ -50,26 +52,29 @@ export default class TagsController {
   }
 
   /**
-  * Illustrations for tag.
-  * GET tag/:name
-  *
-  * @param {object} ctx
-  * @param {Request} ctx.request
-  * @param {Response} ctx.response
-  * @param {View} ctx.view
-  */
+   * Illustrations for tag.
+   * GET tag/:name
+   *
+   * @param {object} ctx
+   * @param {Request} ctx.request
+   * @param {Response} ctx.response
+   * @param {View} ctx.view
+   */
   public async illustrations({ params, auth }: HttpContext) {
-
     const thetag = _.get(params, 'name', '')
 
     //@tag.illustrations
-    const tag = await Tag.findByOrFail('name', thetag);
-    const tagQuery = await tag.related('illustrations').query().where('user_id', `${auth.user?.id}`).orderBy('title')
+    const tag = await Tag.findByOrFail('name', thetag)
+    const tagQuery = await tag
+      .related('illustrations')
+      .query()
+      .where('user_id', `${auth.user?.id}`)
+      .orderBy('title')
 
     if (tagQuery.length < 1) {
       return {
         id: tag.id,
-        name: tag.name
+        name: tag.name,
       }
     }
 
@@ -78,7 +83,6 @@ export default class TagsController {
       name: tag.name,
       illustrations: tagQuery,
     }
-
 
     return returnTags
   }
@@ -96,7 +100,7 @@ export default class TagsController {
 
     try {
       await request.validateUsing(TagValidator, {
-        meta: { userId: auth.user!.id }
+        meta: { userId: auth.user!.id },
       })
     } catch (error) {
       return response.status(400).send(error.messages)
@@ -105,7 +109,9 @@ export default class TagsController {
     let tag = await Tag.findOrFail(params.id)
 
     if (await bouncer.denies(editTag, tag)) {
-      return response.forbidden({ message: 'E_AUTHORIZATION_FAILURE: Not authorized to perform this action' })
+      return response.forbidden({
+        message: 'E_AUTHORIZATION_FAILURE: Not authorized to perform this action',
+      })
     }
 
     // Check if another tag with the same name already exists for this user
@@ -114,7 +120,9 @@ export default class TagsController {
       .first()
 
     if (existingTag) {
-      return response.status(400).send([{ message: 'Cannot update tag with the same name of an existing tag' }])
+      return response
+        .status(400)
+        .send([{ message: 'Cannot update tag with the same name of an existing tag' }])
     }
     // Safe to update
     tag.name = name
@@ -123,7 +131,6 @@ export default class TagsController {
 
     return response.send({ message: 'Updated successfully' })
   }
-
 
   /**
    * Delete a tag with id.
@@ -134,15 +141,15 @@ export default class TagsController {
    * @param {Response} ctx.response
    */
   public async destroy({ params, auth, response }: HttpContext) {
-
     let tag = await Tag.findOrFail(params.id)
 
     if (!tag.toJSON()[0] && tag.user_id != auth.user?.id) {
-      return response.status(403).send({ message: 'You do not have permission to access this resource' })
+      return response
+        .status(403)
+        .send({ message: 'You do not have permission to access this resource' })
     }
 
     await tag.delete()
     return response.send({ message: `Deleted tag id: ${tag.id}` })
   }
-
 }

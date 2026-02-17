@@ -18,11 +18,12 @@ export default class PlacesController {
     const places = await Place.findByOrFail('illustration_id', params.illustration_id)
 
     if (await bouncer.denies(viewPlace, places)) {
-      return response.forbidden({message: 'E_AUTHORIZATION_FAILURE: Not authorized to perform this action'})
+      return response.forbidden({
+        message: 'E_AUTHORIZATION_FAILURE: Not authorized to perform this action',
+      })
     }
 
     return places
-
   }
 
   /**
@@ -35,7 +36,6 @@ export default class PlacesController {
    * @param {View} ctx.view
    */
   public async store({ params, auth, request, response }: HttpContext) {
-
     const posted = request.all()
     let illustration
     try {
@@ -45,13 +45,15 @@ export default class PlacesController {
     }
 
     if (!illustration.toJSON()[0] && illustration.user_id != auth.user?.id) {
-      return response.status(403).send({ message: 'You do not have permission to access this resource' })
+      return response
+        .status(403)
+        .send({ message: 'You do not have permission to access this resource' })
     }
 
     posted.user_id = auth.user?.id
     const place = await Place.create(posted)
     await illustration.related('places').save(place)
-    return response.send({message: 'Created successfully', id: place.id})
+    return response.send({ message: 'Created successfully', id: place.id })
   }
 
   /**
@@ -63,7 +65,6 @@ export default class PlacesController {
    * @param {Response} ctx.response
    */
   public async update({ params, auth, request, response }: HttpContext) {
-
     const post = request.body()
 
     let place = await Place.findOrFail(params.id)
@@ -73,16 +74,17 @@ export default class PlacesController {
     place.used = _.get(post, 'used', place.used)
 
     if (post.illustration_id != place.illustration_id) {
-      return response.status(403).send({message: 'Error: Mismatched illustration_id'})
+      return response.status(403).send({ message: 'Error: Mismatched illustration_id' })
     }
 
     if (place.user_id != auth.user?.id) {
-      return response.status(403).send({message: 'You do not have permission to access this resource'})
+      return response
+        .status(403)
+        .send({ message: 'You do not have permission to access this resource' })
     }
     await place.save()
 
-    return response.send({message: 'Updated successfully'})
-
+    return response.send({ message: 'Updated successfully' })
   }
 
   /**
@@ -94,13 +96,14 @@ export default class PlacesController {
    * @param {Response} ctx.response
    */
   public async destroy({ params, auth, response }: HttpContext) {
-
     let place = await Place.findOrFail(params.id)
 
     if (place.user_id != auth.user?.id) {
-      return response.status(403).send({message: 'You do not have permission to access this resource'})
+      return response
+        .status(403)
+        .send({ message: 'You do not have permission to access this resource' })
     }
     await place.delete()
-    return response.send({message: `Deleted place id: ${place.id}`})
+    return response.send({ message: `Deleted place id: ${place.id}` })
   }
 }

@@ -15,7 +15,12 @@ import { apiClient } from '@japa/api-client'
  * Configure Japa plugins in the plugins array.
  * Learn more - https://japa.dev/docs/runner-config#plugins-optional
  */
-export const plugins: Config['plugins'] = [assert(), pluginAdonisJS(app), apiClient('http://localhost:3333'), fileSystem()]
+export const plugins: Config['plugins'] = [
+  assert(),
+  pluginAdonisJS(app),
+  apiClient('http://localhost:3333'),
+  fileSystem(),
+]
 
 /**
  * Configure lifecycle function to run before and after all the
@@ -25,17 +30,14 @@ export const plugins: Config['plugins'] = [assert(), pluginAdonisJS(app), apiCli
  * The teardown functions are executer after all the tests
  */
 export const runnerHooks: Required<Pick<Config, 'setup' | 'teardown'>> = {
-  setup: [
-    () => testUtils.db().migrate()
-  ],
+  setup: [() => testUtils.db().migrate()],
   teardown: [],
 }
 
 export const reporters: Config['reporters'] = {
   //  activated: ['ndjson'],
- activated: ['spec'],
+  activated: ['spec'],
 }
-
 
 /**
  * Configure suites by tapping into the test suite instance.

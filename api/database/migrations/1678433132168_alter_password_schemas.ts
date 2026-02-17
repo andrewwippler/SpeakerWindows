@@ -1,9 +1,9 @@
-import { BaseSchema } from "@adonisjs/lucid/schema";
+import { BaseSchema } from '@adonisjs/lucid/schema'
 
 export default class extends BaseSchema {
   protected tableName = 'users'
 
-  public async up () {
+  public async up() {
     this.schema.table(this.tableName, (table) => {
       // alter table
       table.renameColumn('encrypted_password', 'password')
@@ -19,7 +19,7 @@ export default class extends BaseSchema {
     })
   }
 
-  public async down () {
+  public async down() {
     this.schema.table(this.tableName, (table) => {
       // reverse alternations
       table.renameColumn('password', 'encrypted_password')

@@ -9,7 +9,11 @@ import Tag from '#models/tag'
 import Place from '#models/place'
 import User from '#models/user'
 import { ModelObject } from '@adonisjs/lucid/types/model'
-let goodUser: User, badUser: User, testTagIdOne: string | number | ModelObject, testTagIdTwo: number, illustration
+let goodUser: User,
+  badUser: User,
+  testTagIdOne: string | number | ModelObject,
+  testTagIdTwo: number,
+  illustration
 
 test.group('Illustrations', (group) => {
   group.each.setup(async () => {
@@ -17,34 +21,28 @@ test.group('Illustrations', (group) => {
     return () => db.rollbackGlobalTransaction()
   })
   group.setup(async () => {
-
-    goodUser = await UserFactory.merge({password: 'oasssadfasdf'}).create()
-    badUser = await UserFactory.merge({password: 'oasssadfasdf'}).create() // bad user does not have access to good user
+    goodUser = await UserFactory.merge({ password: 'oasssadfasdf' }).create()
+    badUser = await UserFactory.merge({ password: 'oasssadfasdf' }).create() // bad user does not have access to good user
 
     // executed before all the tests for a given suite
-    illustration = await IllustrationFactory.merge({ title: 'Illustrations Test', user_id: goodUser.id }).create()
+    illustration = await IllustrationFactory.merge({
+      title: 'Illustrations Test',
+      user_id: goodUser.id,
+    }).create()
     const place1 = await PlaceFactory.merge({ user_id: goodUser.id }).make()
     const place2 = await PlaceFactory.merge({ user_id: goodUser.id }).make()
     const place3 = await PlaceFactory.merge({ user_id: goodUser.id }).make()
     const place4 = await PlaceFactory.merge({ user_id: goodUser.id }).make()
     const place5 = await PlaceFactory.merge({ user_id: goodUser.id }).make()
-    illustration.related('places').saveMany(
-      [
-        place1,
-        place2,
-        place3,
-        place4,
-        place5
-      ]
-    )
+    illustration.related('places').saveMany([place1, place2, place3, place4, place5])
 
-      // executed before all the tests for a given suite
-  const tags = await TagFactory.createMany(3)
+    // executed before all the tests for a given suite
+    const tags = await TagFactory.createMany(3)
 
-  testTagIdOne = tags[0].id
-  testTagIdTwo = tags[1].id
+    testTagIdOne = tags[0].id
+    testTagIdTwo = tags[1].id
 
-  await illustration.related('tags').attach([testTagIdOne])
+    await illustration.related('tags').attach([testTagIdOne])
   })
 
   group.teardown(async () => {
@@ -53,7 +51,7 @@ test.group('Illustrations', (group) => {
   })
 
   test('Unauthenticated creation fails', async ({ client, assert }) => {
-    const illustration =  {
+    const illustration = {
       author: 'testy mctest',
       title: 'New Post',
       source: 'test',
@@ -66,46 +64,62 @@ test.group('Illustrations', (group) => {
     // assert.equal(response.body().message,'E_UNAUTHORIZED_ACCESS: You do not have permission to access this resource')
   })
 
-
   test('Create illustrations with user', async ({ client, assert }) => {
-    const loggedInUser = await client.post('/login').json({ email: goodUser.email, password: 'oasssadfasdf' })
+    const loggedInUser = await client
+      .post('/login')
+      .json({ email: goodUser.email, password: 'oasssadfasdf' })
 
-    const illustration =  {
+    const illustration = {
       author: 'testy mctest',
       title: 'New Post',
       source: 'test',
       content: 'this shall pass as new',
     }
-    const response = await client.post('/illustration').bearerToken(loggedInUser.body().token).json(illustration)
+    const response = await client
+      .post('/illustration')
+      .bearerToken(loggedInUser.body().token)
+      .json(illustration)
 
     response.assertStatus(200)
-    assert.equal(response.body().message,'Created successfully')
+    assert.equal(response.body().message, 'Created successfully')
     assert.isNumber(response.body().id)
 
-    const verify = await client.get(`/illustration/${response.body().id}`).bearerToken(loggedInUser.body().token)
+    const verify = await client
+      .get(`/illustration/${response.body().id}`)
+      .bearerToken(loggedInUser.body().token)
     verify.assertBodyContains(illustration)
   })
 
   test('Duplicate illustration cannot be imported', async ({ client, assert }) => {
-    const loggedInUser = await client.post('/login').json({ email: goodUser.email, password: 'oasssadfasdf' })
+    const loggedInUser = await client
+      .post('/login')
+      .json({ email: goodUser.email, password: 'oasssadfasdf' })
 
-    const illustration =  {
+    const illustration = {
       author: 'dup author',
       title: 'Dup Post',
       source: 'dup-source',
       content: 'this shall be unique',
     }
 
-    const first = await client.post('/illustration').bearerToken(loggedInUser.body().token).json(illustration)
+    const first = await client
+      .post('/illustration')
+      .bearerToken(loggedInUser.body().token)
+      .json(illustration)
     first.assertStatus(200)
 
-    const second = await client.post('/illustration').bearerToken(loggedInUser.body().token).json(illustration)
+    const second = await client
+      .post('/illustration')
+      .bearerToken(loggedInUser.body().token)
+      .json(illustration)
     second.assertStatus(409)
     assert.equal(second.body().message, 'Duplicate illustration')
   })
 
   test('Create illustrations with legacy_id', async ({ client, assert }) => {
-    const loggedInUser = await client.post('/login').json({ email: goodUser.email, password: 'oasssadfasdf' })
+    const loggedInUser = await client
+      .post('/login')
+      .json({ email: goodUser.email, password: 'oasssadfasdf' })
 
     const illustration = {
       legacy_id: 123,
@@ -114,26 +128,39 @@ test.group('Illustrations', (group) => {
       source: 'test',
       content: 'this shall pass as new',
     }
-    const response = await client.post('/illustration').bearerToken(loggedInUser.body().token).json(illustration)
+    const response = await client
+      .post('/illustration')
+      .bearerToken(loggedInUser.body().token)
+      .json(illustration)
 
     response.assertStatus(200)
-    assert.equal(response.body().message,'Created successfully')
+    assert.equal(response.body().message, 'Created successfully')
     assert.isNumber(response.body().id)
 
     const verify = await client.get(`/illustrations/123`).bearerToken(loggedInUser.body().token)
-    assert.equal(verify.body().legacyId,123)
+    assert.equal(verify.body().legacyId, 123)
   })
 
   test('Cannot access unowned illustration', async ({ client, assert }) => {
-    const loggedInUser = await client.post('/login').json({ email: badUser.email, password: 'oasssadfasdf' })
-    const illustration = await IllustrationFactory.merge({ title: 'Illustrations Test2', legacy_id: 899, user_id: goodUser.id }).create()
-    const response = await client.get(`/illustration/${illustration.id}`).bearerToken(loggedInUser.body().token)
+    const loggedInUser = await client
+      .post('/login')
+      .json({ email: badUser.email, password: 'oasssadfasdf' })
+    const illustration = await IllustrationFactory.merge({
+      title: 'Illustrations Test2',
+      legacy_id: 899,
+      user_id: goodUser.id,
+    }).create()
+    const response = await client
+      .get(`/illustration/${illustration.id}`)
+      .bearerToken(loggedInUser.body().token)
     response.assertStatus(403)
     assert.equal(response.body().message, 'You do not have permission to access this resource')
 
-    const legacy = await client.get(`/illustrations/${illustration.legacy_id}`).bearerToken(loggedInUser.body().token)
+    const legacy = await client
+      .get(`/illustrations/${illustration.legacy_id}`)
+      .bearerToken(loggedInUser.body().token)
     legacy.assertStatus(403)
-    assert.equal(legacy.body().message,'You do not have permission to access this resource')
+    assert.equal(legacy.body().message, 'You do not have permission to access this resource')
   })
 
   test('Create illustrations with tags and places', async ({ client, assert }) => {
@@ -142,9 +169,7 @@ test.group('Illustrations', (group) => {
       title: 'testy mctest',
       source: 'test',
       content: 'this shall pass',
-      tags: [
-        'work', 'Home', 'testing camel case', 'Home'
-      ],
+      tags: ['work', 'Home', 'testing camel case', 'Home'],
       places: [
         {
           place: 'place1',
@@ -155,17 +180,24 @@ test.group('Illustrations', (group) => {
           place: 'place2',
           location: 'loc2',
           used: '2020-04-16 19:52:37',
-        }
-      ]
+        },
+      ],
     }
-    const loggedInUser = await client.post('/login').json({ email: goodUser.email, password: 'oasssadfasdf' })
-    const response = await client.post('/illustration').bearerToken(loggedInUser.body().token).json(illus)
+    const loggedInUser = await client
+      .post('/login')
+      .json({ email: goodUser.email, password: 'oasssadfasdf' })
+    const response = await client
+      .post('/illustration')
+      .bearerToken(loggedInUser.body().token)
+      .json(illus)
 
     response.assertStatus(200)
-    assert.equal(response.body().message,'Created successfully')
+    assert.equal(response.body().message, 'Created successfully')
     assert.isNumber(response.body().id)
 
-    const verify = await client.get(`/illustration/${response.body().id}`).bearerToken(loggedInUser.body().token)
+    const verify = await client
+      .get(`/illustration/${response.body().id}`)
+      .bearerToken(loggedInUser.body().token)
     verify.assertStatus(200)
     // console.log(verify.body())
     assert.equal(verify.body().title, 'Testy Mctest') // should be State Case
@@ -175,9 +207,9 @@ test.group('Illustrations', (group) => {
   })
 
   test('Create illustrations with lots of tags', async ({ client, assert }) => {
-
-    const loggedInUser = await client.post('/login').json({ email: goodUser.email, password: 'oasssadfasdf' })
-
+    const loggedInUser = await client
+      .post('/login')
+      .json({ email: goodUser.email, password: 'oasssadfasdf' })
 
     const tags = [...Array(1000).keys()].map(String)
     const illus = {
@@ -185,38 +217,49 @@ test.group('Illustrations', (group) => {
       title: 'testy mctest',
       source: 'test',
       content: 'this too shall pass',
-      tags
+      tags,
     }
-    const response = await client.post('/illustration').bearerToken(loggedInUser.body().token).json(illus)
+    const response = await client
+      .post('/illustration')
+      .bearerToken(loggedInUser.body().token)
+      .json(illus)
 
     response.assertStatus(200)
-    assert.equal(response.body().message,'Created successfully')
+    assert.equal(response.body().message, 'Created successfully')
     assert.isNumber(response.body().id)
 
-    const verify = await client.get(`/illustration/${response.body().id}`).bearerToken(loggedInUser.body().token)
+    const verify = await client
+      .get(`/illustration/${response.body().id}`)
+      .bearerToken(loggedInUser.body().token)
     verify.assertStatus(200)
 
     const illustrationWithThousandTags = await Illustration.query()
       .where({ id: response.body().id })
-      .preload('tags');
-      const illustrationWithThousandTagsLength = await illustrationWithThousandTags[0].toJSON().tags.length
+      .preload('tags')
+    const illustrationWithThousandTagsLength =
+      await illustrationWithThousandTags[0].toJSON().tags.length
     assert.equal(illustrationWithThousandTagsLength, tags.length)
   })
 
   test('Illustration is not present in unrelated tag', async ({ client, assert }) => {
-    const loggedInUser = await client.post('/login').json({ email: goodUser.email, password: 'oasssadfasdf' })
+    const loggedInUser = await client
+      .post('/login')
+      .json({ email: goodUser.email, password: 'oasssadfasdf' })
 
     const illustration = await Illustration.findByOrFail('title', 'Illustrations Test')
     const tag = await Tag.find(testTagIdTwo)
-    const response = await client.get(`/illustration/${illustration.id}`).bearerToken(loggedInUser.body().token)
+    const response = await client
+      .get(`/illustration/${illustration.id}`)
+      .bearerToken(loggedInUser.body().token)
 
     assert.equal(response.body().tags.length, 1)
     assert.notEqual(response.body().tags[0].name, tag.name)
   })
 
   test('Can update illustration with auth', async ({ client, assert }) => {
-
-    const loggedInUser = await client.post('/login').json({ email: goodUser.email, password: 'oasssadfasdf' })
+    const loggedInUser = await client
+      .post('/login')
+      .json({ email: goodUser.email, password: 'oasssadfasdf' })
     const illustration = await Illustration.findBy('title', 'Illustrations Test')
     const tagTwo = await Tag.find(testTagIdTwo)
     const tagOne = await Tag.find(testTagIdOne)
@@ -226,10 +269,13 @@ test.group('Illustrations', (group) => {
       title: 'Testy mctest tester 123',
       source: 'Testing',
       content: 'This, too, shall pass',
-      tags: [tagOne.name, tagTwo.name, "third tag"]
+      tags: [tagOne.name, tagTwo.name, 'third tag'],
     }
 
-    const response = await client.put(`/illustration/${illustration.id}`).bearerToken(loggedInUser.body().token).json(illus)
+    const response = await client
+      .put(`/illustration/${illustration.id}`)
+      .bearerToken(loggedInUser.body().token)
+      .json(illus)
     response.assertStatus(200)
     assert.equal(response.body().message, 'Updated successfully')
     assert.equal(response.body().illustration.author, illus.author)
@@ -237,12 +283,16 @@ test.group('Illustrations', (group) => {
     assert.equal(response.body().illustration.source, illus.source)
     assert.equal(response.body().illustration.content, illus.content)
     assert.equal(response.body().illustration.tags.length, 3)
-
   })
 
   test('Cannot update illustration wrong auth', async ({ client, assert }) => {
-    const loggedInUser = await client.post('/login').json({ email: badUser.email, password: 'oasssadfasdf' })
-    const illustration = await IllustrationFactory.merge({title: 'Tester', user_id: goodUser.id}).create()
+    const loggedInUser = await client
+      .post('/login')
+      .json({ email: badUser.email, password: 'oasssadfasdf' })
+    const illustration = await IllustrationFactory.merge({
+      title: 'Tester',
+      user_id: goodUser.id,
+    }).create()
 
     const illus = {
       author: 'Tester testing',
@@ -251,62 +301,88 @@ test.group('Illustrations', (group) => {
       content: 'This, too, shall not pass',
     }
 
-    const response = await client.put(`/illustration/${illustration.id}`).bearerToken(loggedInUser.body().token).json(illus)
+    const response = await client
+      .put(`/illustration/${illustration.id}`)
+      .bearerToken(loggedInUser.body().token)
+      .json(illus)
     response.assertStatus(403)
-    assert.equal(response.body().message, 'E_AUTHORIZATION_FAILURE: Not authorized to perform this action')
-
-   })
+    assert.equal(
+      response.body().message,
+      'E_AUTHORIZATION_FAILURE: Not authorized to perform this action'
+    )
+  })
 
   test('Can delete illustration with auth', async ({ client, assert }) => {
-    const loggedInUser = await client.post('/login').json({ email: goodUser.email, password: 'oasssadfasdf' })
+    const loggedInUser = await client
+      .post('/login')
+      .json({ email: goodUser.email, password: 'oasssadfasdf' })
 
-    const illustration = await IllustrationFactory.merge({title: 'Testing Delete', user_id: goodUser.id}).create()
+    const illustration = await IllustrationFactory.merge({
+      title: 'Testing Delete',
+      user_id: goodUser.id,
+    }).create()
     const tags = await TagFactory.merge({ name: 'Do Not Delete' }).make()
     const place = await PlaceFactory.make()
 
     await illustration.related('tags').attach([tags.id])
     await illustration.related('places').save(place)
 
-    const response = await client.delete(`/illustration/${illustration.id}`).bearerToken(loggedInUser.body().token)
+    const response = await client
+      .delete(`/illustration/${illustration.id}`)
+      .bearerToken(loggedInUser.body().token)
     response.assertStatus(200)
-    response.assertBodyContains({ 'message': `Deleted illustration id: ${illustration.id}` })
+    response.assertBodyContains({ message: `Deleted illustration id: ${illustration.id}` })
 
-    const responseFourOhThree = await client.get(`/illustration/${illustration.id}`).bearerToken(loggedInUser.body().token)
+    const responseFourOhThree = await client
+      .get(`/illustration/${illustration.id}`)
+      .bearerToken(loggedInUser.body().token)
     responseFourOhThree.assertStatus(403)
 
     // check to see the place is no longer there
     const deletedPlace = await Place.findBy('illustration_id', illustration.id)
     assert.isTrue(!deletedPlace)
-
   })
 
   test('Cannot delete illustration wrong auth', async ({ client, assert }) => {
-    const loggedInUser = await client.post('/login').json({ email: badUser.email, password: 'oasssadfasdf' })
-    const goodloggedInUser = await client.post('/login').json({ email: goodUser.email, password: 'oasssadfasdf' })
-    const illustration = await IllustrationFactory.merge({title: 'Testing Delete', user_id: goodUser.id}).create()
+    const loggedInUser = await client
+      .post('/login')
+      .json({ email: badUser.email, password: 'oasssadfasdf' })
+    const goodloggedInUser = await client
+      .post('/login')
+      .json({ email: goodUser.email, password: 'oasssadfasdf' })
+    const illustration = await IllustrationFactory.merge({
+      title: 'Testing Delete',
+      user_id: goodUser.id,
+    }).create()
     const tags = await TagFactory.merge({ name: 'Do Not Delete' }).create()
     const place = await PlaceFactory.make()
 
     await illustration.related('tags').attach([tags.id])
     await illustration.related('places').save(place)
 
-    const response = await client.delete(`/illustration/${illustration.id}`).bearerToken(loggedInUser.body().token)
+    const response = await client
+      .delete(`/illustration/${illustration.id}`)
+      .bearerToken(loggedInUser.body().token)
     response.assertStatus(403)
-    response.assertBody({ 'message': `You do not have permission to access this resource` })
+    response.assertBody({ message: `You do not have permission to access this resource` })
 
-    const responseFourOhThree = await client.get(`/illustration/${illustration.id}`).bearerToken(goodloggedInUser.body().token)
+    const responseFourOhThree = await client
+      .get(`/illustration/${illustration.id}`)
+      .bearerToken(goodloggedInUser.body().token)
     responseFourOhThree.assertStatus(200)
-
   })
 
   test('403 on unknown illustration', async ({ client }) => {
-    const loggedInUser = await client.post('/login').json({ email: goodUser.email, password: 'oasssadfasdf' })
+    const loggedInUser = await client
+      .post('/login')
+      .json({ email: goodUser.email, password: 'oasssadfasdf' })
 
-    const response = await client.get('/illustration/99999999999').bearerToken(loggedInUser.body().token)
+    const response = await client
+      .get('/illustration/99999999999')
+      .bearerToken(loggedInUser.body().token)
     response.assertStatus(500)
 
     // todo: fix to 403
     // response.assertBodyContains({ "message": "You do not have permission to access this resource" })
   })
-
 })

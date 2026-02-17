@@ -47,59 +47,60 @@ async function getTags(user) {
       },
     ]
   }
-   return [{
+  return [
+    {
       name: 'Bafflegab',
       user_id: user,
     },
-      {
+    {
       name: 'Ballistic',
       user_id: user,
     },
-      {
+    {
       name: 'Bamboozle',
       user_id: user,
     },
-      {
+    {
       name: 'Bedlam',
       user_id: user,
     },
-      {
+    {
       name: 'Bugbear',
       user_id: user,
     },
-      {
+    {
       name: 'Bulbous',
       user_id: user,
     },
-      {
+    {
       name: 'Calamity',
       user_id: user,
     },
-      {
+    {
       name: 'Calliope',
       user_id: user,
     },
-      {
+    {
       name: 'Catamaran',
       user_id: user,
     },
-      {
+    {
       name: 'Convivial',
       user_id: user,
     },
-      {
+    {
       name: 'Cornucopia',
       user_id: user,
-    },]
+    },
+  ]
 }
 
 export default class extends BaseSeeder {
-  public async run () {
+  public async run() {
     const tags = await TagFactory.merge(await getTags(1)).makeMany(10)
     const tagsTwo = await TagFactory.merge(await getTags(2)).makeMany(10)
 
     await Tag.fetchOrCreateMany('name', tags)
     await Tag.fetchOrCreateMany('name', tagsTwo)
-
   }
 }

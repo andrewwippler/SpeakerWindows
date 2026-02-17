@@ -13,12 +13,18 @@ test.group('IllustrationsController.search', (group) => {
 
   test('controller calls Illustration.search and handles empty query', async ({ assert }) => {
     const user = await UserFactory.create()
-    const ill = await IllustrationFactory.merge({ title: 'Controller Search', user_id: user.id }).create()
+    const ill = await IllustrationFactory.merge({
+      title: 'Controller Search',
+      user_id: user.id,
+    }).create()
 
     // Spy on Illustration.search
     let called = false
     const original = Illustration.search
-    ;(Illustration as any).search = async (...args: any[]) => { called = true; return [ill] }
+    ;(Illustration as any).search = async (...args: any[]) => {
+      called = true
+      return [ill]
+    }
 
     const controller = new IllustrationsController()
 
@@ -28,10 +34,14 @@ test.group('IllustrationsController.search', (group) => {
         input: (key: string, def: any) => {
           if (key === 'q') return 'Controller'
           return def
-        }
+        },
       },
       auth: { user },
-      response: { ok: (data: any) => data, badRequest: (d: any) => d, internalServerError: (d: any) => d }
+      response: {
+        ok: (data: any) => data,
+        badRequest: (d: any) => d,
+        internalServerError: (d: any) => d,
+      },
     }
 
     const res = await controller.search(ctx as any)
@@ -46,7 +56,7 @@ test.group('IllustrationsController.search', (group) => {
     const ctx: any = {
       request: { input: (k: string) => '' },
       auth: { user: { id: 1 } },
-      response: { badRequest: (d: any) => d }
+      response: { badRequest: (d: any) => d },
     }
 
     const out = await controller.search(ctx as any)
