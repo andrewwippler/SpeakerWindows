@@ -50,11 +50,6 @@ test.group('Tag', (group) => {
     ])
   })
 
-  group.teardown(async () => {
-    await goodUser.delete()
-    await badUser.delete()
-  })
-
   test('Can get list of my tags (i.e. index page)', async ({ client }) => {
     const loggedInUser = await client
       .post('/login')

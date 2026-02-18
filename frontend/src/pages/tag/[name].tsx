@@ -240,6 +240,15 @@ export default function Tag() {
                 href={`/illustration/${d.id}`}
               >
                 {d.title}
+                {d.badge && (
+                  <span className={`ml-2 text-xs px-2 py-0.5 rounded ${
+                    d.badge === 'Private' 
+                      ? 'bg-yellow-100 text-yellow-800' 
+                      : 'bg-blue-100 text-blue-800'
+                  }`}>
+                    {d.badge}
+                  </span>
+                )}
               </Link>
               <div className="invisible h-0 group-hover/item:h-auto group-hover/item:visible">
                 {d.content ? d.content.slice(0, 256) + "..." : "No Content"}

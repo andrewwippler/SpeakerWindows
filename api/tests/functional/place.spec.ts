@@ -43,11 +43,6 @@ test.group('Place', (group) => {
     }).create()
   })
 
-  group.teardown(async () => {
-    await goodUser.delete()
-    await badUser.delete()
-  })
-
   test('Can get list of places on my specific illustration', async ({ client }) => {
     const loggedInUser = await client
       .post('/login')

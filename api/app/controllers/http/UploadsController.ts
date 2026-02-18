@@ -1,4 +1,4 @@
-import { editIllustration } from '#app/abilities/main'
+import { canEditIllustration } from '#app/abilities/main'
 import Illustration from '#models/illustration'
 import { cuid } from '@adonisjs/core/helpers'
 import { HttpContext } from '@adonisjs/core/http'
@@ -9,11 +9,12 @@ import fs from 'fs/promises'
 import _ from 'lodash'
 
 export default class UploadsController {
-  public async store({ auth, bouncer, request, response }: HttpContext) {
+  public async store({ auth, request, response }: HttpContext) {
     const { illustration_id } = request.all()
     const illustration = await Illustration.findOrFail(illustration_id)
 
-    if (await bouncer.denies(editIllustration, illustration)) {
+    const canEdit = await canEditIllustration(auth.user!, illustration)
+    if (!canEdit) {
       return response.forbidden({
         message: 'E_AUTHORIZATION_FAILURE: Not authorized to perform this action',
       })

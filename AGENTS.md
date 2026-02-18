@@ -56,6 +56,8 @@ npm run dev     # Dev server
 npm run build   # Production build
 npm run start   # Start production server
 npm run lint    # Lint code
+npm run test    # Run Jest tests
+npm run test:coverage  # Run tests with coverage (90% threshold)
 ```
 
 ## Code Style Guidelines

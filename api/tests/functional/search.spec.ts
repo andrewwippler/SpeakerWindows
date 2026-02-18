@@ -36,10 +36,6 @@ test.group('Search API', (group) => {
     }
   })
 
-  group.teardown(async () => {
-    await goodUser.delete()
-  })
-
   test('Can search for all', async ({ client }) => {
     const loggedInUser = await client
       .post('/login')

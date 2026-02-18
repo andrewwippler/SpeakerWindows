@@ -32,7 +32,7 @@ export const tagReducer = createSlice({
 
     },
     removeTag: (state, actions) => {
-      state.tags = state.tags.filter(item => item.name !== actions.payload)
+      state.tags = Array.isArray(state.tags) ? state.tags.filter(item => item.name !== actions.payload) : []
     },
   },
 })

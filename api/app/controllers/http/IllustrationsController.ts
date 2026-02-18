@@ -8,11 +8,26 @@ import { SearchIndexingService } from '#services/search_indexing_service'
 import LocalEmbeddingProvider from '#services/local_embedding_provider'
 import _ from 'lodash'
 import { DateTime } from 'luxon'
-import { editIllustration } from '#app/abilities/main'
+import { canEditIllustration, canEditIllustrationContent, canDeleteIllustration, canViewIllustration } from '#app/abilities/main'
 import Upload from '#models/upload'
 import app from '@adonisjs/core/services/app'
 import fs from 'fs/promises'
 import env from '#start/env'
+import TeamMember from '#models/team_member'
+import Team from '#models/team'
+
+async function getUserTeamIds(userId: number): Promise<number[]> {
+  const memberships = await TeamMember.query().where('user_id', userId)
+  return memberships.map((m) => m.teamId)
+}
+
+async function getUserRoleInTeam(userId: number, teamId: number): Promise<string | null> {
+  const membership = await TeamMember.query()
+    .where('team_id', teamId)
+    .where('user_id', userId)
+    .first()
+  return membership?.role || null
+}
 
 export default class IllustrationsController {
   /**
@@ -36,7 +51,6 @@ export default class IllustrationsController {
     try {
       illustrationQuery = await Illustration.query()
         .where('id', id)
-        .andWhere('user_id', `${auth.user!.id}`)
         .preload('tags', (builder) => {
           builder.orderBy('name', 'asc')
         })
@@ -47,14 +61,30 @@ export default class IllustrationsController {
           builder.orderBy('name', 'asc')
         })
 
-      // console.log(auth.user!.id,!!illustrationQuery[0],!illustrationQuery[0])
-      if (!!illustrationQuery[0]) {
-        const illustration = illustrationQuery[0].toJSON()
-        return illustration
+      if (!illustrationQuery[0]) {
+        return response.status(404).send({ message: 'Illustration not found' })
       }
-      return response
-        .status(403)
-        .send({ message: 'You do not have permission to access this resource' })
+
+      const illustration = illustrationQuery[0]
+
+      // Check if user can view
+      const canView = await canViewIllustration(auth.user!, illustration)
+      if (!canView) {
+        return response
+          .status(403)
+          .send({ message: 'You do not have permission to access this resource' })
+      }
+
+      // Get user role for this illustration's team
+      let userRole: string | null = null
+      if (illustration.team_id) {
+        userRole = await getUserRoleInTeam(auth.user!.id, illustration.team_id)
+      }
+
+      const result = illustration.toJSON()
+      result.userRole = userRole
+
+      return result
     } catch (err) {
       return response.status(500).send({ message: 'Database error' })
     }
@@ -115,14 +145,74 @@ export default class IllustrationsController {
    * @param {View} ctx.view
    */
   public async store({ request, bouncer, auth, response }: HttpContext) {
-    const { author, title, source, content, tags, places, legacy_id } = request.all()
+    const { author, title, source, content, tags, places, legacy_id, private: isPrivate, team_id } = request.all()
     const user_id = auth.user!.id
 
-    let create_data = { author, title, source, content, user_id }
+    // Get user's team membership to determine role
+    let userRole: string | null = null
+    let userTeamId: number | null = null
+
+    // First check if user is a member of any team (not their own)
+    // Check all memberships and find one where team.user_id != user_id
+    const allMemberships = await TeamMember.query()
+      .where('user_id', user_id)
+      .exec()
+
+    for (const membership of allMemberships) {
+      const team = await Team.find(membership.teamId)
+      if (team && team.userId !== user_id) {
+        userTeamId = membership.teamId
+        userRole = membership.role
+        break
+      }
+    }
+
+    // If not a member of someone else's team, check if user owns a team
+    if (!userTeamId) {
+      const ownedTeam = await Team.query().where('user_id', user_id).first()
+      if (ownedTeam) {
+        userTeamId = ownedTeam.id
+        userRole = 'owner'
+      }
+    }
+
+    // Determine default private setting based on role
+    // Owner/Creator can create team illustrations (private = false)
+    // Editor/ReadOnly must create private illustrations (private = true)
+    let shouldBePrivate = isPrivate
+    if (shouldBePrivate === undefined || shouldBePrivate === null) {
+      // Default based on role
+      if (userRole === 'owner' || userRole === 'creator') {
+        shouldBePrivate = false
+      } else {
+        shouldBePrivate = true
+      }
+    }
+
+    // If creating for a team, check permissions
+    let finalTeamId: number | null = null
+    if (team_id) {
+      const role = await getUserRoleInTeam(user_id, team_id)
+      if (role && ['owner', 'creator'].includes(role)) {
+        finalTeamId = team_id
+        // If team illustration, it can't be private
+        shouldBePrivate = false
+      } else {
+        // User can't create for this team, create as private instead
+        finalTeamId = userTeamId
+        shouldBePrivate = true
+      }
+    } else if (!shouldBePrivate && userTeamId) {
+      // Not explicitly set to private, use user's team
+      finalTeamId = userTeamId
+    } else if (shouldBePrivate && userTeamId) {
+      // Private illustration, use user's team
+      finalTeamId = userTeamId
+    }
+
+    let create_data: any = { author, title, source, content, user_id, team_id: finalTeamId, private: shouldBePrivate }
     if (!!legacy_id) {
-      // keep the old ID
-      // @ts-ignore
-      create_data = { author, title, source, content, user_id, legacy_id }
+      create_data = { author, title, source, content, user_id, legacy_id, team_id: finalTeamId, private: shouldBePrivate }
     }
 
     // checks if create data items are empty and inserts default values
@@ -146,7 +236,7 @@ export default class IllustrationsController {
     // check for duplicates for this user and source
     const existing = await Illustration.query()
       .where('user_id', user_id)
-      .andWhere('source', create_data.source)
+      .where('source', create_data.source || '')
       .andWhere('content_hash', content_hash)
       .first()
 
@@ -155,7 +245,6 @@ export default class IllustrationsController {
     }
 
     // include hash in create payload
-    // @ts-ignore
     create_data.content_hash = content_hash
 
     const illustration = await Illustration.create(create_data)
@@ -224,21 +313,58 @@ export default class IllustrationsController {
    * @param {Response} ctx.response
    */
   public async update({ params, auth, bouncer, request, response }: HttpContext) {
-    const { author, title, source, content, tags } = request.all()
+    const { author, title, source, content, tags, private: isPrivate } = request.all()
     // places are on their own URI. Tags can be in the illustration post
 
     let illustration = await Illustration.findByOrFail('id', _.get(params, 'id', 0))
 
-    if (await bouncer.denies(editIllustration, illustration)) {
+    // Check if user can edit metadata (more permissive)
+    const canEdit = await canEditIllustration(auth.user!, illustration)
+    if (!canEdit) {
       return response.forbidden({
         message: 'E_AUTHORIZATION_FAILURE: Not authorized to perform this action',
       })
     }
 
+    // Check if user can edit content (more restrictive)
+    const canEditContent = await canEditIllustrationContent(auth.user!, illustration)
+
+    // Always allow updating metadata
     illustration.author = author
     illustration.title = title
     illustration.source = source
-    illustration.content = content
+
+    // Only allow content update if user has content editing permission
+    if (canEditContent) {
+      illustration.content = content
+    }
+
+    // Handle private flag change
+    if (isPrivate !== undefined && isPrivate !== illustration.private) {
+      // Get user's team
+      const userTeam = await Team.query().where('user_id', auth.user!.id).first()
+      
+      if (isPrivate === true) {
+        // Making private: use user's own team
+        illustration.private = true
+        if (userTeam) {
+          illustration.team_id = userTeam.id
+        }
+      } else {
+        // Making public: need to check if user can create for team
+        if (illustration.team_id) {
+          const role = await getUserRoleInTeam(auth.user!.id, illustration.team_id)
+          if (role && ['owner', 'creator'].includes(role)) {
+            illustration.private = false
+          } else {
+            // Can't share to team, keep private
+            illustration.private = true
+          }
+        } else {
+          illustration.private = false
+        }
+      }
+    }
 
     await illustration.save()
 
@@ -258,7 +384,15 @@ export default class IllustrationsController {
     }
 
     const returnValue = await illustration.toJSON()
-    returnValue.tags = await tags
+    returnValue.tags = tags
+    returnValue.canEditContent = canEditContent
+
+    // Get user role for this illustration's team
+    let userRole: string | null = null
+    if (illustration.team_id) {
+      userRole = await getUserRoleInTeam(auth.user!.id, illustration.team_id)
+    }
+    returnValue.userRole = userRole
 
     // Re-index updated illustration to refresh hybrid index
     try {
@@ -281,12 +415,18 @@ export default class IllustrationsController {
    */
   public async destroy({ params, auth, response }: HttpContext) {
     let id = _.get(params, 'id', 0)
-    let illustration = await Illustration.query().where('id', id)
+    let illustration = await Illustration.query().where('id', id).first()
 
-    if (illustration[0].user_id != auth.user?.id) {
+    if (!illustration) {
+      return response.status(404).send({ message: 'Illustration not found' })
+    }
+
+    // Check if user can delete
+    const canDelete = await canDeleteIllustration(auth.user!, illustration)
+    if (!canDelete) {
       return response
         .status(403)
-        .send({ message: 'You do not have permission to access this resource' })
+        .send({ message: 'You do not have permission to delete this resource' })
     }
 
     await Place.query().where('illustration_id', id).delete()
@@ -296,18 +436,62 @@ export default class IllustrationsController {
       env.get('NODE_ENV'),
       auth.user?.id.toString(),
       id.toString()
-    ) // delete just the illustration folder
+    )
     await fs.rm(uploadsPath, { recursive: true, force: true })
 
-    await illustration[0].related('tags').detach()
-    await illustration[0].delete()
+    await illustration.related('tags').detach()
+    await illustration.delete()
     try {
       const indexingService = new SearchIndexingService(LocalEmbeddingProvider)
       await indexingService.deleteIndex(id)
     } catch (err) {
       console.error('Failed to delete search index for illustration', id, err)
     }
-    return response.send({ message: `Deleted illustration id: ${illustration[0].id}` })
+    return response.send({ message: `Deleted illustration id: ${illustration.id}` })
+  }
+
+  public async index({ auth }: HttpContext) {
+    const user = auth.user!
+    const userId = user.id
+
+    // Get all team IDs the user belongs to
+    const teamIds = await getUserTeamIds(userId)
+
+    // Get illustrations:
+    // 1. Own illustrations (user_id matches)
+    // 2. Team illustrations (team_id in user's teams AND not private)
+    const illustrations = await Illustration.query()
+      .where((query) => {
+        query.where('user_id', userId)
+        if (teamIds.length > 0) {
+          query.orWhere((inner) => {
+            inner.whereIn('team_id', teamIds).andWhere('private', false)
+          })
+        }
+      })
+      .preload('user', (q) => q.select('id', 'username'))
+      .orderBy('created_at', 'desc')
+
+    // Add badges info
+    const result = illustrations.map((ill) => {
+      const isOwner = ill.user_id === userId
+      const isTeam = ill.team_id && teamIds.includes(ill.team_id) && !ill.private
+      const isPrivate = ill.private && isOwner
+
+      let badge: string | null = null
+      if (isPrivate) {
+        badge = 'Private'
+      } else if (isTeam) {
+        badge = 'Team'
+      }
+
+      return {
+        ...ill.toJSON(),
+        badge,
+      }
+    })
+
+    return result
   }
 
   /**
@@ -336,11 +520,32 @@ export default class IllustrationsController {
         includeScores: includeDetails,
       })
 
-      // Filter to only user's illustrations
+      const userId = auth.user!.id
+      const teamIds = await getUserTeamIds(userId)
+
+      // Filter to only accessible illustrations
+      // 1. Own illustrations (user_id matches)
+      // 2. Team illustrations (team_id in user's teams AND not private)
       const userResults = Array.isArray(results)
         ? results.filter((r: any) => {
             const ill = r.illustration || r
-            return ill.user_id === auth.user?.id
+            
+            // Always include own illustrations
+            if (ill.user_id === userId) {
+              return true
+            }
+            
+            // Don't include private illustrations from others
+            if (ill.private) {
+              return false
+            }
+            
+            // Include team illustrations
+            if (ill.team_id && teamIds.includes(ill.team_id)) {
+              return true
+            }
+            
+            return false
           })
         : results
 

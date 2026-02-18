@@ -25,13 +25,6 @@ test.group('Authors', (group) => {
     badUser = await UserFactory.merge({ password: 'oasssadfasdf' }).create() // bad user does not have access to good user
   })
 
-  group.teardown(async () => {
-    await goodUser.delete()
-    await badUser.delete()
-    await Illustration.query().delete()
-    await Tag.query().delete()
-    await Place.query().delete()
-  })
   test('Author routes', async ({ client, assert }) => {
     const loggedInUser = await client
       .post('/login')

@@ -33,6 +33,7 @@ export const authOptions: NextAuthOptions = {
           name: result.name,
           email: result.email,
           settings: result.settings || [],
+          token: result.token,     // API token for authorization
         };
       },
     }),
@@ -51,8 +52,8 @@ export const authOptions: NextAuthOptions = {
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
-        token.accessToken = user.id;      // store user ID
-        token.settings = user.settings;   // store user settings
+        token.accessToken = (user as any).token || user.id;  // use API token if available, fallback to user ID
+        token.settings = (user as any).settings || [];
       }
       return token;
     },
