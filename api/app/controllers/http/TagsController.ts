@@ -62,30 +62,37 @@ export default class TagsController {
     const tag = _.get(params, 'name', '')
     const user_id = `${auth.user?.id}`
     const teamIdQuery = request.qs().team_id
-    let teamId = ''
-    if (teamIdQuery !== undefined && teamIdQuery !== '') {
-      teamId = teamIdQuery
+    let teamId: number | null = null
+    if (teamIdQuery !== undefined && teamIdQuery !== '' && teamIdQuery !== 'null') {
+      teamId = Number(teamIdQuery)
     }
 
     // assuming bad data can be sent here. Raw should parameterize input
     // https://security.stackexchange.com/q/172297/35582
     // @ts-ignore
-    const tagQuery = await Tag.query()
+    let tagQuery = Tag.query()
       .where('name', 'ILIKE', `${tag}%`)
       .andWhere('user_id', user_id)
-      .andWhere('team_id', teamId)
       .orderBy('name')
       .limit(10)
+
+    if (teamId === null) {
+      tagQuery = tagQuery.andWhereNull('team_id')
+    } else {
+      tagQuery = tagQuery.andWhere('team_id', teamId)
+    }
+
+    const results = await tagQuery
 
     // console.log({
     //   message: 'debug', user_id, searchString: tag, data: tagQuery
     //   , data2: tagQuery
     // })
-    if (tagQuery.length < 1) {
+    if (results.length < 1) {
       return response.status(204).send({ message: 'no results found' })
     }
 
-    return tagQuery
+    return results
   }
 
   /**

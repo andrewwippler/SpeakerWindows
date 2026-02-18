@@ -85,7 +85,7 @@ test.group('Tag', (group) => {
     await illustration.related('tags').attach([tags.id])
     await illustration2.related('tags').attach([tags2.id])
 
-    const response = await client.get('/tag/Searching').bearerToken(loggedInUser.body().token)
+    const response = await client.get('/tag/Searching?team_id=null').bearerToken(loggedInUser.body().token)
 
     response.assertStatus(200)
     // console.log(response.body())
@@ -132,7 +132,7 @@ test.group('Tag', (group) => {
       .post('/login')
       .json({ email: goodUser.email, password: 'oasssadfasdf' })
 
-    const response = await client.get('/tags/coo').bearerToken(loggedInUser.body().token)
+    const response = await client.get('/tags/coo?team_id=null').bearerToken(loggedInUser.body().token)
 
     response.assertStatus(200)
     assert.isTrue(response.body().length >= 2)
@@ -144,7 +144,7 @@ test.group('Tag', (group) => {
       .post('/login')
       .json({ email: badUser.email, password: 'oasssadfasdf' })
 
-    const response = await client.get('/tags/a').bearerToken(loggedInUser.body().token)
+    const response = await client.get('/tags/a?team_id=null').bearerToken(loggedInUser.body().token)
 
     response.assertStatus(200)
     assert.isTrue(response.body().length == 1)
@@ -156,12 +156,12 @@ test.group('Tag', (group) => {
       .post('/login')
       .json({ email: goodUser.email, password: 'oasssadfasdf' })
     const response = await client
-      .get('/tags/zzzzzzzzzzzzzzzznotatagzzzzzzz')
+      .get('/tags/zzzzzzzzzzzzzzzznotatagzzzzzzz?team_id=null')
       .bearerToken(loggedInUser.body().token)
 
     response.assertStatus(204)
 
-    const zeroResponse = await client.get('/tags/0').bearerToken(loggedInUser.body().token)
+    const zeroResponse = await client.get('/tags/0?team_id=null').bearerToken(loggedInUser.body().token)
 
     zeroResponse.assertStatus(204)
   })

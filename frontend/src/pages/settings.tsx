@@ -186,11 +186,6 @@ export default function Settings() {
     api.post("/team/invitations", { email: inviteEmail, role: inviteRole }, session?.accessToken).then((data) => {
       if (data.message === "Invitation sent") {
         dispatch(setFlashMessage({ severity: "info", message: "Invitation sent" }));
-        api.get("/team/invitations", {}, session?.accessToken).then((data) => {
-          if (Array.isArray(data)) {
-            setPendingInvitations(data);
-          }
-        });
         setInviteEmail("");
       } else {
         dispatch(setFlashMessage({ severity: "danger", message: data.message || "Failed to send invitation" }));
@@ -340,8 +335,8 @@ export default function Settings() {
                   <h2 className="text-lg font-bold text-sky-900">Team</h2>
                 </div>
 
-                {/* Joined Teams Section - Show if user is member of another team */}
-                {team && memberships.length > 0  ? (
+                {/* Joined Teams Section - Show if user is member of another team AND not owner */}
+                {team && memberships.length > 0 && team?.role !== 'owner' ? (
                   <div className="border rounded-md p-4 bg-blue-50 mb-4">
                     <h3 className="text-md font-semibold text-blue-900 mb-2">You are a member of:</h3>
                     {memberships.map((membership) => (
@@ -398,8 +393,8 @@ export default function Settings() {
                       )}
                     </div>
 
-                    {/* Show invite link only for owner/creator OR owner with no members in another team AND if there are no pending invites */}
-                    {(team?.role === 'owner' || team?.role === 'creator') && (memberships?.length ?? 0) === 0 && (pendingInvitations?.length ?? 0) === 0 && (
+                    {/* Show invite link only for owner/creator OR owner with no members in another team  */}
+                    {(team?.role === 'owner' || team?.role === 'creator')  && (
                       <>
                         <div className="mb-4">
                           <p className="text-sm text-gray-500 mb-2">Invite Code: {team?.inviteCode}</p>
