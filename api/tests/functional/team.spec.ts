@@ -1437,4 +1437,80 @@ test.group('Team Illustrations', (group) => {
     const invitations = userInvitationsResponse.body()
     assert.equal(invitations.length, 0)
   })
+
+  test('Cannot block team already blocked', async ({ client }) => {
+    const owner = await UserFactory.make()
+    const ownerUser = {
+      email: owner.email,
+      password: owner.password + '1A!a',
+      password_confirmation: owner.password + '1A!a',
+    }
+
+    await client.post('/register').json(ownerUser)
+    const ownerLogin = await client.post('/login').json({
+      email: owner.email,
+      password: owner.password + '1A!a',
+    })
+
+    const teamResponse = await client.get('/team').bearerToken(ownerLogin.body().token)
+    const teamId = teamResponse.body().id
+
+    const blocker = await UserFactory.make()
+    const blockerData = {
+      email: blocker.email,
+      password: blocker.password + '1A!a',
+      password_confirmation: blocker.password + '1A!a',
+    }
+
+    await client.post('/register').json(blockerData)
+    const blockerLogin = await client.post('/login').json({
+      email: blocker.email,
+      password: blocker.password + '1A!a',
+    })
+
+    await client.post('/user/blocks')
+      .bearerToken(blockerLogin.body().token)
+      .json({ teamId })
+
+    const blockAgainResponse = await client.post('/user/blocks')
+      .bearerToken(blockerLogin.body().token)
+      .json({ teamId })
+    blockAgainResponse.assertStatus(400)
+    blockAgainResponse.assertBodyContains({ message: 'Team already blocked' })
+  })
+
+  test('Cannot unblock team not blocked', async ({ client }) => {
+    const owner = await UserFactory.make()
+    const ownerUser = {
+      email: owner.email,
+      password: owner.password + '1A!a',
+      password_confirmation: owner.password + '1A!a',
+    }
+
+    await client.post('/register').json(ownerUser)
+    const ownerLogin = await client.post('/login').json({
+      email: owner.email,
+      password: owner.password + '1A!a',
+    })
+
+    const teamResponse = await client.get('/team').bearerToken(ownerLogin.body().token)
+    const teamId = teamResponse.body().id
+
+    const blocker = await UserFactory.make()
+    const blockerData = {
+      email: blocker.email,
+      password: blocker.password + '1A!a',
+      password_confirmation: blocker.password + '1A!a',
+    }
+
+    await client.post('/register').json(blockerData)
+    const blockerLogin = await client.post('/login').json({
+      email: blocker.email,
+      password: blocker.password + '1A!a',
+    })
+
+    const unblockResponse = await client.delete(`/user/blocks/${teamId}`).bearerToken(blockerLogin.body().token)
+    unblockResponse.assertStatus(404)
+    unblockResponse.assertBodyContains({ message: 'Block not found' })
+  })
 })

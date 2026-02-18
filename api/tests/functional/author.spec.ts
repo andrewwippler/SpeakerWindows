@@ -97,4 +97,45 @@ test.group('Authors', (group) => {
     const last = await client.get('/author/boogers').bearerToken(loggedInUser.body().token)
     last.assertStatus(204)
   })
+
+  test('No authors returns 204', async ({ client }) => {
+    const loggedInUser = await client
+      .post('/login')
+      .json({ email: goodUser.email, password: 'oasssadfasdf' })
+
+    const response = await client.get('/illustration/authors').bearerToken(loggedInUser.body().token)
+    response.assertStatus(204)
+  })
+
+  test('Update author with no changes returns 400', async ({ client }) => {
+    const loggedInUser = await client
+      .post('/login')
+      .json({ email: goodUser.email, password: 'oasssadfasdf' })
+
+    const illustration = {
+      author: 'testy mctest',
+      title: 'New Post',
+      source: 'test',
+      content: 'this shall pass as new',
+    }
+    await client.post('/illustration').bearerToken(loggedInUser.body().token).json(illustration)
+
+    const response = await client
+      .put('/author/' + illustration.author)
+      .bearerToken(loggedInUser.body().token)
+      .json({ author: illustration.author })
+    response.assertStatus(400)
+  })
+
+  test('Update author with non-existent author returns 200 with no results', async ({ client }) => {
+    const loggedInUser = await client
+      .post('/login')
+      .json({ email: goodUser.email, password: 'oasssadfasdf' })
+
+    const response = await client
+      .put('/author/nonExistentAuthor')
+      .bearerToken(loggedInUser.body().token)
+      .json({ author: 'new author' })
+    response.assertStatus(200)
+  })
 })
