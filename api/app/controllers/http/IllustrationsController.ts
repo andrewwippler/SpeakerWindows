@@ -316,6 +316,8 @@ export default class IllustrationsController {
    */
   public async update({ params, auth, bouncer, request, response }: HttpContext) {
     const { author, title, source, content, tags, private: isPrivate } = request.all()
+    console.log('Update request body:', { author, title, source, content, tags, isPrivate })
+    console.log('Update request params:', request.all())
     // places are on their own URI. Tags can be in the illustration post
 
     let illustration = await Illustration.findByOrFail('id', _.get(params, 'id', 0))
@@ -345,7 +347,7 @@ export default class IllustrationsController {
     if (isPrivate !== undefined && isPrivate !== illustration.private) {
       // Get user's team
       const userTeam = await Team.query().where('user_id', auth.user!.id).first()
-      
+
       if (isPrivate === true) {
         // Making private: use user's own team
         illustration.private = true
@@ -475,26 +477,7 @@ export default class IllustrationsController {
       .preload('user', (q) => q.select('id', 'username'))
       .orderBy('created_at', 'desc')
 
-    // Add badges info
-    const result = illustrations.map((ill) => {
-      const isOwner = ill.user_id === userId
-      const isTeam = ill.team_id && teamIds.includes(ill.team_id) && !ill.private
-      const isPrivate = ill.private && isOwner
-
-      let badge: string | null = null
-      if (isPrivate) {
-        badge = 'Private'
-      } else if (isTeam) {
-        badge = 'Team'
-      }
-
-      return {
-        ...ill.toJSON(),
-        badge,
-      }
-    })
-
-    return result
+    return illustrations
   }
 
   /**
@@ -532,22 +515,22 @@ export default class IllustrationsController {
       const userResults = Array.isArray(results)
         ? results.filter((r: any) => {
             const ill = r.illustration || r
-            
+
             // Always include own illustrations
             if (ill.user_id === userId) {
               return true
             }
-            
+
             // Don't include private illustrations from others
             if (ill.private) {
               return false
             }
-            
+
             // Include team illustrations
             if (ill.team_id && teamIds.includes(ill.team_id)) {
               return true
             }
-            
+
             return false
           })
         : results

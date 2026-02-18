@@ -33,16 +33,16 @@ export default function Tag() {
   const [data, setData] = useState([]);
   const [editTag, setEditTag] = useState(false);
   const [showBulkRemove, setShowBulkRemove] = useState(false);
-  const [selectedIllustrations, setSelectedIllustrations] = useState<number[]>([]);
+  const [selectedIllustrations, setSelectedIllustrations] = useState<number[]>(
+    [],
+  );
 
   const refreshData = (token: string | undefined) => {
     const teamId = session?.team?.id;
     const params = teamId ? { team_id: teamId } : {};
-    api
-      .get(`/tag/${router.query.name}`, params, token)
-      .then((data) => {
-        setData(data);
-      });
+    api.get(`/tag/${router.query.name}`, params, token).then((data) => {
+      setData(data);
+    });
   };
 
   useEffect(() => {
@@ -55,7 +55,14 @@ export default function Tag() {
       return;
     }
     refreshData(session?.accessToken);
-  }, [name, dispatch, status, router.query.name, session?.team?.id, session?.accessToken]);
+  }, [
+    name,
+    dispatch,
+    status,
+    router.query.name,
+    session?.team?.id,
+    session?.accessToken,
+  ]);
 
   const handleSave = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -67,7 +74,7 @@ export default function Tag() {
       .then((data) => {
         if (data.message != "Updated successfully") {
           dispatch(
-            setFlashMessage({ severity: "danger", message: data.message })
+            setFlashMessage({ severity: "danger", message: data.message }),
           );
           return;
         }
@@ -75,7 +82,7 @@ export default function Tag() {
           setFlashMessage({
             severity: "success",
             message: `Tag "${name}" was renamed to ${newname}.`,
-          })
+          }),
         );
         setEditTag(false);
         router.replace(`/tag/${newname}`);
@@ -90,14 +97,14 @@ export default function Tag() {
         title: name,
         delete_name: "Tag",
         redirect: true,
-      })
+      }),
     );
     dispatch(setModal(true));
   };
 
   const handleToggleSelect = (id: number) => {
     setSelectedIllustrations((prev) =>
-      prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id]
+      prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id],
     );
   };
 
@@ -105,13 +112,17 @@ export default function Tag() {
     if (selectedIllustrations.length === 0) return;
 
     api
-      .delete(`/tags/${data.id}/illustrations`, { illustration_ids: selectedIllustrations }, session?.accessToken)
+      .delete(
+        `/tags/${data.id}/illustrations`,
+        { illustration_ids: selectedIllustrations },
+        session?.accessToken,
+      )
       .then((response) => {
         dispatch(
           setFlashMessage({
             severity: "success",
             message: response.message,
-          })
+          }),
         );
         setSelectedIllustrations([]);
         setShowBulkRemove(false);
@@ -122,7 +133,7 @@ export default function Tag() {
           setFlashMessage({
             severity: "danger",
             message: err.message || "Failed to remove illustrations",
-          })
+          }),
         );
       });
   };
@@ -131,7 +142,9 @@ export default function Tag() {
     if (selectedIllustrations.length === data.illustrations?.length) {
       setSelectedIllustrations([]);
     } else {
-      setSelectedIllustrations(data.illustrations?.map((ill: any) => ill.id) || []);
+      setSelectedIllustrations(
+        data.illustrations?.map((ill: any) => ill.id) || [],
+      );
     }
   };
 
@@ -232,31 +245,33 @@ export default function Tag() {
         ) : data.illustrations.length > 0 ? (
           data.illustrations.map((d, i) => (
             <li key={i} className="group/item hover:bg-slate-200">
-              {showBulkRemove && (
-                <input
-                  type="checkbox"
-                  className="mr-3 h-4 w-4 rounded border-gray-300 text-sky-600 focus:ring-sky-500"
-                  checked={selectedIllustrations.includes(d.id)}
-                  onChange={() => handleToggleSelect(d.id)}
-                />
-              )}
-              <Link
-                className="block pb-1 group-hover/item:underline"
-                href={`/illustration/${d.id}`}
-              >
-                {d.title}
-                {d.badge && (
-                  <span className={`ml-2 text-xs px-2 py-0.5 rounded ${
-                    d.badge === 'Private' 
-                      ? 'bg-yellow-100 text-yellow-800' 
-                      : 'bg-blue-100 text-blue-800'
-                  }`}>
-                    {d.badge}
-                  </span>
+              <div className="flex items-start gap-3">
+                {showBulkRemove && (
+                  <input
+                    type="checkbox"
+                    className="mt-1 h-4 w-4 rounded border-gray-300 text-sky-600 focus:ring-sky-500"
+                    checked={selectedIllustrations.includes(d.id)}
+                    onChange={() => handleToggleSelect(d.id)}
+                  />
                 )}
-              </Link>
-              <div className="invisible h-0 group-hover/item:h-auto group-hover/item:visible">
-                {d.content ? d.content.slice(0, 256) + "..." : "No Content"}
+
+                <div className="flex-1">
+                  <Link
+                    className="block pb-1 group-hover/item:underline"
+                    href={`/illustration/${d.id}`}
+                  >
+                    {d.private && (
+                      <span className="ml-2 text-xs px-2 py-0.5 rounded bg-yellow-100 text-yellow-800">
+                        Private
+                      </span>
+                    )}
+                    {d.title}
+                  </Link>
+
+                  <div className="invisible h-0 group-hover/item:h-auto group-hover/item:visible">
+                    {d.content ? d.content.slice(0, 256) + "..." : "No Content"}
+                  </div>
+                </div>
               </div>
             </li>
           ))

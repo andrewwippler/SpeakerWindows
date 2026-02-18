@@ -1,5 +1,5 @@
 import { ChangeEvent, FormEvent, useState } from "react";
-import { ArrowLeftIcon, TrashIcon, PhotoIcon, PlusIcon } from "@heroicons/react/24/solid";
+import { ArrowLeftIcon, TrashIcon, PhotoIcon, PlusIcon, PencilSquareIcon } from "@heroicons/react/24/solid";
 import api from "@/library/api";
 import { useAppSelector, useAppDispatch } from "@/hooks";
 import { setFlashMessage } from "@/features/flash/reducer";
@@ -149,6 +149,7 @@ export default function IllustrationForm({
       source: form.source.value.trim(),
       tags: formattedTags,
       content: form.content.value.trim(),
+      private: form.private.checked,
     };
   };
 
@@ -168,7 +169,7 @@ export default function IllustrationForm({
   return (
     <>
       <div className="mr-4 text-xl font-bold pb-4 text-sky-900 flex items-center">
-        <PlusIcon className="h-6 w-6 mr-2" />
+        {edit ? <PencilSquareIcon className="h-6 w-6 mr-2" /> : <PlusIcon className="h-6 w-6 mr-2" />}
         {edit ? "Edit" : "New"} Illustration
       </div>
 
@@ -177,6 +178,22 @@ export default function IllustrationForm({
           <div className="overflow-hidden shadow sm:rounded-md">
             <div className="bg-white px-4 py-5 sm:p-6">
               <div className="grid grid-cols-6 gap-6">
+
+                <div className="col-span-6 sm:col-span-6">
+                  <div className="mt-2 flex items-center">
+                    <input
+                      type="checkbox"
+                      name="private"
+                      id="private"
+                      defaultChecked={
+                        edit && illustration ? illustration.private : false
+                      }
+                      className="h-4 w-4 rounded border-sky-300 text-indigo-600 focus:ring-indigo-600"
+                    />
+                    <span className="ml-2 text-sm text-gray-500">Private/Personal illustration</span>
+                  </div>
+                </div>
+
                 <div className="col-span-6 sm:col-span-3">
                   <label
                     htmlFor="ititle"
@@ -215,6 +232,7 @@ export default function IllustrationForm({
                     className="mt-2 block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
                   />
                 </div>
+
 
                 <div className="col-span-6">
                   <label
