@@ -36,10 +36,6 @@ test.group('Search API', (group) => {
     }
   })
 
-  group.teardown(async () => {
-    await goodUser.delete()
-  })
-
   test('Can search for all', async ({ client }) => {
     const loggedInUser = await client
       .post('/login')
@@ -182,5 +178,44 @@ test.group('Search indexing', (group) => {
 
     rows = await db.rawQuery('SELECT * FROM document_search WHERE document_id = ?', [ill.id])
     assert.equal(rows.rows.length, 0)
+  })
+})
+
+test.group('SearchIndexingService view count', (group) => {
+  group.each.setup(async () => {
+    await db.beginGlobalTransaction()
+    return () => db.rollbackGlobalTransaction()
+  })
+
+  test('incrementViewCount updates view count', async ({ assert }) => {
+    const user = await UserFactory.create()
+    const ill = await IllustrationFactory.merge({
+      title: 'View Count Test',
+      user_id: user.id,
+    }).create()
+
+    const indexing = new SearchIndexingService(LocalEmbeddingProvider)
+    await indexing.indexIllustration(ill.id)
+
+    await indexing.incrementViewCount(ill.id, 5)
+
+    const rows = await db.rawQuery('SELECT view_count FROM document_search WHERE document_id = ?', [ill.id])
+    assert.equal(rows.rows[0].view_count, 5)
+  })
+
+  test('updateUserInteractionScore updates score', async ({ assert }) => {
+    const user = await UserFactory.create()
+    const ill = await IllustrationFactory.merge({
+      title: 'Interaction Score Test',
+      user_id: user.id,
+    }).create()
+
+    const indexing = new SearchIndexingService(LocalEmbeddingProvider)
+    await indexing.indexIllustration(ill.id)
+
+    await indexing.updateUserInteractionScore(ill.id, 10)
+
+    const rows = await db.rawQuery('SELECT user_interaction_score FROM document_search WHERE document_id = ?', [ill.id])
+    assert.equal(rows.rows[0].user_interaction_score, 10)
   })
 })

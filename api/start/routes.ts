@@ -34,6 +34,7 @@ const PlacesController = () => import('#controllers/http/PlacesController')
 const HybridSearchController = () => import('#controllers/http/HybridSearchController')
 const UploadsController = () => import('#controllers/http/UploadsController')
 const ContactsController = () => import('#controllers/http/ContactsController')
+const TeamsController = () => import('#controllers/http/TeamsController')
 
 const PATH_TRAVERSAL_REGEX = /(?:^|[\\/])\.\.(?:[\\/]|$)/
 
@@ -87,6 +88,27 @@ router
     // Images
     router.post('/upload', [UploadsController, 'store'])
     router.delete('/upload/:id', [UploadsController, 'destroy'])
+
+    // Teams
+    router.get('/team', [TeamsController, 'getTeam'])
+    router.put('/team', [TeamsController, 'updateTeam'])
+    router.get('/team/members', [TeamsController, 'getMembers'])
+    router.post('/team/members', [TeamsController, 'addMember'])
+    router.put('/team/members/:userId', [TeamsController, 'updateMember'])
+    router.delete('/team/members/:userId', [TeamsController, 'removeMember'])
+    router.post('/teams/join/:inviteCode', [TeamsController, 'joinTeam'])
+    router.get('/team/illustrations', [TeamsController, 'getTeamIllustrations'])
+    router.get('/team/memberships', [TeamsController, 'getMemberships'])
+    router.delete('/team/memberships/:teamId', [TeamsController, 'leaveTeam'])
+    router.get('/team/invitations', [TeamsController, 'getTeamInvitations'])
+    router.post('/team/invitations', [TeamsController, 'createInvitation'])
+    router.delete('/team/invitations/:id', [TeamsController, 'cancelInvitation'])
+    router.post('/team/invitations/:id/accept', [TeamsController, 'acceptInvitation'])
+    router.post('/team/invitations/:id/decline', [TeamsController, 'declineInvitation'])
+    router.get('/user/invitations', [TeamsController, 'getUserInvitations'])
+    router.get('/user/blocks', [TeamsController, 'getUserBlocks'])
+    router.post('/user/blocks', [TeamsController, 'blockTeam'])
+    router.delete('/user/blocks/:teamId', [TeamsController, 'unblockTeam'])
   })
   .use([
     middleware.auth({

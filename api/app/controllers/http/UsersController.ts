@@ -2,7 +2,18 @@ import type { HttpContext } from '@adonisjs/core/http'
 import User from '#models/user'
 import { CreateUserValidator } from '#validators/CreateUserValidator'
 import Setting from '#models/setting'
+import Team from '#models/team'
+import TeamMember from '#models/team_member'
 import limiter from '@adonisjs/limiter/services/main'
+
+function generateInviteCode(): string {
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
+  let code = ''
+  for (let i = 0; i < 8; i++) {
+    code += chars.charAt(Math.floor(Math.random() * chars.length))
+  }
+  return code
+}
 
 export default class UsersController {
   public async login({ auth, request, response }: HttpContext) {
@@ -40,13 +51,48 @@ export default class UsersController {
 
       const sharedToken = token.value!.release()
 
+      const team = await Team.query().where('user_id', user.id).first()
+      let teamData = null
+      if (team) {
+        const members = await TeamMember.query()
+          .where('team_id', team.id)
+          .preload('user', (query) => {
+            query.select('id', 'username', 'email')
+          })
+
+        teamData = {
+          id: team.id,
+          name: team.name,
+          inviteCode: team.inviteCode,
+          role: 'owner',
+          members: members.map((m) => ({
+            userId: m.userId,
+            username: m.user.username,
+            email: m.user.email,
+            role: m.role,
+          })),
+        }
+      }
+
+      const memberships = await TeamMember.query()
+        .where('user_id', user.id)
+        .preload('team')
+
+      const membershipsData = memberships.map((m) => ({
+        teamId: m.teamId,
+        teamName: m.team.name,
+        role: m.role,
+      }))
+
       return {
-        id: sharedToken,
+        id: user.id,
         token: sharedToken,
         settings,
         name: user.username,
         email: user.email,
         uid: user.uid,
+        team: teamData,
+        memberships: membershipsData,
       }
     } catch (error) {
       console.log('login error: ', error)
@@ -73,6 +119,18 @@ export default class UsersController {
 
     const user = await User.create({ email, password })
 
-    return response.send({ message: 'Created successfully', uid: user.uid })
+    const team = await Team.create({
+      inviteCode: generateInviteCode(),
+      name: 'My Team',
+      userId: user.id,
+    })
+
+    await TeamMember.create({
+      teamId: team.id,
+      userId: user.id,
+      role: 'owner',
+    })
+
+    return response.send({ message: 'Created successfully', id: user.id, uid: user.uid })
   }
 }

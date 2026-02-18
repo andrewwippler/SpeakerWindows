@@ -41,10 +41,12 @@ export default function TagSelect({
       show(true);
     }
 
+    const tagsArray = Array.isArray(tags) ? tags : [];
+
     if (!event.target.value.trim().length) {
-      _filteredTags = [...tags];
+      _filteredTags = [...tagsArray];
     } else {
-      _filteredTags = tags.filter((tag: tagType) => {
+      _filteredTags = tagsArray.filter((tag: tagType) => {
         return tag.name
           .toLowerCase()
           .startsWith(event.target.value.toLowerCase());

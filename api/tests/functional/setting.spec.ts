@@ -15,11 +15,6 @@ test.group('Contact', (group) => {
     badUser = await UserFactory.merge({ password: 'oasssadfasdf' }).create() // bad user does not have access to good user
   })
 
-  group.teardown(async () => {
-    await goodUser.delete()
-    await badUser.delete()
-  })
-
   test('My user has settings when I log in', async ({ client }) => {
     const loggedInUser = await client
       .post('/login')

@@ -2,6 +2,27 @@
 import NextAuth, { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 
+export interface TeamMembership {
+  teamId: number;
+  teamName: string;
+  role: string;
+}
+
+export interface TeamMember {
+  userId: number;
+  username: string;
+  email: string;
+  role: string;
+}
+
+export interface Team {
+  id: number;
+  name: string;
+  inviteCode: string;
+  role: string;
+  members?: TeamMember[];
+}
+
 export const authOptions: NextAuthOptions = {
   providers: [
     CredentialsProvider({
@@ -33,6 +54,9 @@ export const authOptions: NextAuthOptions = {
           name: result.name,
           email: result.email,
           settings: result.settings || [],
+          token: result.token,     // API token for authorization
+          team: result.team || null,
+          memberships: result.memberships || [],
         };
       },
     }),
@@ -51,8 +75,10 @@ export const authOptions: NextAuthOptions = {
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
-        token.accessToken = user.id;      // store user ID
-        token.settings = user.settings;   // store user settings
+        token.accessToken = (user as any).token || user.id;  // use API token if available, fallback to user ID
+        token.settings = (user as any).settings || [];
+        token.team = (user as any).team || null;
+        token.memberships = (user as any).memberships || [];
       }
       return token;
     },
@@ -60,6 +86,8 @@ export const authOptions: NextAuthOptions = {
     async session({ session, token }) {
       session.accessToken = token.accessToken as string;
       session.settings = Array.isArray(token.settings) ? token.settings : [];
+      session.team = token.team as Team | null;
+      session.memberships = token.memberships as TeamMembership[];
       return session;
     },
     // redirect to last viewed page after Login
@@ -80,10 +108,14 @@ export const authOptions: NextAuthOptions = {
 declare module "next-auth" {
   interface Session {
     accessToken?: string;
-    settings?: Array<any>; // Replace `any` with a proper type if available
+    settings?: Array<any>;
+    team?: Team | null;
+    memberships?: TeamMembership[];
   }
   interface User {
-    settings?: Array<any>; // Replace `any` with a proper type if available
+    settings?: Array<any>;
+    team?: Team | null;
+    memberships?: TeamMembership[];
   }
 }
 

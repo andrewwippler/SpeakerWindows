@@ -5,6 +5,7 @@ import Place from './place.js'
 import Tag from './tag.js'
 import User from './user.js'
 import Upload from './upload.js'
+import Team from './team.js'
 import type { ManyToMany, BelongsTo, HasMany } from '@adonisjs/lucid/types/relations'
 import hybridSearchService from '#services/hybrid_search_service'
 import { RankingService } from '#services/ranking_service'
@@ -34,6 +35,12 @@ export default class Illustration extends BaseModel {
   declare user_id: number
 
   @column()
+  declare team_id: number | null
+
+  @column()
+  declare private: boolean
+
+  @column()
   declare legacy_id: number
 
   @column.dateTime({ autoCreate: true })
@@ -54,6 +61,9 @@ export default class Illustration extends BaseModel {
 
   @belongsTo(() => User)
   declare user: BelongsTo<typeof User>
+
+  @belongsTo(() => Team)
+  declare team: BelongsTo<typeof Team>
 
   @hasMany(() => Upload, {
     foreignKey: 'illustration_id',

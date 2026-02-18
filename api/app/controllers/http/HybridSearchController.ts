@@ -16,8 +16,6 @@ import Tag from '#models/tag'
 import Place from '#models/place'
 import _ from 'lodash'
 import { HybridSearchValidator } from '#validators/HybridSearchValidator'
-import { TextSearchValidator } from '#validators/TextSearchValidator'
-import { CandidatesValidator } from '#validators/CandidatesValidator'
 
 export default class HybridSearchController {
   private hybridSearch = HybridSearchService
@@ -124,72 +122,6 @@ export default class HybridSearchController {
       console.error('Hybrid search error:', error)
       return response.internalServerError({
         error: 'Search failed',
-        message: (error as any).message,
-      })
-    }
-  }
-
-  /**
-   * POST /api/search/text-only
-   *
-   * Fast text-only search without semantic retrieval
-   */
-  async searchText({ request, response }: HttpContext) {
-    const validated = await request.validateUsing(TextSearchValidator)
-
-    const { query } = validated
-
-    try {
-      const candidates = await this.hybridSearch.retrieve(query, Array(384).fill(0))
-
-      if (candidates.length === 0) {
-        return response.ok({
-          results: [],
-        })
-      }
-
-      const illustrations = await Illustration.query().whereIn(
-        'id',
-        candidates.map((c: any) => c.illustrationId)
-      )
-
-      return response.ok({
-        results: illustrations,
-      })
-    } catch (error) {
-      console.error('Text search error:', error)
-      return response.internalServerError({
-        error: 'Search failed',
-        message: (error as any).message,
-      })
-    }
-  }
-
-  /**
-   * POST /api/search/candidates
-   *
-   * Low-level endpoint to debug retrieval stages
-   * Returns raw candidate data with per-method ranks
-   */
-  async getCandidates({ request, response }: HttpContext) {
-    const validated = await request.validateUsing(CandidatesValidator)
-
-    const { query, embedding: userEmbedding } = validated
-
-    try {
-      const candidates = await this.hybridSearch.retrieve(
-        query,
-        userEmbedding || this.getDefaultEmbedding()
-      )
-
-      return response.ok({
-        candidates,
-        totalCandidates: candidates.length,
-      })
-    } catch (error) {
-      console.error('Get candidates error:', error)
-      return response.internalServerError({
-        error: 'Failed to retrieve candidates',
         message: (error as any).message,
       })
     }

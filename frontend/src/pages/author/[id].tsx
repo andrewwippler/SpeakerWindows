@@ -37,13 +37,15 @@ export default function Author() {
       return
     }
     // add - for data fetching
-    api.get(`/author/${name}`, '', session?.accessToken)
+    const teamId = session?.team?.id;
+    const params = teamId ? { team_id: teamId } : {};
+    api.get(`/author/${name}`, params, session?.accessToken)
       .then(data => {
         // console.log(data)
         setData(data); // illustrations
         setLoading(false)
     });
-  }, [name, status, dispatch, session?.accessToken]);
+  }, [name, status, dispatch, session?.team?.id, session?.accessToken]);
 
     const handleSave = (event: FormEvent<HTMLFormElement>) => {
       event.preventDefault();

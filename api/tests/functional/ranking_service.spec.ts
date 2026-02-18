@@ -270,4 +270,46 @@ test.group('RankingService', (group) => {
     assert.equal(sorted[0].illustration.title, 'Apple Guide')
     assert.equal(sorted[1].illustration.title, 'Banana Book')
   })
+
+  test('ranker uses custom weights', async ({ assert }) => {
+    const ill = (await IllustrationFactory.create()).toJSON() as any
+    const ilModel = await Illustration.findOrFail(ill.id)
+
+    const ranker = new RankingService({
+      weights: { fts_title: 2.0, fts_body: 1.0, fuzzy: 0.5, semantic: 1.5 },
+    })
+    const cand: CandidateRank[] = [{ illustrationId: ilModel.id, ftsTitleRank: 1 }]
+    const map = new Map<number, Illustration>([[ilModel.id, ilModel]])
+
+    const res = await ranker.rank(cand, map)
+    assert.equal(res[0].rrfScores.fts_title, 2.0 / (60 + 1))
+  })
+
+  test('ranker handles candidates with different ranks', async ({ assert }) => {
+    const ill = (await IllustrationFactory.create()).toJSON() as any
+    const ilModel = await Illustration.findOrFail(ill.id)
+
+    const ranker = new RankingService()
+    const cand: CandidateRank[] = [
+      { illustrationId: ilModel.id, ftsTitleRank: 1, ftsBodyRank: 2, fuzzyRank: 3, semanticRank: 4 },
+    ]
+    const map = new Map<number, Illustration>([[ilModel.id, ilModel]])
+
+    const res = await ranker.rank(cand, map)
+    assert.isDefined(res[0].rrfScores.fts_title)
+    assert.isDefined(res[0].rrfScores.fts_body)
+    assert.isDefined(res[0].rrfScores.fuzzy)
+    assert.isDefined(res[0].rrfScores.semantic)
+  })
+
+  test('ranker handles missing illustration gracefully', async ({ assert }) => {
+    const ranker = new RankingService()
+    const cand: CandidateRank[] = [
+      { illustrationId: 99999, ftsTitleRank: 1 },
+    ]
+    const map = new Map<number, Illustration>()
+
+    const res = await ranker.rank(cand, map)
+    assert.equal(res.length, 0)
+  })
 })

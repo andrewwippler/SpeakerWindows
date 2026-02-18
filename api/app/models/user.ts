@@ -11,6 +11,9 @@ import Setting from './setting.js'
 import type { HasMany, HasOne } from '@adonisjs/lucid/types/relations'
 import { DbAccessTokensProvider } from '@adonisjs/auth/access_tokens'
 import { withAuthFinder } from '@adonisjs/auth/mixins/lucid'
+import Team from './team.js'
+import TeamMember from './team_member.js'
+import type { BelongsTo } from '@adonisjs/lucid/types/relations'
 
 const AuthFinder = withAuthFinder(() => hash.use('bcrypt'), {
   uids: ['email'],
@@ -70,6 +73,14 @@ export default class User extends compose(BaseModel, AuthFinder) {
     foreignKey: 'user_id',
   })
   declare setting: HasOne<typeof Setting>
+
+  @hasOne(() => Team, {
+    foreignKey: 'userId',
+  })
+  declare team: HasOne<typeof Team>
+
+  @hasMany(() => TeamMember)
+  declare teamMembers: HasMany<typeof TeamMember>
 
   @beforeSave()
   public static async UidGen(user: User) {

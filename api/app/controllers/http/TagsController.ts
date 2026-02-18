@@ -1,6 +1,8 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import _ from 'lodash'
 import Tag from '#models/tag'
+import TeamMember from '#models/team_member'
+import Team from '#models/team'
 import { TagValidator } from '#validators/TagValidator'
 import { editTag } from '#app/abilities/main'
 
@@ -14,8 +16,37 @@ export default class TagsController {
    * @param {Response} ctx.response
    * @param {View} ctx.view
    */
-  public async index({ auth }: HttpContext) {
-    return await Tag.query().where('user_id', `${auth.user?.id}`).orderBy('name')
+  public async index({ auth, request }: HttpContext) {
+    const teamIdQuery = request.qs().team_id
+    let teamId: number | null = null
+    if (teamIdQuery !== undefined && teamIdQuery !== 'null') {
+      teamId = Number(teamIdQuery)
+    }
+
+    const userId = auth.user?.id
+
+    if (teamId === null) {
+      return await Tag.query()
+        .where('user_id', `${userId}`)
+        .whereNull('team_id')
+        .orderBy('name')
+    }
+
+    const isMember = await TeamMember.query()
+      .where('team_id', teamId)
+      .where('user_id', userId)
+      .first()
+
+    const team = await Team.find(teamId)
+    const isOwner = team?.userId === userId
+
+    if (!isMember && !isOwner) {
+      return []
+    }
+
+    return await Tag.query()
+      .where('team_id', teamId)
+      .orderBy('name')
   }
 
   /**
@@ -27,48 +58,96 @@ export default class TagsController {
    * @param {Response} ctx.response
    * @param {View} ctx.view
    */
-  public async search({ params, auth, response }: HttpContext) {
+  public async search({ params, auth, request, response }: HttpContext) {
     const tag = _.get(params, 'name', '')
     const user_id = `${auth.user?.id}`
+    const teamIdQuery = request.qs().team_id
+    let teamId: number | null = null
+    if (teamIdQuery !== undefined && teamIdQuery !== '' && teamIdQuery !== 'null') {
+      teamId = Number(teamIdQuery)
+    }
 
     // assuming bad data can be sent here. Raw should parameterize input
     // https://security.stackexchange.com/q/172297/35582
     // @ts-ignore
-    const tagQuery = await Tag.query()
+    let tagQuery = Tag.query()
       .where('name', 'ILIKE', `${tag}%`)
       .andWhere('user_id', user_id)
       .orderBy('name')
       .limit(10)
 
+    if (teamId === null) {
+      tagQuery = tagQuery.andWhereNull('team_id')
+    } else {
+      tagQuery = tagQuery.andWhere('team_id', teamId)
+    }
+
+    const results = await tagQuery
+
     // console.log({
     //   message: 'debug', user_id, searchString: tag, data: tagQuery
     //   , data2: tagQuery
     // })
-    if (tagQuery.length < 1) {
+    if (results.length < 1) {
       return response.status(204).send({ message: 'no results found' })
     }
 
-    return tagQuery
+    return results
   }
 
   /**
-   * Illustrations for tag.
+   * Get the Illustrations listed under a given tag.
    * GET tag/:name
    *
    * @param {object} ctx
    * @param {Request} ctx.request
    * @param {Response} ctx.response
    * @param {View} ctx.view
+   * @returns {object} tag details and associated illustrations
    */
-  public async illustrations({ params, auth }: HttpContext) {
+  public async illustrations({ params, auth, request, response }: HttpContext) {
     const thetag = _.get(params, 'name', '')
+    const teamIdQuery = request.qs().team_id
 
-    //@tag.illustrations
-    const tag = await Tag.findByOrFail('name', thetag)
+    const userId = auth.user?.id
+
+    let tag: Tag | null = null
+
+    if (!teamIdQuery || teamIdQuery === 'null') {
+      tag = await Tag.query()
+        .where('name', thetag)
+        .where('user_id', userId)
+        .whereNull('team_id')
+        .first()
+    } else {
+      const teamId = Number(teamIdQuery)
+
+      const isMember = await TeamMember.query()
+        .where('team_id', teamId)
+        .where('user_id', userId)
+        .first()
+
+      const team = await Team.find(teamId)
+      const isOwner = team?.userId === userId
+
+      if (!isMember && !isOwner) {
+        return response.status(403).send({ message: 'Not a team member' })
+      }
+
+      tag = await Tag.query()
+        .where('name', thetag)
+        .where('team_id', teamId)
+        .first()
+    }
+
+    if (!tag) {
+      return response.status(404).send({ message: 'Tag not found' })
+    }
+
     const tagQuery = await tag
       .related('illustrations')
       .query()
-      .where('user_id', `${auth.user?.id}`)
+      .where('user_id', `${userId}`)
       .orderBy('title')
 
     if (tagQuery.length < 1) {
@@ -114,9 +193,10 @@ export default class TagsController {
       })
     }
 
-    // Check if another tag with the same name already exists for this user
+    // Check if another tag with the same name already exists for this user and team
+    const teamPart = tag.team_id ? '-team-' + tag.team_id : ''
     const existingTag = await Tag.query()
-      .where('slug', name + '-' + auth.user!.id)
+      .where('slug', name + '-' + auth.user!.id + teamPart)
       .first()
 
     if (existingTag) {

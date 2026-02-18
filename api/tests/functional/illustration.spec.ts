@@ -18,13 +18,10 @@ let goodUser: User,
 test.group('Illustrations', (group) => {
   group.each.setup(async () => {
     await db.beginGlobalTransaction()
-    return () => db.rollbackGlobalTransaction()
-  })
-  group.setup(async () => {
-    goodUser = await UserFactory.merge({ password: 'oasssadfasdf' }).create()
-    badUser = await UserFactory.merge({ password: 'oasssadfasdf' }).create() // bad user does not have access to good user
 
-    // executed before all the tests for a given suite
+    goodUser = await UserFactory.merge({ password: 'oasssadfasdf' }).create()
+    badUser = await UserFactory.merge({ password: 'oasssadfasdf' }).create()
+
     illustration = await IllustrationFactory.merge({
       title: 'Illustrations Test',
       user_id: goodUser.id,
@@ -36,18 +33,14 @@ test.group('Illustrations', (group) => {
     const place5 = await PlaceFactory.merge({ user_id: goodUser.id }).make()
     illustration.related('places').saveMany([place1, place2, place3, place4, place5])
 
-    // executed before all the tests for a given suite
     const tags = await TagFactory.createMany(3)
 
     testTagIdOne = tags[0].id
     testTagIdTwo = tags[1].id
 
     await illustration.related('tags').attach([testTagIdOne])
-  })
 
-  group.teardown(async () => {
-    await goodUser.delete()
-    await badUser.delete()
+    return () => db.rollbackGlobalTransaction()
   })
 
   test('Unauthenticated creation fails', async ({ client, assert }) => {
@@ -336,7 +329,7 @@ test.group('Illustrations', (group) => {
     const responseFourOhThree = await client
       .get(`/illustration/${illustration.id}`)
       .bearerToken(loggedInUser.body().token)
-    responseFourOhThree.assertStatus(403)
+    responseFourOhThree.assertStatus(404)
 
     // check to see the place is no longer there
     const deletedPlace = await Place.findBy('illustration_id', illustration.id)
@@ -364,7 +357,7 @@ test.group('Illustrations', (group) => {
       .delete(`/illustration/${illustration.id}`)
       .bearerToken(loggedInUser.body().token)
     response.assertStatus(403)
-    response.assertBody({ message: `You do not have permission to access this resource` })
+    response.assertBody({ message: `You do not have permission to delete this resource` })
 
     const responseFourOhThree = await client
       .get(`/illustration/${illustration.id}`)

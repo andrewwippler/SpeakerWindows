@@ -233,22 +233,39 @@ export default function IllustrationWrapper() {
             )}
           </div>
 
-          <div className="columns-1">
-            {illustration?.content && (
-              <button
-                type="button"
-                data-toggle="tooltip"
-                data-placement="bottom"
-                title="Copy to clipboard"
-                className="flex w-full justify-center px-4 py-2 my-4 font-semibold text-medium bg-gray-300 hover:bg-gray-500 text-white rounded-md shadow-sm"
-                onClick={(e) => {
-                  handleCopy(e, illustration.content);
-                }}
-              >
-                <ClipboardDocumentListIcon className="h-6 w-6 mr-2" />{" "}
-                <span>Copy Illustration Content</span>
-              </button>
-            )}
+            <div className="columns-1">
+              {illustration?.content && illustration?.userRole !== 'editor' && illustration?.userRole !== 'readonly' && (
+                <button
+                  type="button"
+                  data-toggle="tooltip"
+                  data-placement="bottom"
+                  title="Copy to clipboard"
+                  className="flex w-full justify-center px-4 py-2 my-4 font-semibold text-medium bg-gray-300 hover:bg-gray-500 text-white rounded-md shadow-sm"
+                  onClick={(e) => {
+                    handleCopy(e, illustration.content);
+                  }}
+                >
+                  <ClipboardDocumentListIcon className="h-6 w-6 mr-2" />{" "}
+                  <span>Copy Illustration Content</span>
+                </button>
+              )}
+
+              {illustration?.userRole === 'editor' && (
+                <div className="px-4 py-2 my-4 bg-yellow-50 border border-yellow-200 rounded-md">
+                  <p className="text-sm text-yellow-800">
+                    As an Editor, you can only edit metadata (title, author, source, tags).
+                    You cannot edit the content of this illustration.
+                  </p>
+                </div>
+              )}
+
+              {illustration?.userRole === 'readonly' && (
+                <div className="px-4 py-2 my-4 bg-gray-100 border border-gray-200 rounded-md">
+                  <p className="text-sm text-gray-600">
+                    As a Read-Only member, you can view this illustration but cannot edit it.
+                  </p>
+                </div>
+              )}
 
             <div className="columns-1">
               {illustration?.uploads.length > 0 && (
@@ -294,20 +311,27 @@ export default function IllustrationWrapper() {
               </button>
               <button
                 onClick={() => dispatch(setIllustrationEdit(true))}
-                className="px-4 py-2 mr-4 mt-2 font-semibold text-sm bg-green-300 hover:bg-green-500 text-white rounded-full shadow-sm inline-flex items-center"
+                className={`px-4 py-2 mr-4 mt-2 font-semibold text-sm rounded-full shadow-sm inline-flex items-center ${
+                  illustration?.userRole === 'readonly'
+                    ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                    : 'bg-green-300 hover:bg-green-500 text-white'
+                }`}
+                disabled={illustration?.userRole === 'readonly'}
               >
                 <PencilSquareIcon className="h-4 w-4 sm:mr-2 hidden sm:block" />
                 Edit<span className="hidden md:block">&nbsp;Illustration</span>
               </button>
 
-              <button
-                onClick={() => handleDeleteIllustration(illustration)}
-                className="px-4 py-2 mr-4 mt-2 font-semibold text-sm bg-red-300 hover:bg-red-500 text-white rounded-full shadow-sm inline-flex items-center"
-              >
-                <TrashIcon className="h-4 w-4 sm:mr-2 hidden sm:block" />
-                Delete
-                <span className="hidden md:block">&nbsp;Illustration</span>
-              </button>
+              {illustration?.userRole !== 'readonly' && (
+                <button
+                  onClick={() => handleDeleteIllustration(illustration)}
+                  className="px-4 py-2 mr-4 mt-2 font-semibold text-sm bg-red-300 hover:bg-red-500 text-white rounded-full shadow-sm inline-flex items-center"
+                >
+                  <TrashIcon className="h-4 w-4 sm:mr-2 hidden sm:block" />
+                  Delete
+                  <span className="hidden md:block">&nbsp;Illustration</span>
+                </button>
+              )}
             </div>
           </div>
         </>

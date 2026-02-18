@@ -16,5 +16,7 @@ export class illustrationType {
   author!: string ;
   title!: string ;
   id!: number ;
+  userRole?: string;
+  private: boolean = false;
 
 }

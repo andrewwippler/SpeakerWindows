@@ -36,11 +36,6 @@ test.group('UploadsController', (group) => {
     }).create()
   })
 
-  group.teardown(async () => {
-    await goodUser.delete()
-    await badUser.delete()
-  })
-
   test('should upload a file successfully', async ({ client, assert }) => {
     const loggedInUser = await client
       .post('/login')
