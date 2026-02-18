@@ -35,9 +35,11 @@ export default function Tag() {
   const [showBulkRemove, setShowBulkRemove] = useState(false);
   const [selectedIllustrations, setSelectedIllustrations] = useState<number[]>([]);
 
-  const refreshData = () => {
+  const refreshData = (token: string | undefined) => {
+    const teamId = session?.team?.id;
+    const params = teamId ? { team_id: teamId } : {};
     api
-      .get(`/tag/${router.query.name}`, "", session?.accessToken)
+      .get(`/tag/${router.query.name}`, params, token)
       .then((data) => {
         setData(data);
       });
@@ -49,8 +51,11 @@ export default function Tag() {
     }
     if (!session?.accessToken)
       dispatch(setRedirect(`/tag/${router.query.name}`));
-    refreshData();
-  }, [name, dispatch, status, router.query.name]);
+    if (!router.query.name) {
+      return;
+    }
+    refreshData(session?.accessToken);
+  }, [name, dispatch, status, router.query.name, session?.team?.id, session?.accessToken]);
 
   const handleSave = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();

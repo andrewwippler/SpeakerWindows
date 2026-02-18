@@ -75,15 +75,18 @@ export default function Tags({ token }: TagsProps) {
         {[columnOneData, columnTwoData, columnThreeData].map(
           (column, colIndex) => (
             <div key={colIndex}>
-              {column.map((tag, i) => (
-                <Link
-                  key={`${colIndex}-${i}`}
-                  href={`/tag/${tag.name}`}
-                  className="block pb-2 hover:text-sky-700 transition"
-                >
-                  {tag.name.replace(/-/g, " ")}
-                </Link>
-              ))}
+              {column.map((tag, i) => {
+                  const teamId = session?.team?.id;
+                  const href = teamId ? `/tag/${tag.name}?team_id=${teamId}` : `/tag/${tag.name}`;
+                  return (
+                  <Link
+                    key={`${colIndex}-${i}`}
+                    href={href}
+                    className="block pb-2 hover:text-sky-700 transition"
+                  >
+                    {tag.name.replace(/-/g, " ")}
+                  </Link>
+                )})}
             </div>
           )
         )}

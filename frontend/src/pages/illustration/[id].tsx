@@ -253,7 +253,7 @@ export default function IllustrationWrapper() {
               {illustration?.userRole === 'editor' && (
                 <div className="px-4 py-2 my-4 bg-yellow-50 border border-yellow-200 rounded-md">
                   <p className="text-sm text-yellow-800">
-                    As an Editor, you can only edit metadata (title, author, source, tags). 
+                    As an Editor, you can only edit metadata (title, author, source, tags).
                     You cannot edit the content of this illustration.
                   </p>
                 </div>
@@ -332,15 +332,6 @@ export default function IllustrationWrapper() {
                   <span className="hidden md:block">&nbsp;Illustration</span>
                 </button>
               )}
-
-              <button
-                onClick={() => handleDeleteIllustration(illustration)}
-                className="px-4 py-2 mr-4 mt-2 font-semibold text-sm bg-red-300 hover:bg-red-500 text-white rounded-full shadow-sm inline-flex items-center"
-              >
-                <TrashIcon className="h-4 w-4 sm:mr-2 hidden sm:block" />
-                Delete
-                <span className="hidden md:block">&nbsp;Illustration</span>
-              </button>
             </div>
           </div>
         </>

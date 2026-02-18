@@ -62,9 +62,9 @@ export default class TagsController {
     const tag = _.get(params, 'name', '')
     const user_id = `${auth.user?.id}`
     const teamIdQuery = request.qs().team_id
-    let teamId: number | null = null
-    if (teamIdQuery !== undefined && teamIdQuery !== 'null') {
-      teamId = Number(teamIdQuery)
+    let teamId = ''
+    if (teamIdQuery !== undefined && teamIdQuery !== '') {
+      teamId = teamIdQuery
     }
 
     // assuming bad data can be sent here. Raw should parameterize input
@@ -89,23 +89,58 @@ export default class TagsController {
   }
 
   /**
-   * Illustrations for tag.
+   * Get the Illustrations listed under a given tag.
    * GET tag/:name
    *
    * @param {object} ctx
    * @param {Request} ctx.request
    * @param {Response} ctx.response
    * @param {View} ctx.view
+   * @returns {object} tag details and associated illustrations
    */
-  public async illustrations({ params, auth }: HttpContext) {
+  public async illustrations({ params, auth, request, response }: HttpContext) {
     const thetag = _.get(params, 'name', '')
+    const teamIdQuery = request.qs().team_id
 
-    //@tag.illustrations
-    const tag = await Tag.findByOrFail('name', thetag)
+    const userId = auth.user?.id
+
+    let tag: Tag | null = null
+
+    if (!teamIdQuery || teamIdQuery === 'null') {
+      tag = await Tag.query()
+        .where('name', thetag)
+        .where('user_id', userId)
+        .whereNull('team_id')
+        .first()
+    } else {
+      const teamId = Number(teamIdQuery)
+
+      const isMember = await TeamMember.query()
+        .where('team_id', teamId)
+        .where('user_id', userId)
+        .first()
+
+      const team = await Team.find(teamId)
+      const isOwner = team?.userId === userId
+
+      if (!isMember && !isOwner) {
+        return response.status(403).send({ message: 'Not a team member' })
+      }
+
+      tag = await Tag.query()
+        .where('name', thetag)
+        .where('team_id', teamId)
+        .first()
+    }
+
+    if (!tag) {
+      return response.status(404).send({ message: 'Tag not found' })
+    }
+
     const tagQuery = await tag
       .related('illustrations')
       .query()
-      .where('user_id', `${auth.user?.id}`)
+      .where('user_id', `${userId}`)
       .orderBy('title')
 
     if (tagQuery.length < 1) {

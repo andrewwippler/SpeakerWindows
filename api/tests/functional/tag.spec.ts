@@ -80,8 +80,8 @@ test.group('Tag', (group) => {
       title: 'Testing tag selection2',
       user_id: goodUser.id,
     }).create()
-    const tags = await TagFactory.merge({ name: 'Searching' }).create()
-    const tags2 = await TagFactory.merge({ name: 'Searching2' }).create()
+    const tags = await TagFactory.merge({ name: 'Searching', user_id: goodUser.id }).create()
+    const tags2 = await TagFactory.merge({ name: 'Searching2', user_id: goodUser.id }).create()
     await illustration.related('tags').attach([tags.id])
     await illustration2.related('tags').attach([tags2.id])
 

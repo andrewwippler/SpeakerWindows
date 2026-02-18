@@ -51,6 +51,39 @@ export default class UsersController {
 
       const sharedToken = token.value!.release()
 
+      const team = await Team.query().where('user_id', user.id).first()
+      let teamData = null
+      if (team) {
+        const members = await TeamMember.query()
+          .where('team_id', team.id)
+          .preload('user', (query) => {
+            query.select('id', 'username', 'email')
+          })
+
+        teamData = {
+          id: team.id,
+          name: team.name,
+          inviteCode: team.inviteCode,
+          role: 'owner',
+          members: members.map((m) => ({
+            userId: m.userId,
+            username: m.user.username,
+            email: m.user.email,
+            role: m.role,
+          })),
+        }
+      }
+
+      const memberships = await TeamMember.query()
+        .where('user_id', user.id)
+        .preload('team')
+
+      const membershipsData = memberships.map((m) => ({
+        teamId: m.teamId,
+        teamName: m.team.name,
+        role: m.role,
+      }))
+
       return {
         id: user.id,
         token: sharedToken,
@@ -58,6 +91,8 @@ export default class UsersController {
         name: user.username,
         email: user.email,
         uid: user.uid,
+        team: teamData,
+        memberships: membershipsData,
       }
     } catch (error) {
       console.log('login error: ', error)

@@ -81,17 +81,13 @@ export default function Settings() {
 
   useEffect(() => {
     if (session?.accessToken) {
-      api.get("/team", {}, session.accessToken).then((data) => {
-        if (data && !data.message) {
-          setTeam(data);
-          setTeamName(data.name);
-        }
-      });
-      api.get("/team/memberships", {}, session.accessToken).then((data) => {
-        if (Array.isArray(data)) {
-          setMemberships(data);
-        }
-      });
+      if (session.team) {
+        setTeam(session.team);
+        setTeamName(session.team.name);
+      }
+      if (session.memberships) {
+        setMemberships(session.memberships);
+      }
       dispatch(fetchInvitationsIfNeeded(session.accessToken));
       api.get("/user/blocks", {}, session.accessToken).then((data) => {
         if (Array.isArray(data)) {
@@ -99,7 +95,7 @@ export default function Settings() {
         }
       });
     }
-  }, [session?.accessToken, dispatch]);
+  }, [session?.accessToken, session?.team, session?.memberships, dispatch]);
 
   useEffect(() => {
     setPendingInvitations(invitations);
