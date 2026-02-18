@@ -5,6 +5,7 @@ import User from '#models/user'
 import Illustration from '#models/illustration'
 import TeamInvitation from '#models/team_invitation'
 import TeamBlock from '#models/team_block'
+import Tag from '#models/tag'
 import type { TeamRole } from '#models/team'
 
 export default class TeamsController {
@@ -215,6 +216,32 @@ export default class TeamsController {
       role: 'readonly',
     })
 
+    const personalTags = await Tag.query()
+      .where('user_id', user.id)
+      .where('team_id', null)
+
+    const teamTags = await Tag.query()
+      .where('team_id', team.id)
+
+    for (const personalTag of personalTags) {
+      const matchingTeamTag = teamTags.find(
+        (t) => t.name.toLowerCase() === personalTag.name.toLowerCase()
+      )
+
+      if (matchingTeamTag) {
+        const illustrations = await personalTag.related('illustrations').query()
+        for (const ill of illustrations) {
+          await personalTag.related('illustrations').detach([ill.id])
+          await matchingTeamTag.related('illustrations').attach([ill.id])
+        }
+        await personalTag.delete()
+      } else {
+        personalTag.team_id = team.id
+        personalTag.slug = ''
+        await personalTag.save()
+      }
+    }
+
     return { message: 'Joined team successfully' }
   }
 
@@ -283,6 +310,18 @@ export default class TeamsController {
     }
 
     await membership.delete()
+
+    const teamTags = await Tag.query()
+      .where('user_id', user.id)
+      .where('team_id', teamId)
+
+    for (const tag of teamTags) {
+      await Tag.create({
+        name: tag.name,
+        user_id: user.id,
+        team_id: null,
+      })
+    }
 
     return { message: 'Left team successfully' }
   }

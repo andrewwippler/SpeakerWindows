@@ -16,7 +16,8 @@ import {
 } from "@heroicons/react/24/solid";
 import { useSession } from "next-auth/react";
 import LoginBtn from "./LoginBtn";
-import api from "@/library/api";
+import { useAppDispatch, useAppSelector } from "@/hooks";
+import { selectInvitations, fetchInvitationsIfNeeded } from "@/features/user/reducer";
 
 function NavLink({
   href,
@@ -102,18 +103,20 @@ function MobileNavLink({
 export default function Header() {
   const { data: session } = useSession();
   const router = useRouter();
+  const dispatch = useAppDispatch();
+  const invitations = useAppSelector(selectInvitations);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [invitationCount, setInvitationCount] = useState(0);
 
   useEffect(() => {
     if (session?.accessToken) {
-      api.get("/user/invitations", {}, session.accessToken).then((data) => {
-        if (Array.isArray(data)) {
-          setInvitationCount(data.length);
-        }
-      });
+      dispatch(fetchInvitationsIfNeeded(session.accessToken));
     }
-  }, [session?.accessToken]);
+  }, [session?.accessToken, dispatch]);
+
+  useEffect(() => {
+    setInvitationCount(invitations?.length ?? 0);
+  }, [invitations]);
 
   return (
     <div className="bg-white">

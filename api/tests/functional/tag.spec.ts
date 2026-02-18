@@ -3,6 +3,8 @@ import UserFactory from '#database/factories/UserFactory'
 import Tag from '#models/tag'
 import TagFactory from '#database/factories/TagFactory'
 import IllustrationFactory from '#database/factories/IllustrationFactory'
+import TeamFactory from '#database/factories/TeamFactory'
+import TeamMemberFactory from '#database/factories/TeamMemberFactory'
 import db from '@adonisjs/lucid/services/db'
 let goodUser, badUser
 
@@ -351,5 +353,172 @@ test.group('Tag', (group) => {
 
     response.assertStatus(403)
     response.assertBodyContains({ message: 'You do not have permission to access this resource' })
+  })
+})
+
+test.group('Tag - Team Scoped', (group) => {
+  group.each.setup(async () => {
+    await db.beginGlobalTransaction()
+    return () => db.rollbackGlobalTransaction()
+  })
+
+  test('Tags created before joining team become team tags after join', async ({ client, assert }) => {
+    const userA = await UserFactory.merge({ password: 'oasssadfasdf' }).create()
+    const userB = await UserFactory.merge({ password: 'oasssadfasdf' }).create()
+
+    const loginA = await client.post('/login').json({ email: userA.email, password: 'oasssadfasdf' })
+    loginA.assertStatus(200)
+    const tokenA = loginA.body().token
+
+    const loginB = await client.post('/login').json({ email: userB.email, password: 'oasssadfasdf' })
+    loginB.assertStatus(200)
+    const tokenB = loginB.body().token
+
+    const teamB = await TeamFactory.merge({ userId: userB.id }).create()
+
+    const illustration = await IllustrationFactory.merge({
+      title: 'Test Illustration',
+      user_id: userA.id,
+    }).create()
+
+    const tags = []
+    for (let i = 1; i <= 5; i++) {
+      const tag = await Tag.create({
+        name: `Tag-${i}`,
+        user_id: userA.id,
+        team_id: null,
+      })
+      tags.push(tag)
+      await illustration.related('tags').attach([tag.id])
+    }
+
+    const personalTagsResponse = await client.get('/tags?team_id=null').bearerToken(tokenA)
+    personalTagsResponse.assertStatus(200)
+    assert.equal(personalTagsResponse.body().length, 5)
+
+    const joinResponse = await client.post(`/teams/join/${teamB.inviteCode}`).bearerToken(tokenA)
+    joinResponse.assertStatus(200)
+    assert.equal(joinResponse.body().message, 'Joined team successfully')
+
+    const teamTagsResponse = await client.get(`/tags?team_id=${teamB.id}`).bearerToken(tokenA)
+    assert.equal(teamTagsResponse.body().length, 5)
+
+    for (const tag of teamTagsResponse.body()) {
+      assert.isTrue(tag.slug.includes(`-team-${teamB.id}`))
+    }
+
+    const newPersonalTagsResponse = await client.get('/tags?team_id=null').bearerToken(tokenA)
+    assert.equal(newPersonalTagsResponse.body().length, 0)
+  })
+
+  test('When joining team, personal tags with same name as team tags are merged', async ({ client, assert }) => {
+    const userA = await UserFactory.merge({ password: 'oasssadfasdf' }).create()
+    const userB = await UserFactory.merge({ password: 'oasssadfasdf' }).create()
+
+    const loginA = await client.post('/login').json({ email: userA.email, password: 'oasssadfasdf' })
+    const tokenA = loginA.body().token
+
+    const loginB = await client.post('/login').json({ email: userB.email, password: 'oasssadfasdf' })
+    const tokenB = loginB.body().token
+
+    const teamB = await TeamFactory.merge({ userId: userB.id }).create()
+
+    const illA = await IllustrationFactory.merge({
+      title: 'UserA Illustration',
+      user_id: userA.id,
+    }).create()
+
+    const personalReact = await Tag.create({
+      name: 'React',
+      user_id: userA.id,
+      team_id: null,
+    })
+    await illA.related('tags').attach([personalReact.id])
+
+    const teamReact = await Tag.create({
+      name: 'React',
+      user_id: userB.id,
+      team_id: teamB.id,
+    })
+
+    const joinResponse = await client.post(`/teams/join/${teamB.inviteCode}`).bearerToken(tokenA)
+    assert.equal(joinResponse.body().message, 'Joined team successfully')
+
+    const teamTagsResponse = await client.get(`/tags?team_id=${teamB.id}`).bearerToken(tokenA)
+    assert.equal(teamTagsResponse.body().length, 1)
+    assert.equal(teamTagsResponse.body()[0].name, 'React')
+
+    const personalReactExists = await Tag.find(personalReact.id)
+    assert.isNull(personalReactExists)
+
+    const illTags = await illA.related('tags').query()
+    assert.equal(illTags.length, 1)
+    assert.equal(illTags[0].id, teamReact.id)
+  })
+
+  test('When user leaves team, team tags become personal tags', async ({ client, assert }) => {
+    const userA = await UserFactory.merge({ password: 'oasssadfasdf' }).create()
+    const userB = await UserFactory.merge({ password: 'oasssadfasdf' }).create()
+
+    const loginA = await client.post('/login').json({ email: userA.email, password: 'oasssadfasdf' })
+    const tokenA = loginA.body().token
+
+    const loginB = await client.post('/login').json({ email: userB.email, password: 'oasssadfasdf' })
+    const tokenB = loginB.body().token
+
+    const teamB = await TeamFactory.merge({ userId: userB.id }).create()
+
+    const ownerTag = await Tag.create({ name: 'Owner-Tag', user_id: userB.id, team_id: teamB.id })
+
+    const alphaTag = await Tag.create({ name: 'Alpha', user_id: userA.id, team_id: null })
+    const betaTag = await Tag.create({ name: 'Beta', user_id: userA.id, team_id: null })
+
+    const joinResponse = await client.post(`/teams/join/${teamB.inviteCode}`).bearerToken(tokenA)
+    assert.equal(joinResponse.body().message, 'Joined team successfully')
+
+    const afterJoinPersonal = await client.get('/tags?team_id=null').bearerToken(tokenA)
+    assert.equal(afterJoinPersonal.body().length, 0)
+
+    const afterJoinTeam = await client.get(`/tags?team_id=${teamB.id}`).bearerToken(tokenA)
+    assert.equal(afterJoinTeam.body().length, 3)
+
+    const leaveResponse = await client.delete(`/team/memberships/${teamB.id}`).bearerToken(tokenA)
+    assert.equal(leaveResponse.body().message, 'Left team successfully')
+
+    const afterLeavePersonal = await client.get('/tags?team_id=null').bearerToken(tokenA)
+    assert.equal(afterLeavePersonal.body().length, 2)
+    const names = afterLeavePersonal.body().map((t: any) => t.name).sort()
+    assert.deepEqual(names, ['Alpha', 'Beta'])
+
+    const ownerAfterLeave = await client.get(`/tags?team_id=${teamB.id}`).bearerToken(tokenB)
+    assert.equal(ownerAfterLeave.body().length, 3)
+    const ownerTagNames = ownerAfterLeave.body().map((t: any) => t.name).sort()
+    assert.deepEqual(ownerTagNames, ['Alpha', 'Beta', 'Owner-Tag'])
+
+    const illustration = await IllustrationFactory.merge({
+      title: 'New Personal Illustration',
+      user_id: userA.id,
+    }).create()
+    const gammaTag = await Tag.create({ name: 'Gamma', user_id: userA.id, team_id: null })
+    await illustration.related('tags').attach([gammaTag.id])
+
+    const afterNewTagPersonal = await client.get('/tags?team_id=null').bearerToken(tokenA)
+    assert.equal(afterNewTagPersonal.body().length, 3)
+    const allNames = afterNewTagPersonal.body().map((t: any) => t.name).sort()
+    assert.deepEqual(allNames, ['Alpha', 'Beta', 'Gamma'])
+
+    const userAlpha = afterNewTagPersonal.body().find((t: any) => t.name === 'Alpha')
+    const deleteResponse = await client.delete(`/tags/${userAlpha.id}`).bearerToken(tokenA)
+    assert.equal(deleteResponse.body().message, `Deleted tag id: ${userAlpha.id}`)
+
+    const userAfterDelete = await client.get('/tags?team_id=null').bearerToken(tokenA)
+    assert.equal(userAfterDelete.body().length, 2)
+    const userTagNames = userAfterDelete.body().map((t: any) => t.name).sort()
+    assert.deepEqual(userTagNames, ['Beta', 'Gamma'])
+
+    const ownerStillHasAlpha = await client.get(`/tags?team_id=${teamB.id}`).bearerToken(tokenB)
+    assert.equal(ownerStillHasAlpha.body().length, 3)
+    const ownerTagNamesAfterDelete = ownerStillHasAlpha.body().map((t: any) => t.name).sort()
+    assert.deepEqual(ownerTagNamesAfterDelete, ['Alpha', 'Beta', 'Owner-Tag'])
   })
 })

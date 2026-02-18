@@ -1,6 +1,8 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import _ from 'lodash'
 import Tag from '#models/tag'
+import TeamMember from '#models/team_member'
+import Team from '#models/team'
 import { TagValidator } from '#validators/TagValidator'
 import { editTag } from '#app/abilities/main'
 
@@ -14,8 +16,37 @@ export default class TagsController {
    * @param {Response} ctx.response
    * @param {View} ctx.view
    */
-  public async index({ auth }: HttpContext) {
-    return await Tag.query().where('user_id', `${auth.user?.id}`).orderBy('name')
+  public async index({ auth, request }: HttpContext) {
+    const teamIdQuery = request.qs().team_id
+    let teamId: number | null = null
+    if (teamIdQuery !== undefined && teamIdQuery !== 'null') {
+      teamId = Number(teamIdQuery)
+    }
+
+    const userId = auth.user?.id
+
+    if (teamId === null) {
+      return await Tag.query()
+        .where('user_id', `${userId}`)
+        .whereNull('team_id')
+        .orderBy('name')
+    }
+
+    const isMember = await TeamMember.query()
+      .where('team_id', teamId)
+      .where('user_id', userId)
+      .first()
+
+    const team = await Team.find(teamId)
+    const isOwner = team?.userId === userId
+
+    if (!isMember && !isOwner) {
+      return []
+    }
+
+    return await Tag.query()
+      .where('team_id', teamId)
+      .orderBy('name')
   }
 
   /**
@@ -27,9 +58,14 @@ export default class TagsController {
    * @param {Response} ctx.response
    * @param {View} ctx.view
    */
-  public async search({ params, auth, response }: HttpContext) {
+  public async search({ params, auth, request, response }: HttpContext) {
     const tag = _.get(params, 'name', '')
     const user_id = `${auth.user?.id}`
+    const teamIdQuery = request.qs().team_id
+    let teamId: number | null = null
+    if (teamIdQuery !== undefined && teamIdQuery !== 'null') {
+      teamId = Number(teamIdQuery)
+    }
 
     // assuming bad data can be sent here. Raw should parameterize input
     // https://security.stackexchange.com/q/172297/35582
@@ -37,6 +73,7 @@ export default class TagsController {
     const tagQuery = await Tag.query()
       .where('name', 'ILIKE', `${tag}%`)
       .andWhere('user_id', user_id)
+      .andWhere('team_id', teamId)
       .orderBy('name')
       .limit(10)
 
@@ -114,9 +151,10 @@ export default class TagsController {
       })
     }
 
-    // Check if another tag with the same name already exists for this user
+    // Check if another tag with the same name already exists for this user and team
+    const teamPart = tag.team_id ? '-team-' + tag.team_id : ''
     const existingTag = await Tag.query()
-      .where('slug', name + '-' + auth.user!.id)
+      .where('slug', name + '-' + auth.user!.id + teamPart)
       .first()
 
     if (existingTag) {

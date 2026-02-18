@@ -251,9 +251,10 @@ export default class IllustrationsController {
     if (tags && tags.length > 0) {
       const newTags = [...new Set(tags)].map((tag) => {
         return {
-          slug: TagSlugSanitizer(tag + '-' + auth.user?.id),
+          slug: TagSlugSanitizer(tag + '-' + auth.user?.id + (finalTeamId ? '-team-' + finalTeamId : '')),
           name: tag,
           user_id: auth.user?.id,
+          team_id: finalTeamId ?? null,
         }
       })
       // console.log(newTags)
@@ -263,9 +264,10 @@ export default class IllustrationsController {
     } else {
       const newTags = [
         {
-          slug: TagSlugSanitizer('untitled-' + auth.user?.id),
+          slug: TagSlugSanitizer('untitled-' + auth.user?.id + (finalTeamId ? '-team-' + finalTeamId : '')),
           name: 'untitled',
           user_id: auth.user?.id,
+          team_id: finalTeamId ?? null,
         },
       ]
       // @ts-ignore
@@ -371,9 +373,10 @@ export default class IllustrationsController {
     if (tags && tags.length > 0) {
       const newTags = [...new Set(tags)].map((tag) => {
         return {
-          slug: TagSlugSanitizer(tag + '-' + auth.user?.id),
+          slug: TagSlugSanitizer(tag + '-' + auth.user?.id + (illustration.team_id ? '-team-' + illustration.team_id : '')),
           name: tag,
           user_id: auth.user?.id,
+          team_id: illustration.team_id ?? null,
         }
       })
       // console.log(newTags)

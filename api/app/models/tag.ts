@@ -1,9 +1,10 @@
 import { DateTime } from 'luxon'
-import { BaseModel, beforeSave, column, manyToMany } from '@adonisjs/lucid/orm'
+import { BaseModel, beforeSave, column, manyToMany, belongsTo } from '@adonisjs/lucid/orm'
 import Illustration from './illustration.js'
+import Team from './team.js'
 import _ from 'lodash'
 import TagSlugSanitizer from '#app/helpers/tag'
-import type { ManyToMany } from '@adonisjs/lucid/types/relations'
+import type { ManyToMany, BelongsTo } from '@adonisjs/lucid/types/relations'
 
 function fixName(name: string | undefined) {
   let first = _.startCase(name)
@@ -16,6 +17,9 @@ export default class Tag extends BaseModel {
 
   @column()
   declare user_id: number
+
+  @column({ default: null })
+  declare team_id: number | null
 
   @column()
   declare slug: string
@@ -36,10 +40,14 @@ export default class Tag extends BaseModel {
   })
   declare illustrations: ManyToMany<typeof Illustration>
 
+  @belongsTo(() => Team)
+  declare team: BelongsTo<typeof Team>
+
   @beforeSave()
   public static async createSlug(tag: Tag) {
     if (!tag.slug) {
-      tag.slug = (tag.name || 'default-name') + '-' + (tag.user_id || '0')
+      const teamPart = tag.team_id ? `-team-${tag.team_id}` : ''
+      tag.slug = (tag.name || 'default-name') + '-' + (tag.user_id || '0') + teamPart
     }
     tag.slug = TagSlugSanitizer(tag.slug)
   }

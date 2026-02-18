@@ -3,23 +3,21 @@ import Layout from "@/components/Layout";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 import api from "@/library/api";
-import { useAppDispatch } from "@/hooks";
+import { useAppDispatch, useAppSelector } from "@/hooks";
 import { setFlashMessage } from "@/features/flash/reducer";
+import {
+  selectInvitations,
+  fetchInvitationsIfNeeded,
+  clearInvitationsCache,
+} from "@/features/user/reducer";
 import { ArrowLeftIcon, CheckIcon, XMarkIcon } from "@heroicons/react/24/solid";
-
-interface Invitation {
-  id: number;
-  teamId: number;
-  teamName: string;
-  role: string;
-}
 
 export default function Invitations() {
   const { data: session, status } = useSession();
   const router = useRouter();
   const dispatch = useAppDispatch();
+  const invitations = useAppSelector(selectInvitations);
 
-  const [invitations, setInvitations] = useState<Invitation[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -27,20 +25,17 @@ export default function Invitations() {
       router.replace("/login");
     }
     if (session?.accessToken) {
-      api.get("/user/invitations", {}, session.accessToken).then((data) => {
-        if (Array.isArray(data)) {
-          setInvitations(data);
-        }
+      dispatch(fetchInvitationsIfNeeded(session.accessToken)).finally(() => {
         setLoading(false);
       });
     }
-  }, [session?.accessToken, status, router]);
+  }, [session?.accessToken, status, router, dispatch]);
 
   const handleAccept = (invitationId: number) => {
     api.post(`/team/invitations/${invitationId}/accept`, {}, session?.accessToken).then((data) => {
       if (data.message === "Joined team successfully") {
         dispatch(setFlashMessage({ severity: "info", message: "You joined the team!" }));
-        setInvitations(invitations.filter((i) => i.id !== invitationId));
+        dispatch(clearInvitationsCache());
       } else {
         dispatch(setFlashMessage({ severity: "danger", message: data.message || "Failed to accept invitation" }));
       }
@@ -51,7 +46,7 @@ export default function Invitations() {
     api.post(`/team/invitations/${invitationId}/decline`, {}, session?.accessToken).then((data) => {
       if (data.message === "Invitation declined") {
         dispatch(setFlashMessage({ severity: "info", message: "Invitation declined" }));
-        setInvitations(invitations.filter((i) => i.id !== invitationId));
+        dispatch(clearInvitationsCache());
       } else {
         dispatch(setFlashMessage({ severity: "danger", message: data.message || "Failed to decline invitation" }));
       }

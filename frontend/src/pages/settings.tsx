@@ -7,6 +7,9 @@ import {
   getSettings,
   getThunkSettings,
   setSettings,
+  selectInvitations,
+  fetchInvitationsIfNeeded,
+  clearInvitationsCache,
 } from "@/features/user/reducer";
 import router from "next/router";
 import {
@@ -63,6 +66,7 @@ export default function Settings() {
   const dispatch = useAppDispatch();
   dispatch(getThunkSettings(session?.accessToken));
   const settings = useAppSelector(getSettings);
+  const invitations = useAppSelector(selectInvitations);
 
   const [team, setTeam] = useState<Team | null>(null);
   const [memberships, setMemberships] = useState<TeamMembership[]>([]);
@@ -88,18 +92,18 @@ export default function Settings() {
           setMemberships(data);
         }
       });
-      api.get("/user/invitations", {}, session.accessToken).then((data) => {
-        if (Array.isArray(data)) {
-          setPendingInvitations(data);
-        }
-      });
+      dispatch(fetchInvitationsIfNeeded(session.accessToken));
       api.get("/user/blocks", {}, session.accessToken).then((data) => {
         if (Array.isArray(data)) {
           setBlockedTeams(data);
         }
       });
     }
-  }, [session?.accessToken]);
+  }, [session?.accessToken, dispatch]);
+
+  useEffect(() => {
+    setPendingInvitations(invitations);
+  }, [invitations]);
 
   const handleJoinTeam = (inviteCode: string) => {
     if (!inviteCode.trim()) return;
@@ -204,6 +208,7 @@ export default function Settings() {
       if (data.message === "Invitation cancelled") {
         dispatch(setFlashMessage({ severity: "info", message: "Invitation cancelled" }));
         setPendingInvitations(pendingInvitations.filter((i) => i.id !== invitationId));
+        dispatch(clearInvitationsCache());
       } else {
         dispatch(setFlashMessage({ severity: "danger", message: data.message || "Failed to cancel invitation" }));
       }
@@ -215,6 +220,7 @@ export default function Settings() {
       if (data.message === "Invitation accepted") {
         dispatch(setFlashMessage({ severity: "info", message: "Joined team successfully" }));
         setPendingInvitations(pendingInvitations.filter((i) => i.id !== invitationId));
+        dispatch(clearInvitationsCache());
         api.get("/team", {}, session?.accessToken).then((data) => {
           if (data && !data.message) {
             setTeam(data);
@@ -232,6 +238,7 @@ export default function Settings() {
     api.post(`/user/blocks`, { teamId }, session?.accessToken).then((data) => {
       if (data.message === "Team blocked") {
         dispatch(setFlashMessage({ severity: "info", message: "Team blocked" }));
+        dispatch(clearInvitationsCache());
         api.delete(`/team/invitations/${invitationId}`, {}, session?.accessToken).then(() => {
           setPendingInvitations(pendingInvitations.filter((i) => i.id !== invitationId));
         });
@@ -396,7 +403,7 @@ export default function Settings() {
                     </div>
 
                     {/* Show invite link only for owner/creator OR owner with no members in another team AND if there are no pending invites */}
-                    {(team?.role === 'owner' || team?.role === 'creator') && memberships.length === 0 && pendingInvitations.length === 0 && (
+                    {(team?.role === 'owner' || team?.role === 'creator') && (memberships?.length ?? 0) === 0 && (pendingInvitations?.length ?? 0) === 0 && (
                       <>
                         <div className="mb-4">
                           <p className="text-sm text-gray-500 mb-2">Invite Code: {team?.inviteCode}</p>
@@ -444,7 +451,7 @@ export default function Settings() {
             </div>
 
             {/* Pending Invitations Section - Show if user has pending invitations */}
-            {pendingInvitations.length > 0 && (
+            {pendingInvitations?.length > 0 && (
               <div className="mt-6 grid grid-cols-1 gap-x-6 gap-y-4 sm:grid-cols-6">
                 <div className="sm:col-span-6">
                   <h3 className="text-sm font-medium text-gray-900 mb-2">Pending Invitations</h3>
