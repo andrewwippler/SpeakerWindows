@@ -15,6 +15,9 @@ import {
   CogIcon,
   UsersIcon,
   PencilSquareIcon,
+  XMarkIcon,
+  EnvelopeIcon,
+  NoSymbolIcon,
 } from "@heroicons/react/24/solid";
 import { setRedirect } from "@/features/ui/reducer";
 import { useSession } from "next-auth/react";
@@ -41,6 +44,19 @@ interface TeamMembership {
   role: string;
 }
 
+interface PendingInvitation {
+  id: number;
+  userId: number;
+  username: string;
+  email: string;
+  role: string;
+}
+
+interface BlockedTeam {
+  teamId: number;
+  teamName: string;
+}
+
 export default function Settings() {
   const { data: session, status } = useSession();
   const router = useRouter();
@@ -54,6 +70,11 @@ export default function Settings() {
   const [showMembersModal, setShowMembersModal] = useState(false);
   const [isEditingName, setIsEditingName] = useState(false);
   const [teamName, setTeamName] = useState("");
+  const [pendingInvitations, setPendingInvitations] = useState<PendingInvitation[]>([]);
+  const [blockedTeams, setBlockedTeams] = useState<BlockedTeam[]>([]);
+  const [showInviteModal, setShowInviteModal] = useState(false);
+  const [inviteEmail, setInviteEmail] = useState("");
+  const [inviteRole, setInviteRole] = useState("editor");
 
   useEffect(() => {
     if (session?.accessToken) {
@@ -66,6 +87,16 @@ export default function Settings() {
       api.get("/team/memberships", {}, session.accessToken).then((data) => {
         if (Array.isArray(data)) {
           setMemberships(data);
+        }
+      });
+      api.get("/team/invitations", {}, session.accessToken).then((data) => {
+        if (Array.isArray(data)) {
+          setPendingInvitations(data);
+        }
+      });
+      api.get("/user/blocks", {}, session.accessToken).then((data) => {
+        if (Array.isArray(data)) {
+          setBlockedTeams(data);
         }
       });
     }
@@ -147,6 +178,46 @@ export default function Settings() {
     api.get("/team/memberships", {}, session?.accessToken).then((data) => {
       if (Array.isArray(data)) {
         setMemberships(data);
+      }
+    });
+  };
+
+  const handleInviteByEmail = () => {
+    if (!inviteEmail.trim()) return;
+    api.post("/team/invitations", { email: inviteEmail, role: inviteRole }, session?.accessToken).then((data) => {
+      if (data.message === "Invitation sent") {
+        dispatch(setFlashMessage({ severity: "info", message: "Invitation sent" }));
+        api.get("/team/invitations", {}, session?.accessToken).then((data) => {
+          if (Array.isArray(data)) {
+            setPendingInvitations(data);
+          }
+        });
+        setShowInviteModal(false);
+        setInviteEmail("");
+      } else {
+        dispatch(setFlashMessage({ severity: "danger", message: data.message || "Failed to send invitation" }));
+      }
+    });
+  };
+
+  const cancelInvitation = (invitationId: number) => {
+    api.delete(`/team/invitations/${invitationId}`, {}, session?.accessToken).then((data) => {
+      if (data.message === "Invitation cancelled") {
+        dispatch(setFlashMessage({ severity: "info", message: "Invitation cancelled" }));
+        setPendingInvitations(pendingInvitations.filter((i) => i.id !== invitationId));
+      } else {
+        dispatch(setFlashMessage({ severity: "danger", message: data.message || "Failed to cancel invitation" }));
+      }
+    });
+  };
+
+  const unblockTeam = (teamId: number) => {
+    api.delete(`/user/blocks/${teamId}`, {}, session?.accessToken).then((data) => {
+      if (data.message === "Team unblocked") {
+        dispatch(setFlashMessage({ severity: "info", message: "Team unblocked" }));
+        setBlockedTeams(blockedTeams.filter((b) => b.teamId !== teamId));
+      } else {
+        dispatch(setFlashMessage({ severity: "danger", message: data.message || "Failed to unblock team" }));
       }
     });
   };
@@ -309,13 +380,42 @@ export default function Settings() {
                           <p className="text-sm text-gray-500">
                             {team.members?.length || 0} member{(team.members?.length || 0) !== 1 ? 's' : ''}
                           </p>
-                          <button
-                            onClick={() => setShowMembersModal(true)}
-                            className="text-sm text-indigo-600 hover:text-indigo-500"
-                          >
-                            Edit Members
-                          </button>
+                          <div className="flex gap-2">
+                            <button
+                              onClick={() => setShowInviteModal(true)}
+                              className="text-sm text-indigo-600 hover:text-indigo-500"
+                            >
+                              Invite by Email
+                            </button>
+                            <button
+                              onClick={() => setShowMembersModal(true)}
+                              className="text-sm text-indigo-600 hover:text-indigo-500"
+                            >
+                              Edit Members
+                            </button>
+                          </div>
                         </div>
+
+                        {/* Pending Invitations */}
+                        {pendingInvitations.length > 0 && (
+                          <div className="mt-4 pt-4 border-t">
+                            <p className="text-sm font-medium text-gray-700 mb-2">Pending Invitations</p>
+                            {pendingInvitations.map((inv) => (
+                              <div key={inv.id} className="flex items-center justify-between py-2 text-sm">
+                                <div>
+                                  <span className="text-gray-900">{inv.email}</span>
+                                  <span className="ml-2 text-gray-500 capitalize">({inv.role})</span>
+                                </div>
+                                <button
+                                  onClick={() => cancelInvitation(inv.id)}
+                                  className="text-red-600 hover:text-red-500"
+                                >
+                                  Cancel
+                                </button>
+                              </div>
+                            ))}
+                          </div>
+                        )}
                       </>
                     )}
 
@@ -357,6 +457,31 @@ export default function Settings() {
                       Join
                     </button>
                   </form>
+                </div>
+              </div>
+            )}
+
+            {/* Blocked Teams Section */}
+            {blockedTeams.length > 0 && (
+              <div className="mt-6 grid grid-cols-1 gap-x-6 gap-y-4 sm:grid-cols-6">
+                <div className="sm:col-span-6">
+                  <div className="border rounded-md p-4 bg-red-50">
+                    <div className="flex items-center mb-2">
+                      <NoSymbolIcon className="h-5 w-5 mr-2 text-red-600" />
+                      <h3 className="text-md font-semibold text-red-900">Blocked Teams</h3>
+                    </div>
+                    {blockedTeams.map((block) => (
+                      <div key={block.teamId} className="flex items-center justify-between py-2 border-b border-red-200 last:border-0">
+                        <span className="text-gray-900">{block.teamName}</span>
+                        <button
+                          onClick={() => unblockTeam(block.teamId)}
+                          className="text-sm text-red-600 hover:text-red-500"
+                        >
+                          Unblock
+                        </button>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               </div>
             )}
@@ -496,6 +621,61 @@ export default function Settings() {
                       onClick={() => setShowMembersModal(false)}
                     >
                       Close
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Invite by Email Modal */}
+          {showInviteModal && (
+            <div className="fixed inset-0 z-50 overflow-y-auto">
+              <div className="flex min-h-screen items-center justify-center px-4 pt-4 pb-20 text-center sm:block sm:p-0">
+                <div className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" onClick={() => setShowInviteModal(false)} />
+
+                <div className="inline-block align-bottom bg-white rounded-lg px-4 pt-5 pb-4 text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full sm:p-6">
+                  <div>
+                    <h3 className="text-lg font-medium text-gray-900 mb-4">Invite by Email</h3>
+                    <div className="space-y-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700">Email</label>
+                        <input
+                          type="email"
+                          value={inviteEmail}
+                          onChange={(e) => setInviteEmail(e.target.value)}
+                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm border p-2"
+                          placeholder="user@example.com"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700">Role</label>
+                        <select
+                          value={inviteRole}
+                          onChange={(e) => setInviteRole(e.target.value)}
+                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm border p-2"
+                        >
+                          <option value="creator">Creator</option>
+                          <option value="editor">Editor</option>
+                          <option value="readonly">Read-Only</option>
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="mt-5 sm:mt-4 sm:flex sm:flex-row-reverse">
+                    <button
+                      type="button"
+                      onClick={handleInviteByEmail}
+                      className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-indigo-600 text-base font-medium text-white hover:bg-indigo-700 sm:ml-3 sm:w-auto sm:text-sm"
+                    >
+                      Send Invitation
+                    </button>
+                    <button
+                      type="button"
+                      className="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 sm:mt-0 sm:w-auto sm:text-sm"
+                      onClick={() => setShowInviteModal(false)}
+                    >
+                      Cancel
                     </button>
                   </div>
                 </div>

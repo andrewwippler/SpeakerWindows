@@ -981,4 +981,460 @@ test.group('Team Illustrations', (group) => {
     teamResponse.assertStatus(200)
     teamResponse.assertBodyContains({ role: 'owner' })
   })
+
+  test('Can invite user by email', async ({ client, assert }) => {
+    const owner = await UserFactory.make()
+    const ownerUser = {
+      email: owner.email,
+      password: owner.password + '1A!a',
+      password_confirmation: owner.password + '1A!a',
+    }
+
+    await client.post('/register').json(ownerUser)
+    const ownerLogin = await client.post('/login').json({
+      email: owner.email,
+      password: owner.password + '1A!a',
+    })
+
+    const invitedUser = await UserFactory.make()
+    const invitedUserData = {
+      email: invitedUser.email,
+      password: invitedUser.password + '1A!a',
+      password_confirmation: invitedUser.password + '1A!a',
+    }
+
+    await client.post('/register').json(invitedUserData)
+
+    const inviteResponse = await client.post('/team/invitations')
+      .bearerToken(ownerLogin.body().token)
+      .json({ email: invitedUser.email, role: 'editor' })
+    inviteResponse.assertStatus(200)
+    inviteResponse.assertBodyContains({ message: 'Invitation sent' })
+  })
+
+  test('Cannot invite non-existent user', async ({ client, assert }) => {
+    const owner = await UserFactory.make()
+    const ownerUser = {
+      email: owner.email,
+      password: owner.password + '1A!a',
+      password_confirmation: owner.password + '1A!a',
+    }
+
+    await client.post('/register').json(ownerUser)
+    const ownerLogin = await client.post('/login').json({
+      email: owner.email,
+      password: owner.password + '1A!a',
+    })
+
+    const inviteResponse = await client.post('/team/invitations')
+      .bearerToken(ownerLogin.body().token)
+      .json({ email: 'nonexistent@example.com', role: 'editor' })
+    inviteResponse.assertStatus(404)
+    inviteResponse.assertBodyContains({ message: 'No user found with that email' })
+  })
+
+  test('Cannot invite yourself', async ({ client, assert }) => {
+    const owner = await UserFactory.make()
+    const ownerUser = {
+      email: owner.email,
+      password: owner.password + '1A!a',
+      password_confirmation: owner.password + '1A!a',
+    }
+
+    await client.post('/register').json(ownerUser)
+    const ownerLogin = await client.post('/login').json({
+      email: owner.email,
+      password: owner.password + '1A!a',
+    })
+
+    const inviteResponse = await client.post('/team/invitations')
+      .bearerToken(ownerLogin.body().token)
+      .json({ email: owner.email, role: 'editor' })
+    inviteResponse.assertStatus(400)
+    inviteResponse.assertBodyContains({ message: 'Cannot invite yourself' })
+  })
+
+  test('Can get team invitations', async ({ client, assert }) => {
+    const owner = await UserFactory.make()
+    const ownerUser = {
+      email: owner.email,
+      password: owner.password + '1A!a',
+      password_confirmation: owner.password + '1A!a',
+    }
+
+    await client.post('/register').json(ownerUser)
+    const ownerLogin = await client.post('/login').json({
+      email: owner.email,
+      password: owner.password + '1A!a',
+    })
+
+    const invitedUser = await UserFactory.make()
+    const invitedUserData = {
+      email: invitedUser.email,
+      password: invitedUser.password + '1A!a',
+      password_confirmation: invitedUser.password + '1A!a',
+    }
+
+    await client.post('/register').json(invitedUserData)
+
+    await client.post('/team/invitations')
+      .bearerToken(ownerLogin.body().token)
+      .json({ email: invitedUser.email, role: 'editor' })
+
+    const invitationsResponse = await client.get('/team/invitations').bearerToken(ownerLogin.body().token)
+    invitationsResponse.assertStatus(200)
+    const invitations = invitationsResponse.body()
+    assert.equal(invitations.length, 1)
+    assert.equal(invitations[0].role, 'editor')
+  })
+
+  test('Can cancel invitation', async ({ client, assert }) => {
+    const owner = await UserFactory.make()
+    const ownerUser = {
+      email: owner.email,
+      password: owner.password + '1A!a',
+      password_confirmation: owner.password + '1A!a',
+    }
+
+    await client.post('/register').json(ownerUser)
+    const ownerLogin = await client.post('/login').json({
+      email: owner.email,
+      password: owner.password + '1A!a',
+    })
+
+    const invitedUser = await UserFactory.make()
+    const invitedUserData = {
+      email: invitedUser.email,
+      password: invitedUser.password + '1A!a',
+      password_confirmation: invitedUser.password + '1A!a',
+    }
+
+    await client.post('/register').json(invitedUserData)
+
+    const inviteResponse = await client.post('/team/invitations')
+      .bearerToken(ownerLogin.body().token)
+      .json({ email: invitedUser.email, role: 'editor' })
+
+    const invitationsResponse = await client.get('/team/invitations').bearerToken(ownerLogin.body().token)
+    const invitationId = invitationsResponse.body()[0].id
+
+    const cancelResponse = await client.delete(`/team/invitations/${invitationId}`).bearerToken(ownerLogin.body().token)
+    cancelResponse.assertStatus(200)
+    cancelResponse.assertBodyContains({ message: 'Invitation cancelled' })
+  })
+
+  test('Can accept invitation', async ({ client, assert }) => {
+    const owner = await UserFactory.make()
+    const ownerUser = {
+      email: owner.email,
+      password: owner.password + '1A!a',
+      password_confirmation: owner.password + '1A!a',
+    }
+
+    await client.post('/register').json(ownerUser)
+    const ownerLogin = await client.post('/login').json({
+      email: owner.email,
+      password: owner.password + '1A!a',
+    })
+
+    const invitedUser = await UserFactory.make()
+    const invitedUserData = {
+      email: invitedUser.email,
+      password: invitedUser.password + '1A!a',
+      password_confirmation: invitedUser.password + '1A!a',
+    }
+
+    await client.post('/register').json(invitedUserData)
+    const invitedLogin = await client.post('/login').json({
+      email: invitedUser.email,
+      password: invitedUser.password + '1A!a',
+    })
+
+    await client.post('/team/invitations')
+      .bearerToken(ownerLogin.body().token)
+      .json({ email: invitedUser.email, role: 'editor' })
+
+    const userInvitationsResponse = await client.get('/user/invitations').bearerToken(invitedLogin.body().token)
+    const invitationId = userInvitationsResponse.body()[0].id
+
+    const acceptResponse = await client.post(`/team/invitations/${invitationId}/accept`).bearerToken(invitedLogin.body().token)
+    acceptResponse.assertStatus(200)
+    acceptResponse.assertBodyContains({ message: 'Joined team successfully' })
+  })
+
+  test('Can decline invitation', async ({ client, assert }) => {
+    const owner = await UserFactory.make()
+    const ownerUser = {
+      email: owner.email,
+      password: owner.password + '1A!a',
+      password_confirmation: owner.password + '1A!a',
+    }
+
+    await client.post('/register').json(ownerUser)
+    const ownerLogin = await client.post('/login').json({
+      email: owner.email,
+      password: owner.password + '1A!a',
+    })
+
+    const invitedUser = await UserFactory.make()
+    const invitedUserData = {
+      email: invitedUser.email,
+      password: invitedUser.password + '1A!a',
+      password_confirmation: invitedUser.password + '1A!a',
+    }
+
+    await client.post('/register').json(invitedUserData)
+    const invitedLogin = await client.post('/login').json({
+      email: invitedUser.email,
+      password: invitedUser.password + '1A!a',
+    })
+
+    await client.post('/team/invitations')
+      .bearerToken(ownerLogin.body().token)
+      .json({ email: invitedUser.email, role: 'editor' })
+
+    const userInvitationsResponse = await client.get('/user/invitations').bearerToken(invitedLogin.body().token)
+    const invitationId = userInvitationsResponse.body()[0].id
+
+    const declineResponse = await client.post(`/team/invitations/${invitationId}/decline`).bearerToken(invitedLogin.body().token)
+    declineResponse.assertStatus(200)
+    declineResponse.assertBodyContains({ message: 'Invitation declined' })
+  })
+
+  test('Can get user invitations', async ({ client, assert }) => {
+    const owner = await UserFactory.make()
+    const ownerUser = {
+      email: owner.email,
+      password: owner.password + '1A!a',
+      password_confirmation: owner.password + '1A!a',
+    }
+
+    await client.post('/register').json(ownerUser)
+    const ownerLogin = await client.post('/login').json({
+      email: owner.email,
+      password: owner.password + '1A!a',
+    })
+
+    const invitedUser = await UserFactory.make()
+    const invitedUserData = {
+      email: invitedUser.email,
+      password: invitedUser.password + '1A!a',
+      password_confirmation: invitedUser.password + '1A!a',
+    }
+
+    await client.post('/register').json(invitedUserData)
+    const invitedLogin = await client.post('/login').json({
+      email: invitedUser.email,
+      password: invitedUser.password + '1A!a',
+    })
+
+    await client.post('/team/invitations')
+      .bearerToken(ownerLogin.body().token)
+      .json({ email: invitedUser.email, role: 'editor' })
+
+    const userInvitationsResponse = await client.get('/user/invitations').bearerToken(invitedLogin.body().token)
+    userInvitationsResponse.assertStatus(200)
+    const invitations = userInvitationsResponse.body()
+    assert.equal(invitations.length, 1)
+    assert.equal(invitations[0].role, 'editor')
+  })
+
+  test('Cannot invite blocked user', async ({ client, assert }) => {
+    const owner = await UserFactory.make()
+    const ownerUser = {
+      email: owner.email,
+      password: owner.password + '1A!a',
+      password_confirmation: owner.password + '1A!a',
+    }
+
+    await client.post('/register').json(ownerUser)
+    const ownerLogin = await client.post('/login').json({
+      email: owner.email,
+      password: owner.password + '1A!a',
+    })
+
+    const team = await Team.query().where('user_id', ownerLogin.body().id).first()
+
+    const blockedUser = await UserFactory.make()
+    const blockedUserData = {
+      email: blockedUser.email,
+      password: blockedUser.password + '1A!a',
+      password_confirmation: blockedUser.password + '1A!a',
+    }
+
+    await client.post('/register').json(blockedUserData)
+    const blockedLogin = await client.post('/login').json({
+      email: blockedUser.email,
+      password: blockedUser.password + '1A!a',
+    })
+
+    await client.post('/user/blocks')
+      .bearerToken(blockedLogin.body().token)
+      .json({ teamId: team!.id })
+
+    const inviteResponse = await client.post('/team/invitations')
+      .bearerToken(ownerLogin.body().token)
+      .json({ email: blockedUser.email, role: 'editor' })
+    inviteResponse.assertStatus(400)
+    inviteResponse.assertBodyContains({ message: 'You cannot invite this user' })
+  })
+
+  test('Can block a team', async ({ client, assert }) => {
+    const owner = await UserFactory.make()
+    const ownerUser = {
+      email: owner.email,
+      password: owner.password + '1A!a',
+      password_confirmation: owner.password + '1A!a',
+    }
+
+    await client.post('/register').json(ownerUser)
+    const ownerLogin = await client.post('/login').json({
+      email: owner.email,
+      password: owner.password + '1A!a',
+    })
+
+    const teamResponse = await client.get('/team').bearerToken(ownerLogin.body().token)
+    const teamId = teamResponse.body().id
+
+    const blocker = await UserFactory.make()
+    const blockerData = {
+      email: blocker.email,
+      password: blocker.password + '1A!a',
+      password_confirmation: blocker.password + '1A!a',
+    }
+
+    await client.post('/register').json(blockerData)
+    const blockerLogin = await client.post('/login').json({
+      email: blocker.email,
+      password: blocker.password + '1A!a',
+    })
+
+    const blockResponse = await client.post('/user/blocks')
+      .bearerToken(blockerLogin.body().token)
+      .json({ teamId })
+    blockResponse.assertStatus(200)
+    blockResponse.assertBodyContains({ message: 'Team blocked' })
+  })
+
+  test('Can get blocked teams', async ({ client, assert }) => {
+    const owner = await UserFactory.make()
+    const ownerUser = {
+      email: owner.email,
+      password: owner.password + '1A!a',
+      password_confirmation: owner.password + '1A!a',
+    }
+
+    await client.post('/register').json(ownerUser)
+    const ownerLogin = await client.post('/login').json({
+      email: owner.email,
+      password: owner.password + '1A!a',
+    })
+
+    const teamResponse = await client.get('/team').bearerToken(ownerLogin.body().token)
+    const teamId = teamResponse.body().id
+
+    const blocker = await UserFactory.make()
+    const blockerData = {
+      email: blocker.email,
+      password: blocker.password + '1A!a',
+      password_confirmation: blocker.password + '1A!a',
+    }
+
+    await client.post('/register').json(blockerData)
+    const blockerLogin = await client.post('/login').json({
+      email: blocker.email,
+      password: blocker.password + '1A!a',
+    })
+
+    await client.post('/user/blocks')
+      .bearerToken(blockerLogin.body().token)
+      .json({ teamId })
+
+    const blocksResponse = await client.get('/user/blocks').bearerToken(blockerLogin.body().token)
+    blocksResponse.assertStatus(200)
+    const blocks = blocksResponse.body()
+    assert.equal(blocks.length, 1)
+  })
+
+  test('Can unblock a team', async ({ client, assert }) => {
+    const owner = await UserFactory.make()
+    const ownerUser = {
+      email: owner.email,
+      password: owner.password + '1A!a',
+      password_confirmation: owner.password + '1A!a',
+    }
+
+    await client.post('/register').json(ownerUser)
+    const ownerLogin = await client.post('/login').json({
+      email: owner.email,
+      password: owner.password + '1A!a',
+    })
+
+    const teamResponse = await client.get('/team').bearerToken(ownerLogin.body().token)
+    const teamId = teamResponse.body().id
+
+    const blocker = await UserFactory.make()
+    const blockerData = {
+      email: blocker.email,
+      password: blocker.password + '1A!a',
+      password_confirmation: blocker.password + '1A!a',
+    }
+
+    await client.post('/register').json(blockerData)
+    const blockerLogin = await client.post('/login').json({
+      email: blocker.email,
+      password: blocker.password + '1A!a',
+    })
+
+    await client.post('/user/blocks')
+      .bearerToken(blockerLogin.body().token)
+      .json({ teamId })
+
+    const unblockResponse = await client.delete(`/user/blocks/${teamId}`).bearerToken(blockerLogin.body().token)
+    unblockResponse.assertStatus(200)
+    unblockResponse.assertBodyContains({ message: 'Team unblocked' })
+  })
+
+  test('Blocking team removes pending invitation', async ({ client, assert }) => {
+    const owner = await UserFactory.make()
+    const ownerUser = {
+      email: owner.email,
+      password: owner.password + '1A!a',
+      password_confirmation: owner.password + '1A!a',
+    }
+
+    await client.post('/register').json(ownerUser)
+    const ownerLogin = await client.post('/login').json({
+      email: owner.email,
+      password: owner.password + '1A!a',
+    })
+
+    const teamResponse = await client.get('/team').bearerToken(ownerLogin.body().token)
+    const teamId = teamResponse.body().id
+
+    const blockedUser = await UserFactory.make()
+    const blockedUserData = {
+      email: blockedUser.email,
+      password: blockedUser.password + '1A!a',
+      password_confirmation: blockedUser.password + '1A!a',
+    }
+
+    await client.post('/register').json(blockedUserData)
+    const blockedLogin = await client.post('/login').json({
+      email: blockedUser.email,
+      password: blockedUser.password + '1A!a',
+    })
+
+    await client.post('/team/invitations')
+      .bearerToken(ownerLogin.body().token)
+      .json({ email: blockedUser.email, role: 'editor' })
+
+    await client.post('/user/blocks')
+      .bearerToken(blockedLogin.body().token)
+      .json({ teamId })
+
+    const userInvitationsResponse = await client.get('/user/invitations').bearerToken(blockedLogin.body().token)
+    const invitations = userInvitationsResponse.body()
+    assert.equal(invitations.length, 0)
+  })
 })

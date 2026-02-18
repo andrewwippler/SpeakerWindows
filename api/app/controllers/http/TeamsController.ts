@@ -3,6 +3,8 @@ import Team from '#models/team'
 import TeamMember from '#models/team_member'
 import User from '#models/user'
 import Illustration from '#models/illustration'
+import TeamInvitation from '#models/team_invitation'
+import TeamBlock from '#models/team_block'
 import type { TeamRole } from '#models/team'
 
 export default class TeamsController {
@@ -298,5 +300,261 @@ export default class TeamsController {
     }
 
     return membership.role
+  }
+
+  public async getTeamInvitations({ auth }: HttpContext) {
+    const user = auth.user!
+
+    const team = await Team.query().where('user_id', user.id).first()
+    if (!team) {
+      return []
+    }
+
+    const invitations = await TeamInvitation.query()
+      .where('team_id', team.id)
+      .where('status', 'pending')
+      .preload('user', (query) => {
+        query.select('id', 'username', 'email')
+      })
+
+    return invitations.map((inv) => ({
+      id: inv.id,
+      userId: inv.userId,
+      username: inv.user?.username,
+      email: inv.user?.email,
+      role: inv.role,
+    }))
+  }
+
+  public async createInvitation({ auth, request, response }: HttpContext) {
+    const user = auth.user!
+    const { email, role } = request.all()
+
+    const team = await Team.query().where('user_id', user.id).first()
+    if (!team) {
+      return response.status(404).send({ message: 'Team not found' })
+    }
+
+    const userMembership = await TeamMember.query()
+      .where('team_id', team.id)
+      .where('user_id', user.id)
+      .first()
+
+    if (!userMembership || (userMembership.role !== 'owner' && userMembership.role !== 'creator')) {
+      return response.status(403).send({ message: 'Only owners and creators can invite members' })
+    }
+
+    const invitedUser = await User.query().where('email', email).first()
+    if (!invitedUser) {
+      return response.status(404).send({ message: 'No user found with that email' })
+    }
+
+    if (invitedUser.id === user.id) {
+      return response.status(400).send({ message: 'Cannot invite yourself' })
+    }
+
+    const existingMember = await TeamMember.query()
+      .where('team_id', team.id)
+      .where('user_id', invitedUser.id)
+      .first()
+
+    if (existingMember) {
+      return response.status(400).send({ message: 'User is already a member' })
+    }
+
+    const existingBlock = await TeamBlock.query()
+      .where('team_id', team.id)
+      .where('user_id', invitedUser.id)
+      .first()
+
+    if (existingBlock) {
+      return response.status(400).send({ message: 'You cannot invite this user' })
+    }
+
+    const existingInvitation = await TeamInvitation.query()
+      .where('team_id', team.id)
+      .where('user_id', invitedUser.id)
+      .where('status', 'pending')
+      .first()
+
+    if (existingInvitation) {
+      return response.status(400).send({ message: 'Invitation already sent to this user' })
+    }
+
+    await TeamInvitation.create({
+      teamId: team.id,
+      userId: invitedUser.id,
+      role: role as TeamRole,
+      status: 'pending',
+    })
+
+    return { message: 'Invitation sent' }
+  }
+
+  public async cancelInvitation({ auth, params, response }: HttpContext) {
+    const user = auth.user!
+    const { id } = params
+
+    const team = await Team.query().where('user_id', user.id).first()
+    if (!team) {
+      return response.status(404).send({ message: 'Team not found' })
+    }
+
+    const invitation = await TeamInvitation.query()
+      .where('id', id)
+      .where('team_id', team.id)
+      .where('status', 'pending')
+      .first()
+
+    if (!invitation) {
+      return response.status(404).send({ message: 'Invitation not found' })
+    }
+
+    await invitation.delete()
+
+    return { message: 'Invitation cancelled' }
+  }
+
+  public async acceptInvitation({ auth, params, response }: HttpContext) {
+    const user = auth.user!
+    const { id } = params
+
+    const invitation = await TeamInvitation.query()
+      .where('id', id)
+      .where('user_id', user.id)
+      .where('status', 'pending')
+      .first()
+
+    if (!invitation) {
+      return response.status(404).send({ message: 'Invitation not found' })
+    }
+
+    const existingMember = await TeamMember.query()
+      .where('team_id', invitation.teamId)
+      .where('user_id', user.id)
+      .first()
+
+    if (existingMember) {
+      await invitation.delete()
+      return response.status(400).send({ message: 'You are already a member of this team' })
+    }
+
+    await TeamMember.create({
+      teamId: invitation.teamId,
+      userId: user.id,
+      role: invitation.role,
+    })
+
+    invitation.status = 'accepted'
+    await invitation.save()
+
+    return { message: 'Joined team successfully' }
+  }
+
+  public async declineInvitation({ auth, params, response }: HttpContext) {
+    const user = auth.user!
+    const { id } = params
+
+    const invitation = await TeamInvitation.query()
+      .where('id', id)
+      .where('user_id', user.id)
+      .where('status', 'pending')
+      .first()
+
+    if (!invitation) {
+      return response.status(404).send({ message: 'Invitation not found' })
+    }
+
+    invitation.status = 'declined'
+    await invitation.save()
+
+    return { message: 'Invitation declined' }
+  }
+
+  public async getUserInvitations({ auth }: HttpContext) {
+    const user = auth.user!
+
+    const invitations = await TeamInvitation.query()
+      .where('user_id', user.id)
+      .where('status', 'pending')
+      .preload('team', (query) => {
+        query.select('id', 'name')
+      })
+
+    return invitations.map((inv) => ({
+      id: inv.id,
+      teamId: inv.teamId,
+      teamName: inv.team?.name,
+      role: inv.role,
+    }))
+  }
+
+  public async getUserBlocks({ auth }: HttpContext) {
+    const user = auth.user!
+
+    const blocks = await TeamBlock.query()
+      .where('user_id', user.id)
+      .preload('team', (query) => {
+        query.select('id', 'name')
+      })
+
+    return blocks.map((block) => ({
+      teamId: block.teamId,
+      teamName: block.team?.name,
+    }))
+  }
+
+  public async blockTeam({ auth, request, response }: HttpContext) {
+    const user = auth.user!
+    const { teamId } = request.all()
+
+    const team = await Team.query().where('id', teamId).first()
+    if (!team) {
+      return response.status(404).send({ message: 'Team not found' })
+    }
+
+    const existingBlock = await TeamBlock.query()
+      .where('team_id', teamId)
+      .where('user_id', user.id)
+      .first()
+
+    if (existingBlock) {
+      return response.status(400).send({ message: 'Team already blocked' })
+    }
+
+    await TeamBlock.create({
+      teamId: teamId,
+      userId: user.id,
+    })
+
+    const pendingInvitation = await TeamInvitation.query()
+      .where('team_id', teamId)
+      .where('user_id', user.id)
+      .where('status', 'pending')
+      .first()
+
+    if (pendingInvitation) {
+      await pendingInvitation.delete()
+    }
+
+    return { message: 'Team blocked' }
+  }
+
+  public async unblockTeam({ auth, params, response }: HttpContext) {
+    const user = auth.user!
+    const { teamId } = params
+
+    const block = await TeamBlock.query()
+      .where('team_id', teamId)
+      .where('user_id', user.id)
+      .first()
+
+    if (!block) {
+      return response.status(404).send({ message: 'Block not found' })
+    }
+
+    await block.delete()
+
+    return { message: 'Team unblocked' }
   }
 }

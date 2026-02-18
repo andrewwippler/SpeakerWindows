@@ -100,6 +100,15 @@ router
     router.get('/team/illustrations', [TeamsController, 'getTeamIllustrations'])
     router.get('/team/memberships', [TeamsController, 'getMemberships'])
     router.delete('/team/memberships/:teamId', [TeamsController, 'leaveTeam'])
+    router.get('/team/invitations', [TeamsController, 'getTeamInvitations'])
+    router.post('/team/invitations', [TeamsController, 'createInvitation'])
+    router.delete('/team/invitations/:id', [TeamsController, 'cancelInvitation'])
+    router.post('/team/invitations/:id/accept', [TeamsController, 'acceptInvitation'])
+    router.post('/team/invitations/:id/decline', [TeamsController, 'declineInvitation'])
+    router.get('/user/invitations', [TeamsController, 'getUserInvitations'])
+    router.get('/user/blocks', [TeamsController, 'getUserBlocks'])
+    router.post('/user/blocks', [TeamsController, 'blockTeam'])
+    router.delete('/user/blocks/:teamId', [TeamsController, 'unblockTeam'])
   })
   .use([
     middleware.auth({

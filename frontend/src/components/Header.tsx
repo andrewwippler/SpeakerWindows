@@ -1,13 +1,14 @@
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import { Bars3Icon, XMarkIcon } from "@heroicons/react/24/outline";
 import { Dialog } from "@headlessui/react";
 import fetchJson from "@/library/fetchJson";
-import { PlusIcon, TagIcon, BookOpenIcon, UserGroupIcon, CogIcon, MagnifyingGlassIcon } from "@heroicons/react/24/solid";
+import { PlusIcon, TagIcon, BookOpenIcon, UserGroupIcon, CogIcon, MagnifyingGlassIcon, BellIcon } from "@heroicons/react/24/solid";
 import { useSession } from "next-auth/react";
 import LoginBtn from "./LoginBtn";
+import api from "@/library/api";
 
 function NavLink({ href, icon: Icon, children }: { href: string; icon: any; children: React.ReactNode }) {
   const router = useRouter();
@@ -47,6 +48,17 @@ export default function Header() {
   const { data: session } = useSession();
   const router = useRouter();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [invitationCount, setInvitationCount] = useState(0);
+
+  useEffect(() => {
+    if (session?.accessToken) {
+      api.get("/user/invitations", {}, session.accessToken).then((data) => {
+        if (Array.isArray(data)) {
+          setInvitationCount(data.length);
+        }
+      });
+    }
+  }, [session?.accessToken]);
 
   return (
     <div className="bg-white">
@@ -85,6 +97,21 @@ export default function Header() {
                 <NavLink href="/articles" icon={BookOpenIcon}>Articles</NavLink>
                 <NavLink href="/authors" icon={UserGroupIcon}>Authors</NavLink>
                 <NavLink href="/settings" icon={CogIcon}>Settings</NavLink>
+                {invitationCount > 0 && (
+                  <Link
+                    href="/invitations"
+                    className="text-sm font-semibold leading-6 flex items-center text-orange-600"
+                  >
+                    <BellIcon className="h-5 w-5 mr-1.5" />
+                    Invitations
+                    <span className="ml-1 bg-orange-500 text-white text-xs rounded-full px-1.5 py-0.5">
+                      {invitationCount}
+                    </span>
+                  </Link>
+                )}
+                {invitationCount === 0 && (
+                  <NavLink href="/settings" icon={BellIcon}>Invitations</NavLink>
+                )}
                 <NavLink href="/search" icon={MagnifyingGlassIcon}>Search</NavLink>
               </>
             )}
@@ -124,6 +151,7 @@ export default function Header() {
                       <MobileNavLink href="/articles" icon={BookOpenIcon}>Articles</MobileNavLink>
                       <MobileNavLink href="/authors" icon={UserGroupIcon}>Authors</MobileNavLink>
                       <MobileNavLink href="/settings" icon={CogIcon}>Settings</MobileNavLink>
+                      <MobileNavLink href="/invitations" icon={BellIcon}>Invitations {invitationCount > 0 && `(${invitationCount})`}</MobileNavLink>
                       <MobileNavLink href="/search" icon={MagnifyingGlassIcon}>Search</MobileNavLink>
                     </>
                   )}
