@@ -24,12 +24,19 @@ export default function Invitations() {
     if (status === "unauthenticated") {
       router.replace("/login");
     }
+  }, [status, router]);
+
+  useEffect(() => {
     if (session?.accessToken) {
-      dispatch(fetchInvitationsIfNeeded(session.accessToken)).finally(() => {
-        setLoading(false);
-      });
+      dispatch(fetchInvitationsIfNeeded(session.accessToken));
     }
-  }, [session?.accessToken, status, router, dispatch]);
+  }, [session?.accessToken, dispatch]);
+
+  useEffect(() => {
+    if (session?.accessToken) {
+      setLoading(false);
+    }
+  }, [session?.accessToken]);
 
   const handleAccept = (invitationId: number) => {
     api.post(`/team/invitations/${invitationId}/accept`, {}, session?.accessToken).then((data) => {
