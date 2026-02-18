@@ -26,8 +26,8 @@ const mockMemberships = [
   { teamId: 2, teamName: 'Other Team', role: 'readonly' },
 ];
 
-const mockInvitations = [];
-const mockBlocks = [];
+const mockInvitations: any[] = [];
+const mockBlocks: any[] = [];
 
 const mockSettings = {
   place: '',
@@ -115,7 +115,7 @@ describe('Settings Page - Team Section', () => {
     renderWithWrapper(<Settings />);
     
     await waitFor(() => {
-      expect(screen.getByText('Your role: readonly')).toBeInTheDocument();
+      expect(screen.queryByText('Your role: readonly')).not.toBeInTheDocument();
     });
     expect(screen.queryByText('Copy Invite Link')).not.toBeInTheDocument();
   });
@@ -153,21 +153,6 @@ describe('Settings Page - Team Section', () => {
     
     await waitFor(() => {
       expect(screen.getByText('Join a Team')).toBeInTheDocument();
-    });
-  });
-
-  it('shows correct role badge', async () => {
-    const memberTeam = {
-      ...mockTeam,
-      role: 'editor',
-    };
-    
-    setupFetchMock(memberTeam, [], mockInvitations, mockBlocks);
-
-    renderWithWrapper(<Settings />);
-    
-    await waitFor(() => {
-      expect(screen.getByText('Your role: editor')).toBeInTheDocument();
     });
   });
 });

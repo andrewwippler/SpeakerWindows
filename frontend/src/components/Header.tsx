@@ -5,40 +5,95 @@ import Image from "next/image";
 import { Bars3Icon, XMarkIcon } from "@heroicons/react/24/outline";
 import { Dialog } from "@headlessui/react";
 import fetchJson from "@/library/fetchJson";
-import { PlusIcon, TagIcon, BookOpenIcon, UserGroupIcon, CogIcon, MagnifyingGlassIcon, BellIcon } from "@heroicons/react/24/solid";
+import {
+  PlusIcon,
+  TagIcon,
+  BookOpenIcon,
+  UserGroupIcon,
+  CogIcon,
+  MagnifyingGlassIcon,
+  BellIcon,
+} from "@heroicons/react/24/solid";
 import { useSession } from "next-auth/react";
 import LoginBtn from "./LoginBtn";
 import api from "@/library/api";
 
-function NavLink({ href, icon: Icon, children }: { href: string; icon: any; children: React.ReactNode }) {
+function NavLink({
+  href,
+  icon: Icon,
+  invitationCount,
+  children,
+}: {
+  href: string;
+  icon?: any;
+  invitationCount?: number;
+  children: React.ReactNode;
+}) {
   const router = useRouter();
-  const isActive = router.pathname === href || (href !== '/' && router.pathname.startsWith(href));
+  const isActive =
+    router.pathname === href ||
+    (href !== "/" && router.pathname.startsWith(href));
+  // if the href is settings, have a bell icon if there are pending invitations
+  if (href === "/settings") {
+    return (
+      <Link
+        href={href}
+        className={`text-sm font-semibold leading-6 flex items-center ${
+          isActive ? "text-sky-900" : "text-sky-100 hover:text-sky-900"
+        }`}
+      >
+        {Icon ? (
+          <span className="relative mr-1.5">
+            <Icon className="h-5 w-5" />
+
+            {(invitationCount ?? 0) > 0 && (
+              <BellIcon
+                className="absolute -top-1 -right-1 h-3 w-3 text-red-500"
+                aria-hidden="true"
+              />
+            )}
+          </span>
+        ) : null}
+        {children}
+      </Link>
+    );
+  }
 
   return (
     <Link
       href={href}
       className={`text-sm font-semibold leading-6 flex items-center ${
-        isActive ? 'text-sky-900' : 'text-sky-100 hover:text-sky-900'
+        isActive ? "text-sky-900" : "text-sky-100 hover:text-sky-900"
       }`}
     >
-      <Icon className="h-5 w-5 mr-1.5" />
+      {Icon ? <Icon className="h-5 w-5 mr-1.5" /> : null}
       {children}
     </Link>
   );
 }
 
-function MobileNavLink({ href, icon: Icon, children }: { href: string; icon: any; children: React.ReactNode }) {
+function MobileNavLink({
+  href,
+  icon: Icon,
+  children,
+}: {
+  href: string;
+  icon: any;
+  children: React.ReactNode;
+}) {
   const router = useRouter();
-  const isActive = router.pathname === href || (href !== '/' && router.pathname.startsWith(href));
+  const isActive =
+    router.pathname === href ||
+    (href !== "/" && router.pathname.startsWith(href));
 
   return (
     <Link
       href={href}
       className={`-mx-3 flex items-center rounded-lg py-2 px-3 text-base font-semibold leading-7 ${
-        isActive ? 'bg-sky-900 text-white' : 'text-sky-300 hover:bg-sky-900'
+        isActive ? "bg-sky-900 text-white" : "text-sky-300 hover:bg-sky-900"
       }`}
     >
-      <Icon className="h-5 w-5 mr-3" />
+      {Icon ? <Icon className="h-5 w-5 mr-3" /> : null}
       {children}
     </Link>
   );
@@ -92,27 +147,28 @@ export default function Header() {
           <div className="hidden lg:flex lg:gap-x-12">
             {session && (
               <>
-                <NavLink href="/" icon={TagIcon}>Tags</NavLink>
-                <NavLink href="/new-illustration" icon={PlusIcon}>New Illustration</NavLink>
-                <NavLink href="/articles" icon={BookOpenIcon}>Articles</NavLink>
-                <NavLink href="/authors" icon={UserGroupIcon}>Authors</NavLink>
-                <NavLink href="/settings" icon={CogIcon}>Settings</NavLink>
-                {invitationCount > 0 && (
-                  <Link
-                    href="/invitations"
-                    className="text-sm font-semibold leading-6 flex items-center text-orange-600"
-                  >
-                    <BellIcon className="h-5 w-5 mr-1.5" />
-                    Invitations
-                    <span className="ml-1 bg-orange-500 text-white text-xs rounded-full px-1.5 py-0.5">
-                      {invitationCount}
-                    </span>
-                  </Link>
-                )}
-                {invitationCount === 0 && (
-                  <NavLink href="/settings" icon={BellIcon}>Invitations</NavLink>
-                )}
-                <NavLink href="/search" icon={MagnifyingGlassIcon}>Search</NavLink>
+                <NavLink href="/" icon={TagIcon}>
+                  Tags
+                </NavLink>
+                <NavLink href="/new-illustration" icon={PlusIcon}>
+                  New Illustration
+                </NavLink>
+                <NavLink href="/articles" icon={BookOpenIcon}>
+                  Articles
+                </NavLink>
+                <NavLink href="/authors" icon={UserGroupIcon}>
+                  Authors
+                </NavLink>
+                <NavLink
+                  href="/settings"
+                  icon={CogIcon}
+                  invitationCount={invitationCount}
+                >
+                  Settings
+                </NavLink>
+                <NavLink href="/search" icon={MagnifyingGlassIcon}>
+                  Search
+                </NavLink>
               </>
             )}
           </div>
@@ -146,19 +202,35 @@ export default function Header() {
                 <div className="space-y-2 py-6">
                   {session && (
                     <>
-                      <MobileNavLink href="/" icon={TagIcon}>Tags</MobileNavLink>
-                      <MobileNavLink href="/new-illustration" icon={PlusIcon}>New Illustration</MobileNavLink>
-                      <MobileNavLink href="/articles" icon={BookOpenIcon}>Articles</MobileNavLink>
-                      <MobileNavLink href="/authors" icon={UserGroupIcon}>Authors</MobileNavLink>
-                      <MobileNavLink href="/settings" icon={CogIcon}>Settings</MobileNavLink>
-                      <MobileNavLink href="/invitations" icon={BellIcon}>Invitations {invitationCount > 0 && `(${invitationCount})`}</MobileNavLink>
-                      <MobileNavLink href="/search" icon={MagnifyingGlassIcon}>Search</MobileNavLink>
+                      <MobileNavLink href="/" icon={TagIcon}>
+                        Tags
+                      </MobileNavLink>
+                      <MobileNavLink href="/new-illustration" icon={PlusIcon}>
+                        New Illustration
+                      </MobileNavLink>
+                      <MobileNavLink href="/articles" icon={BookOpenIcon}>
+                        Articles
+                      </MobileNavLink>
+                      <MobileNavLink href="/authors" icon={UserGroupIcon}>
+                        Authors
+                      </MobileNavLink>
+                      <MobileNavLink href="/settings" icon={CogIcon}>
+                        <span className="relative">
+                          <CogIcon className="h-5 w-5 mr-3" />
+            {(invitationCount ?? 0) > 0 && (
+                            <BellIcon className="h-3 w-3 absolute -top-1 -right-2 text-red-500" />
+                          )}
+                        </span>
+                        Settings
+                      </MobileNavLink>
+                      <MobileNavLink href="/search" icon={MagnifyingGlassIcon}>
+                        Search
+                      </MobileNavLink>
                     </>
                   )}
                 </div>
                 <div className="py-6">
                   <LoginBtn />
-
                 </div>
               </div>
             </div>

@@ -46,9 +46,8 @@ interface TeamMembership {
 
 interface PendingInvitation {
   id: number;
-  userId: number;
-  username: string;
-  email: string;
+  teamId: number;
+  teamName: string;
   role: string;
 }
 
@@ -89,7 +88,7 @@ export default function Settings() {
           setMemberships(data);
         }
       });
-      api.get("/team/invitations", {}, session.accessToken).then((data) => {
+      api.get("/user/invitations", {}, session.accessToken).then((data) => {
         if (Array.isArray(data)) {
           setPendingInvitations(data);
         }
@@ -192,11 +191,11 @@ export default function Settings() {
             setPendingInvitations(data);
           }
         });
-        setShowInviteModal(false);
         setInviteEmail("");
       } else {
         dispatch(setFlashMessage({ severity: "danger", message: data.message || "Failed to send invitation" }));
       }
+      setShowInviteModal(false);
     });
   };
 
@@ -207,6 +206,42 @@ export default function Settings() {
         setPendingInvitations(pendingInvitations.filter((i) => i.id !== invitationId));
       } else {
         dispatch(setFlashMessage({ severity: "danger", message: data.message || "Failed to cancel invitation" }));
+      }
+    });
+  };
+
+  const acceptInvitation = (invitationId: number) => {
+    api.post(`/team/invitations/${invitationId}/accept`, {}, session?.accessToken).then((data) => {
+      if (data.message === "Invitation accepted") {
+        dispatch(setFlashMessage({ severity: "info", message: "Joined team successfully" }));
+        setPendingInvitations(pendingInvitations.filter((i) => i.id !== invitationId));
+        api.get("/team", {}, session?.accessToken).then((data) => {
+          if (data && !data.message) {
+            setTeam(data);
+            setTeamName(data.name);
+          }
+        });
+        refreshMemberships();
+      } else {
+        dispatch(setFlashMessage({ severity: "danger", message: data.message || "Failed to accept invitation" }));
+      }
+    });
+  };
+
+  const blockTeamFromInvitation = (teamId: number, invitationId: number) => {
+    api.post(`/user/blocks`, { teamId }, session?.accessToken).then((data) => {
+      if (data.message === "Team blocked") {
+        dispatch(setFlashMessage({ severity: "info", message: "Team blocked" }));
+        api.delete(`/team/invitations/${invitationId}`, {}, session?.accessToken).then(() => {
+          setPendingInvitations(pendingInvitations.filter((i) => i.id !== invitationId));
+        });
+        api.get("/user/blocks", {}, session?.accessToken).then((data) => {
+          if (Array.isArray(data)) {
+            setBlockedTeams(data);
+          }
+        });
+      } else {
+        dispatch(setFlashMessage({ severity: "danger", message: data.message || "Failed to block team" }));
       }
     });
   };
@@ -301,9 +336,9 @@ export default function Settings() {
                   <UsersIcon className="h-6 w-6 mr-2 text-sky-900" />
                   <h2 className="text-lg font-bold text-sky-900">Team</h2>
                 </div>
-                
+
                 {/* Joined Teams Section - Show if user is member of another team */}
-                {memberships.length > 0 && (
+                {team && memberships.length > 0  ? (
                   <div className="border rounded-md p-4 bg-blue-50 mb-4">
                     <h3 className="text-md font-semibold text-blue-900 mb-2">You are a member of:</h3>
                     {memberships.map((membership) => (
@@ -321,10 +356,7 @@ export default function Settings() {
                       </div>
                     ))}
                   </div>
-                )}
-
-                {/* Own Team Section */}
-                {team ? (
+                ) : (
                   <div className="border rounded-md p-4 bg-gray-50">
                     <div className="flex items-center justify-between mb-4">
                       {isEditingName ? (
@@ -350,8 +382,8 @@ export default function Settings() {
                         </div>
                       ) : (
                         <>
-                          <h3 className="text-md font-semibold">{team.name}</h3>
-                          {(team.role === 'owner' || team.role === 'creator') && (
+                          <h3 className="text-md font-semibold">{team?.name}</h3>
+                          {(team?.role === 'owner' || team?.role === 'creator') && (
                             <button
                               onClick={() => setIsEditingName(true)}
                               className="text-sm text-gray-500 hover:text-gray-700"
@@ -363,11 +395,11 @@ export default function Settings() {
                       )}
                     </div>
 
-                    {/* Show invite link only for owner/creator OR owner with no members in another team */}
-                    {(team.role === 'owner' || team.role === 'creator') && memberships.length === 0 && (
+                    {/* Show invite link only for owner/creator OR owner with no members in another team AND if there are no pending invites */}
+                    {(team?.role === 'owner' || team?.role === 'creator') && memberships.length === 0 && pendingInvitations.length === 0 && (
                       <>
                         <div className="mb-4">
-                          <p className="text-sm text-gray-500 mb-2">Invite Code: {team.inviteCode}</p>
+                          <p className="text-sm text-gray-500 mb-2">Invite Code: {team?.inviteCode}</p>
                           <button
                             onClick={copyInviteLink}
                             className="text-sm bg-indigo-600 text-white px-3 py-1 rounded-md hover:bg-indigo-500"
@@ -378,7 +410,7 @@ export default function Settings() {
 
                         <div className="flex items-center justify-between">
                           <p className="text-sm text-gray-500">
-                            {team.members?.length || 0} member{(team.members?.length || 0) !== 1 ? 's' : ''}
+                            {team?.members?.length || 0} member{(team?.members?.length || 0) !== 1 ? 's' : ''}
                           </p>
                           <div className="flex gap-2">
                             <button
@@ -396,42 +428,62 @@ export default function Settings() {
                           </div>
                         </div>
 
-                        {/* Pending Invitations */}
-                        {pendingInvitations.length > 0 && (
-                          <div className="mt-4 pt-4 border-t">
-                            <p className="text-sm font-medium text-gray-700 mb-2">Pending Invitations</p>
-                            {pendingInvitations.map((inv) => (
-                              <div key={inv.id} className="flex items-center justify-between py-2 text-sm">
-                                <div>
-                                  <span className="text-gray-900">{inv.email}</span>
-                                  <span className="ml-2 text-gray-500 capitalize">({inv.role})</span>
-                                </div>
-                                <button
-                                  onClick={() => cancelInvitation(inv.id)}
-                                  className="text-red-600 hover:text-red-500"
-                                >
-                                  Cancel
-                                </button>
-                              </div>
-                            ))}
-                          </div>
-                        )}
+
                       </>
                     )}
 
+
+
                     {/* Show role badge for non-owner members */}
-                    {team.role && team.role !== 'owner' && (
-                      <p className="text-sm text-gray-500 capitalize">Your role: {team.role}</p>
+                    {team?.role && team?.role !== 'owner' && (
+                      <p className="text-sm text-gray-500 capitalize">Your role: {team?.role}</p>
                     )}
                   </div>
-                ) : (
-                  <p className="text-sm text-gray-500">Loading team...</p>
-                )}
+                ) }
               </div>
             </div>
 
-            {/* Join Team Section - Only show if user is owner with no members and not already member of another team */}
-            {team && team.role === 'owner' && memberships.length === 0 && (team.members?.length || 0) === 0 && (
+            {/* Pending Invitations Section - Show if user has pending invitations */}
+            {pendingInvitations.length > 0 && (
+              <div className="mt-6 grid grid-cols-1 gap-x-6 gap-y-4 sm:grid-cols-6">
+                <div className="sm:col-span-6">
+                  <h3 className="text-sm font-medium text-gray-900 mb-2">Pending Invitations</h3>
+                  {pendingInvitations.map((inv) => (
+                    <div key={inv.id} className="border rounded-md p-4 bg-yellow-50 mb-2">
+                      <div className="flex items-center justify-between mb-2">
+                        <div>
+                          <p className="font-medium text-gray-900">{inv.teamName}</p>
+                          <p className="text-sm text-gray-500 capitalize">Role: {inv.role}</p>
+                        </div>
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => acceptInvitation(inv.id)}
+                            className="text-sm bg-green-600 text-white px-3 py-1 rounded-md hover:bg-green-500"
+                          >
+                            Join
+                          </button>
+                          <button
+                            onClick={() => cancelInvitation(inv.id)}
+                            className="text-sm bg-yellow-600 text-white px-3 py-1 rounded-md hover:bg-yellow-500"
+                          >
+                            Decline
+                          </button>
+                          <button
+                            onClick={() => blockTeamFromInvitation(inv.teamId, inv.id)}
+                            className="text-sm bg-red-600 text-white px-3 py-1 rounded-md hover:bg-red-500"
+                          >
+                            Block
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Join Team by Code - Show if user has no team */}
+            {!team && (
               <div className="mt-6 grid grid-cols-1 gap-x-6 gap-y-4 sm:grid-cols-6">
                 <div className="sm:col-span-6">
                   <h3 className="text-sm font-medium text-gray-900 mb-2">Join a Team</h3>
