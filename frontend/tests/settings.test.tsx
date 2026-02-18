@@ -1,7 +1,8 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import { TestWrapper } from './test-utils';
 import Settings from '../src/pages/settings';
-import mockApi from './__mocks__/api';
+
+declare const global: { fetch: jest.Mock };
 
 const mockTeam = {
   id: 1,
@@ -25,73 +26,82 @@ const mockMemberships = [
   { teamId: 2, teamName: 'Other Team', role: 'readonly' },
 ];
 
-describe('Settings Page - Team Section', () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
-    mockApi.get.mockImplementation((url: string) => {
-      if (url === '/team') {
-        return Promise.resolve(mockTeam);
-      }
-      if (url === '/team/memberships') {
-        return Promise.resolve([]);
-      }
-      return Promise.resolve({});
-    });
-  });
+const mockInvitations = [];
+const mockBlocks = [];
 
+const mockSettings = {
+  place: '',
+  location: '',
+  count: 0,
+};
+
+describe('Settings Page - Team Section', () => {
   const renderWithWrapper = (ui: React.ReactElement) => {
     return render(ui, { wrapper: TestWrapper });
   };
 
-  it('shows "joined team" section when user is member of another team', async () => {
-    mockApi.get.mockImplementation((url: string) => {
-      if (url === '/team') {
-        return Promise.resolve(mockTeam);
+  const setupFetchMock = (team: any, memberships: any[], invitations: any[], blocks: any[]) => {
+    global.fetch.mockImplementation((url: string) => {
+      const urlStr = url.toString();
+      
+      if (urlStr.includes('/team/memberships')) {
+        return Promise.resolve({ ok: true, json: () => Promise.resolve(memberships) });
       }
-      if (url === '/team/memberships') {
-        return Promise.resolve(mockMemberships);
+      
+      if (urlStr.includes('/team/invitations')) {
+        return Promise.resolve({ ok: true, json: () => Promise.resolve(invitations) });
       }
-      return Promise.resolve({});
+      
+      if (urlStr.includes('/user/blocks')) {
+        return Promise.resolve({ ok: true, json: () => Promise.resolve(blocks) });
+      }
+      
+      if (urlStr.includes('/team') && !urlStr.includes('/team/') && !urlStr.includes('/teamem')) {
+        return Promise.resolve({ ok: true, json: () => Promise.resolve(team) });
+      }
+      
+      if (urlStr.includes('/user/invitations')) {
+        return Promise.resolve({ ok: true, json: () => Promise.resolve([]) });
+      }
+      
+      if (urlStr.includes('/settings')) {
+        return Promise.resolve({ ok: true, json: () => Promise.resolve(mockSettings) });
+      }
+      
+      return Promise.resolve({ ok: true, json: () => Promise.resolve({}) });
     });
+  };
+
+  it('shows "joined team" section when user is member of another team', async () => {
+    setupFetchMock(mockTeam, mockMemberships, mockInvitations, mockBlocks);
 
     renderWithWrapper(<Settings />);
     
-    await screen.findByText('You are a member of:');
+    await waitFor(() => {
+      expect(screen.getByText('You are a member of:')).toBeInTheDocument();
+    });
     expect(screen.getByText('Other Team')).toBeInTheDocument();
   });
 
   it('hides "Join a Team" when already member of another team', async () => {
-    mockApi.get.mockImplementation((url: string) => {
-      if (url === '/team') {
-        return Promise.resolve(mockTeam);
-      }
-      if (url === '/team/memberships') {
-        return Promise.resolve(mockMemberships);
-      }
-      return Promise.resolve({});
-    });
+    setupFetchMock(mockTeam, mockMemberships, mockInvitations, mockBlocks);
 
     renderWithWrapper(<Settings />);
     
-    await screen.findByText('You are a member of:');
+    await waitFor(() => {
+      expect(screen.getByText('You are a member of:')).toBeInTheDocument();
+    });
     expect(screen.queryByText('Join a Team')).not.toBeInTheDocument();
   });
 
   it('shows "Leave Team" button for members of other teams', async () => {
-    mockApi.get.mockImplementation((url: string) => {
-      if (url === '/team') {
-        return Promise.resolve(mockTeam);
-      }
-      if (url === '/team/memberships') {
-        return Promise.resolve(mockMemberships);
-      }
-      return Promise.resolve({});
-    });
+    setupFetchMock(mockTeam, mockMemberships, mockInvitations, mockBlocks);
 
     renderWithWrapper(<Settings />);
     
-    await screen.findByText('Leave Team');
-    expect(screen.getByText('Leave Team')).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByText('Leave Team')).toBeInTheDocument();
+    });
   });
 
   it('hides invite link when user is just a member (not owner/creator)', async () => {
@@ -100,19 +110,13 @@ describe('Settings Page - Team Section', () => {
       role: 'readonly',
     };
     
-    mockApi.get.mockImplementation((url: string) => {
-      if (url === '/team') {
-        return Promise.resolve(memberTeam);
-      }
-      if (url === '/team/memberships') {
-        return Promise.resolve([]);
-      }
-      return Promise.resolve({});
-    });
+    setupFetchMock(memberTeam, [], mockInvitations, mockBlocks);
 
     renderWithWrapper(<Settings />);
     
-    await screen.findByText('Your role: readonly');
+    await waitFor(() => {
+      expect(screen.getByText('Your role: readonly')).toBeInTheDocument();
+    });
     expect(screen.queryByText('Copy Invite Link')).not.toBeInTheDocument();
   });
 
@@ -122,54 +126,34 @@ describe('Settings Page - Team Section', () => {
       role: 'creator',
     };
     
-    mockApi.get.mockImplementation((url: string) => {
-      if (url === '/team') {
-        return Promise.resolve(creatorTeam);
-      }
-      if (url === '/team/memberships') {
-        return Promise.resolve([]);
-      }
-      return Promise.resolve({});
-    });
+    setupFetchMock(creatorTeam, [], mockInvitations, mockBlocks);
 
     renderWithWrapper(<Settings />);
     
-    await screen.findByText('Copy Invite Link');
-    expect(screen.getByText('Copy Invite Link')).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByText('Copy Invite Link')).toBeInTheDocument();
+    });
   });
 
   it('owner with members cannot join another team', async () => {
-    mockApi.get.mockImplementation((url: string) => {
-      if (url === '/team') {
-        return Promise.resolve(mockTeam);
-      }
-      if (url === '/team/memberships') {
-        return Promise.resolve([]);
-      }
-      return Promise.resolve({});
-    });
+    setupFetchMock(mockTeam, [], mockInvitations, mockBlocks);
 
     renderWithWrapper(<Settings />);
     
-    await screen.findByText('Edit Members');
+    await waitFor(() => {
+      expect(screen.getByText('Edit Members')).toBeInTheDocument();
+    });
     expect(screen.queryByText('Join a Team')).not.toBeInTheDocument();
   });
 
   it('owner without members sees "Join a Team"', async () => {
-    mockApi.get.mockImplementation((url: string) => {
-      if (url === '/team') {
-        return Promise.resolve(mockEmptyTeam);
-      }
-      if (url === '/team/memberships') {
-        return Promise.resolve([]);
-      }
-      return Promise.resolve({});
-    });
+    setupFetchMock(mockEmptyTeam, [], mockInvitations, mockBlocks);
 
     renderWithWrapper(<Settings />);
     
-    await screen.findByText('Join a Team');
-    expect(screen.getByText('Join a Team')).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByText('Join a Team')).toBeInTheDocument();
+    });
   });
 
   it('shows correct role badge', async () => {
@@ -178,19 +162,12 @@ describe('Settings Page - Team Section', () => {
       role: 'editor',
     };
     
-    mockApi.get.mockImplementation((url: string) => {
-      if (url === '/team') {
-        return Promise.resolve(memberTeam);
-      }
-      if (url === '/team/memberships') {
-        return Promise.resolve([]);
-      }
-      return Promise.resolve({});
-    });
+    setupFetchMock(memberTeam, [], mockInvitations, mockBlocks);
 
     renderWithWrapper(<Settings />);
     
-    await screen.findByText('Your role: editor');
-    expect(screen.getByText('Your role: editor')).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByText('Your role: editor')).toBeInTheDocument();
+    });
   });
 });

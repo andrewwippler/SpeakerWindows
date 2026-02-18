@@ -7,7 +7,7 @@ const mockStore = configureStore({
   reducer: {
     flash: (state = {}) => state,
     ui: (state = {}) => state,
-    user: (state = {}) => state,
+    user: (state = { settings: { place: '', location: '', count: 0 } }) => state,
     modal: (state = { show: false, itemToDelete: null }) => state,
     search: (state = {}) => state,
   },
