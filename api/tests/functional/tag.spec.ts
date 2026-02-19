@@ -199,7 +199,7 @@ test.group('Tag', (group) => {
       .json(updatedTag)
 
     response.assertStatus(400)
-    console.log(response.body())
+    // console.log(response.body())
     assert.equal(
       response.body()[0].message,
       'Cannot update tag with the same name of an existing tag'

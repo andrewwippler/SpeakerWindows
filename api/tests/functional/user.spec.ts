@@ -178,7 +178,7 @@ test.group('Users', (group) => {
     await client.post('/login').json(user)
     await client.post('/login').json(user)
     const login = await client.post('/login').json(user)
-    console.log(login.body())
+    // console.log(login.body())
     login.assertStatus(429)
     assert.equal(login.body().message, 'Too many requests. Please wait 30 minutes and try again.')
   })
