@@ -24,6 +24,7 @@ export default function Tags({ token }: TagsProps) {
 
     const refreshData = (token: string | undefined) => {
       const teamId = session?.team?.id;
+      console.log("refreshing tag data with teamId: ", teamId, session);
       const params = teamId ? { team_id: teamId } : {};
       api
         .get("/tags", params, token)
