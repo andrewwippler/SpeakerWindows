@@ -456,12 +456,11 @@ export default class IllustrationsController {
   }
 
   public async index({ auth }: HttpContext) {
-    const user = auth.user!
-    const userId = user.id
+
+    const userId = auth.user?.id
 
     // Get all team IDs the user belongs to
     const teamIds = await getUserTeamIds(userId)
-
     // Get illustrations:
     // 1. Own illustrations (user_id matches)
     // 2. Team illustrations (team_id in user's teams AND not private)
@@ -474,8 +473,8 @@ export default class IllustrationsController {
           })
         }
       })
-      .preload('user', (q) => q.select('id', 'username'))
-      .orderBy('created_at', 'desc')
+      .preload('user')
+      .orderBy('created_at', 'desc').exec()
 
     return illustrations
   }

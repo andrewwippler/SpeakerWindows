@@ -15,7 +15,7 @@ export default class AuthorsController {
    * @param {View} ctx.view
    */
   public async index({ auth, request, response }: HttpContext) {
-    const teamIdQuery = request.qs().team_id
+    const teamIdQuery = request.input('team_id')
     let teamId: number | null = null
     if (teamIdQuery !== undefined && teamIdQuery !== 'null') {
       teamId = Number(teamIdQuery)
@@ -74,7 +74,7 @@ export default class AuthorsController {
    */
   public async show({ params, auth, request, response }: HttpContext) {
     const theauthor = decodeURI(_.get(params, 'name', ''))
-    const teamIdQuery = request.qs().team_id
+    const teamIdQuery = request.input('team_id')
     const userId = auth.user?.id
 
     let builder = Illustration.query()

@@ -1,10 +1,11 @@
 import type { HttpContext } from '@adonisjs/core/http'
-import _ from 'lodash'
+import _, { orderBy } from 'lodash'
 import Tag from '#models/tag'
 import TeamMember from '#models/team_member'
 import Team from '#models/team'
 import { TagValidator } from '#validators/TagValidator'
 import { editTag } from '#app/abilities/main'
+import { QueryClient } from '@adonisjs/lucid/database'
 
 export default class TagsController {
   /**
@@ -17,28 +18,28 @@ export default class TagsController {
    * @param {View} ctx.view
    */
   public async index({ auth, request }: HttpContext) {
-    const teamIdQuery = request.qs().team_id
-    let teamId: number | null = null
-    if (teamIdQuery !== undefined && teamIdQuery !== 'null') {
-      teamId = Number(teamIdQuery)
-    }
+    const rawTeamId = request.input('team_id')
+
+    const teamId =
+      rawTeamId && !isNaN(Number(rawTeamId))
+        ? Number(rawTeamId)
+        : null
 
     const userId = auth.user?.id
 
     if (teamId === null) {
       return await Tag.query()
         .where('user_id', `${userId}`)
-        .whereNull('team_id')
+        .andWhereNull('team_id')
         .orderBy('name')
     }
 
-    const isMember = await TeamMember.query()
-      .where('team_id', teamId)
-      .where('user_id', userId)
+    const team = await Team.query()
+      .where('id', teamId)
+      .preload('members')
       .first()
-
-    const team = await Team.find(teamId)
     const isOwner = team?.userId === userId
+    const isMember = team?.members.some(m => m.userId === userId)
 
     if (!isMember && !isOwner) {
       return []
@@ -107,17 +108,23 @@ export default class TagsController {
    */
   public async illustrations({ params, auth, request, response }: HttpContext) {
     const thetag = _.get(params, 'name', '')
-    const teamIdQuery = request.qs().team_id
+    const teamIdQuery = request.input('team_id')
 
     const userId = auth.user?.id
 
     let tag: Tag | null = null
 
-    if (!teamIdQuery || teamIdQuery === 'null') {
+    // search for members of team
+    // if members exist, search for tag by team id, otherwise search for tag by user id
+    const members = await Team.query().where('userId', userId)
+      .preload('members')
+      .first()
+
+    if (!teamIdQuery || teamIdQuery === 'null' || (teamIdQuery === userId && members?.members.length === 0)) {
+      console.log('searching for tag by user id')
       tag = await Tag.query()
         .where('name', thetag)
         .where('user_id', userId)
-        .whereNull('team_id')
         .first()
     } else {
       const teamId = Number(teamIdQuery)
@@ -147,7 +154,6 @@ export default class TagsController {
     const tagQuery = await tag
       .related('illustrations')
       .query()
-      .where('user_id', `${userId}`)
       .orderBy('title')
 
     if (tagQuery.length < 1) {
