@@ -156,7 +156,6 @@ export default class IllustrationsController {
     // Check all memberships and find one where team.user_id != user_id
     const allMemberships = await TeamMember.query()
       .where('user_id', user_id)
-      .exec()
 
     for (const membership of allMemberships) {
       const team = await Team.find(membership.teamId)
@@ -474,7 +473,7 @@ export default class IllustrationsController {
         }
       })
       .preload('user')
-      .orderBy('created_at', 'desc').exec()
+      .orderBy('created_at', 'desc')
 
     return illustrations
   }
