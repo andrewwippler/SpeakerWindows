@@ -32,11 +32,11 @@ export default class SettingsController {
       .where('user_id', `${auth.user?.id}`)
       .doesntHave('tags')
     const count2 = tagQuery2.length ? tagQuery2.length : 0
-    console.log({ message: 'settings', user_id: `${auth.user?.id}`, data: tagQuery2 })
+    // console.log({ message: 'settings', user_id: `${auth.user?.id}`, data: tagQuery2 })
     newSettings = { ...newSettings, emptyTags: count2 }
-    console.log({ message: 'settings', user_id: `${auth.user?.id}`, data: newSettings })
+    // console.log({ message: 'settings', user_id: `${auth.user?.id}`, data: newSettings })
 
-    console.log({ message: 'New', user_id: `${auth.user?.id}`, data: newSettings })
+    // console.log({ message: 'New', user_id: `${auth.user?.id}`, data: newSettings })
     return newSettings
   }
 

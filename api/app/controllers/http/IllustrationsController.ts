@@ -316,8 +316,8 @@ export default class IllustrationsController {
    */
   public async update({ params, auth, bouncer, request, response }: HttpContext) {
     const { author, title, source, content, tags, private: isPrivate } = request.all()
-    console.log('Update request body:', { author, title, source, content, tags, isPrivate })
-    console.log('Update request params:', request.all())
+    // console.log('Update request body:', { author, title, source, content, tags, isPrivate })
+    // console.log('Update request params:', request.all())
     // places are on their own URI. Tags can be in the illustration post
 
     let illustration = await Illustration.findByOrFail('id', _.get(params, 'id', 0))

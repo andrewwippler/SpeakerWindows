@@ -121,7 +121,7 @@ export default class TagsController {
       .first()
 
     if (!teamIdQuery || teamIdQuery === 'null' || (teamIdQuery === userId && members?.members.length === 0)) {
-      console.log('searching for tag by user id')
+      // console.log('searching for tag by user id')
       tag = await Tag.query()
         .where('name', thetag)
         .where('user_id', userId)
