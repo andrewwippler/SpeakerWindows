@@ -39,8 +39,8 @@ jobs:
           tags: |
             d.wplr.rocks/speakerwindows:api-${{ github.sha }}
             d.wplr.rocks/speakerwindows:api-latest
-            ghcr.io/${{ github.repository }}/api-${{ github.sha }}
-            ghcr.io/${{ github.repository }}/api-latest
+            ghcr.io/${{ github.repository_owner }}/speakerwindows:api-${{ github.sha }}
+            ghcr.io/${{ github.repository_owner }}/speakerwindows:api-latest
 
   build_frontend_container:
     runs-on: ubuntu-latest
@@ -73,8 +73,8 @@ jobs:
           tags: |
             d.wplr.rocks/speakerwindows:frontend-${{ github.sha }}
             d.wplr.rocks/speakerwindows:frontend-latest
-            ghcr.io/${{ github.repository }}/frontend-${{ github.sha }}
-            ghcr.io/${{ github.repository }}/frontend-latest
+            ghcr.io/${{ github.repository_owner }}/speakerwindows:frontend-${{ github.sha }}
+            ghcr.io/${{ github.repository_owner }}/speakerwindows:frontend-latest
 
   deploy:
     name: Deploy
