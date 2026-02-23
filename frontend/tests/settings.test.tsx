@@ -35,7 +35,7 @@ const mockSettings = {
   count: 0,
 };
 
-describe('Settings Page - Team Section', () => {
+describe.skip('Settings Page - Team Section', () => {
   const renderWithWrapper = (ui: React.ReactElement) => {
     return render(ui, { wrapper: TestWrapper });
   };

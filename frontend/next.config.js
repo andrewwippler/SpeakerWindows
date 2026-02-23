@@ -8,8 +8,6 @@ const nextConfig = {
         hostname: 'avatars.githubusercontent.com',
         pathname: '/**',
       },
-      // existing remote patterns
-
       {
         protocol: 'http',
         hostname: 'localhost',
@@ -27,4 +25,4 @@ const nextConfig = {
   output: 'standalone',
 }
 
-module.exports = nextConfig
+export default nextConfig

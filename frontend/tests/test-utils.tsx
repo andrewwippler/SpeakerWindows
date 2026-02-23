@@ -38,6 +38,9 @@ jest.mock('next-auth/react', () => {
     useSession: () => ({
       data: {
         accessToken: 'mock-token',
+        userId: 1,
+        team: null,
+        memberships: [],
       },
       status: 'authenticated',
     }),
