@@ -86,9 +86,16 @@ export default function Settings() {
 
   useEffect(() => {
     if (session?.accessToken) {
-      if (session.team) {
+      if (session.team?.members?.[0]?.email) {
         setTeam(session.team);
         setTeamName(session.team.name);
+      } else {
+        api.get("/team", {}, session.accessToken).then((data) => {
+          if (data && !data.message) {
+            setTeam(data);
+            setTeamName(data.name);
+          }
+        });
       }
       if (session.memberships) {
         setMemberships(session.memberships);
