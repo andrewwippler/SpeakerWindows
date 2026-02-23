@@ -485,7 +485,7 @@ export default function Settings() {
               <div className="mt-6 grid grid-cols-1 gap-x-6 gap-y-4 sm:grid-cols-6">
                 <div className="sm:col-span-6">
                   <h3 className="text-sm font-medium text-gray-900 mb-2">Join a Team</h3>
-                  <form
+                  <div
                     onSubmit={(e) => {
                       e.preventDefault();
                       const input = e.currentTarget.elements.namedItem('inviteCode') as HTMLInputElement;
@@ -503,10 +503,15 @@ export default function Settings() {
                     <button
                       type="submit"
                       className="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500"
+                      onClick={(e) => {
+                        const input = (e.currentTarget.parentElement?.elements.namedItem('inviteCode') as HTMLInputElement);
+                        handleJoinTeam(input.value);
+                        input.value = '';
+                      }}
                     >
                       Join
                     </button>
-                  </form>
+                  </div>
                 </div>
               </div>
             )}
