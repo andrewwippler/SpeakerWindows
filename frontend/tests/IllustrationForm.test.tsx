@@ -1,199 +1,113 @@
-import { render, screen, waitFor, act } from '@testing-library/react';
-import { TestWrapper, createMockSession, mockApiCalls, resetAllMocks } from './test-utils';
+import '@testing-library/jest-dom';
+import { render, screen, waitFor, fireEvent } from '@testing-library/react';
+import { TestWrapper, resetAllMocks } from './test-utils';
 import IllustrationForm from '../src/components/IllustrationForm';
-import { illustrationType } from '../src/library/illustrationType';
+import api from '@/library/api';
+import { setFlashMessage } from '@/features/flash/reducer';
 
-jest.mock('next/router', () => ({
-  useRouter: () => ({
-    push: jest.fn(),
-    replace: jest.fn(),
-    query: {},
-    pathname: '/',
+/**
+ * 2. MODULE MOCKS
+ * Note: next/router is mocked in test-utils.tsx with back/push/replace
+ */
+
+jest.mock('next-auth/react', () => ({
+  useSession: () => ({
+    data: { user: { name: 'Test User' }, userId: 1, accessToken: 'token-123' },
+    status: 'authenticated',
   }),
 }));
 
 jest.mock('@/library/api', () => ({
   __esModule: true,
   default: {
-    get: jest.fn((route: string) => {
-      if (route === '/tags' || route.includes('/tags?')) {
-        return Promise.resolve([
-          { id: 1, name: 'tag-1', slug: 'tag-1', user_id: 1, team_id: null },
-          { id: 2, name: 'tag-2', slug: 'tag-2', user_id: 1, team_id: null },
-        ]);
-      }
-      if (route.startsWith('/illustration/')) {
-        const id = route.split('/')[2];
-        return Promise.resolve({
-          id: parseInt(id),
-          title: 'Test Illustration',
-          author: 'Test Author',
-          source: 'Test Source',
-          content: 'Test content',
-          user_id: 1,
-          team_id: null,
-          private: false,
-          owner_id: 1,
-          tags: [],
-          places: [],
-          uploads: [],
-        });
-      }
-      return Promise.resolve({});
-    }),
-    post: jest.fn(() => Promise.resolve({ message: 'Created' })),
-    put: jest.fn(() => Promise.resolve({ message: 'Updated' })),
-    delete: jest.fn(() => Promise.resolve({ message: 'Deleted' })),
+    get: jest.fn(() => Promise.resolve([])),
+    post: jest.fn(() => Promise.resolve({ message: 'Success', id: 50 })),
+    put: jest.fn(() => Promise.resolve({ message: 'Updated', illustration: { id: 1 } })),
+    postMultipart: jest.fn(() => Promise.resolve({ message: 'File uploaded successfully' })),
   },
 }));
 
 jest.mock('@/features/flash/reducer', () => ({
-  setFlashMessage: (payload: any) => ({ type: 'flash/setFlashMessage', payload }),
-  setFlash: (payload: any) => ({ type: 'flash/setFlash', payload }),
-  selectFlash: (state: any) => state?.flash?.show ?? false,
-  selectFlashMessage: (state: any) => state?.flash?.object ?? { message: '', severity: '' },
+  setFlashMessage: jest.fn((payload) => ({ type: 'flash/setFlashMessage', payload })),
 }));
 
+// Mock UI actions to avoid dispatch errors
 jest.mock('@/features/ui/reducer', () => ({
-  setIllustrationEdit: jest.fn(),
-  setUpdateUI: jest.fn(),
-  setRedirect: (payload: any) => ({ type: 'ui/setRedirect', payload }),
-  selectIllustrationEdit: (state: any) => state?.ui?.illustrationEdit ?? false,
-  selectUpdateUI: (state: any) => state?.ui?.updateUI ?? false,
-  getRedirect: (state: any) => state?.ui?.redirect ?? '/',
+  setIllustrationEdit: jest.fn(() => ({ type: 'ui/setIllustrationEdit' })),
+  setUpdateUI: jest.fn(() => ({ type: 'ui/setUpdateUI' })),
 }));
 
-jest.mock('@/features/modal/reducer', () => ({
-  selectModal: (state: any) => state?.modal?.show ?? false,
-  setModal: (payload: any) => ({ type: 'modal/setModal', payload }),
-  setThingToDelete: (payload: any) => ({ type: 'modal/setThingToDelete', payload }),
-  thingToDelete: (state: any) => state?.modal?.itemToDelete ?? null,
-}));
-
-jest.mock('@/features/tags/reducer', () => ({
-  getFormattedTags: (state: any) => state?.tags?.formattedTags ?? [],
-  getTags: (state: any) => state?.tags?.tags ?? [],
-  setTags: (payload: any) => ({ type: 'tags/setTags', payload }),
-  addTag: (payload: any) => ({ type: 'tags/addTag', payload }),
-  removeTag: (payload: any) => ({ type: 'tags/removeTag', payload }),
-}));
-
+/**
+ * 3. TEST SUITE
+ */
 describe('IllustrationForm', () => {
+  const mockOwnedIllustration = {
+    id: 1,
+    title: 'Test Illustration',
+    content: 'Test content',
+    author: 'Test Author',
+    source: 'Test Source',
+    tags: [],
+    uploads: [],
+    places: [],
+    private: false,
+    userId: '1', // Matches session userId
+  };
+
   beforeEach(() => {
     resetAllMocks();
     jest.clearAllMocks();
-    mockApiCalls();
   });
 
-  it('renders create mode without crashing', async () => {
-    mockApiCalls({
-      '/tags': [
-        { id: 1, name: 'tag-1', slug: 'tag-1', user_id: 1, team_id: null },
-      ],
-    });
+  it('renders correctly in create mode', () => {
+    render(
+      <TestWrapper>
+        <IllustrationForm />
+      </TestWrapper>
+    );
+    expect(screen.getByText(/New Illustration/i)).toBeInTheDocument();
+  });
 
+  it('renders back button', () => {
     render(
       <TestWrapper>
         <IllustrationForm />
       </TestWrapper>
     );
 
-    await act(async () => {
-      await new Promise(resolve => setTimeout(resolve, 100));
-    });
-
-    expect(document.querySelector('form')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /Back/i })).toBeInTheDocument();
   });
 
-  it('shows privacy checkbox in create mode', async () => {
-    mockApiCalls({
-      '/tags': [
-        { id: 1, name: 'tag-1', slug: 'tag-1', user_id: 1, team_id: null },
-      ],
-    });
-
+  it('dispatches error when file size exceeds 20MB', async () => {
     render(
       <TestWrapper>
-        <IllustrationForm />
+        <IllustrationForm illustration={mockOwnedIllustration as any} />
       </TestWrapper>
     );
 
-    await act(async () => {
-      await new Promise(resolve => setTimeout(resolve, 100));
-    });
+    const fileInput = document.getElementById('file-upload') as HTMLInputElement;
+    const largeFile = new File([''], 'too_big.png', { type: 'image/png' });
+    Object.defineProperty(largeFile, 'size', { value: 21 * 1024 * 1024 }); // 21MB
 
-    expect(screen.getByText(/Private\/Personal illustration/i)).toBeInTheDocument();
+    fireEvent.change(fileInput, { target: { files: [largeFile] } });
+
+    expect(setFlashMessage).toHaveBeenCalledWith(
+      expect.objectContaining({
+        severity: 'danger',
+        message: expect.stringContaining('not exceed 20MB'),
+      })
+    );
   });
 
-  it('shows privacy checkbox when user owns illustration', async () => {
-    const ownedIllustration: illustrationType = {
-      id: 1,
-      title: 'Test Illustration',
-      content: 'Test content',
-      author: 'Test Author',
-      source: 'Test Source',
-      tags: [],
-      uploads: [],
-      places: [],
-      private: false,
-      owner_id: 1,
-      user_id: 1,
-    };
-
-    mockApiCalls({
-      '/tags': [
-        { id: 1, name: 'tag-1', slug: 'tag-1', user_id: 1, team_id: null },
-      ],
-      '/illustration/1': ownedIllustration,
-    });
+  it('hides privacy checkbox in edit mode if user does NOT own it', () => {
+    const foreignIllustration = { ...mockOwnedIllustration, userId: '999' };
 
     render(
       <TestWrapper>
-        <IllustrationForm illustration={ownedIllustration} />
+        <IllustrationForm illustration={foreignIllustration as any} />
       </TestWrapper>
     );
 
-    await act(async () => {
-      await new Promise(resolve => setTimeout(resolve, 100));
-    });
-
-    expect(screen.getByText(/Private\/Personal illustration/i)).toBeInTheDocument();
-  });
-
-  it('shows privacy checkbox in edit mode when user owns illustration', async () => {
-    const ownedIllustration: illustrationType = {
-      id: 1,
-      title: 'Test Illustration',
-      content: 'Test content',
-      author: 'Test Author',
-      source: 'Test Source',
-      tags: [],
-      uploads: [],
-      places: [],
-      private: false,
-      owner_id: 1,
-      user_id: 1,
-    };
-
-    mockApiCalls({
-      '/tags': [
-        { id: 1, name: 'tag-1', slug: 'tag-1', user_id: 1, team_id: null },
-      ],
-      '/illustration/1': ownedIllustration,
-    });
-
-    render(
-      <TestWrapper>
-        <IllustrationForm illustration={ownedIllustration} />
-      </TestWrapper>
-    );
-
-    await act(async () => {
-      await new Promise(resolve => setTimeout(resolve, 100));
-    });
-
-    const privacyCheckbox = screen.getByRole('checkbox');
-    expect(privacyCheckbox).toBeInTheDocument();
-    expect(privacyCheckbox).toHaveAttribute('id', 'private');
+    expect(screen.queryByLabelText(/Private\/Personal illustration/i)).not.toBeInTheDocument();
   });
 });

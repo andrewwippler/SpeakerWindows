@@ -1,8 +1,7 @@
-import { createSlice } from '@reduxjs/toolkit'
+import { createSlice, createSelector } from '@reduxjs/toolkit'
 import { HYDRATE } from 'next-redux-wrapper';
 import type { AppState } from '@/store'
 import { tagType } from '@/library/tagtype'
-import _ from 'lodash'
 
 export interface TagState {
   tags: tagType[]
@@ -38,12 +37,15 @@ export const tagReducer = createSlice({
 })
 export const getTags = (state: AppState) => state.tags.tags
 
-export const getFormattedTags = (state: AppState) => {
-  if (state.tags.tags) {
-    return state.tags.tags.map(tag => { return tag.name })
+export const getFormattedTags = createSelector(
+  [getTags],
+  (tags) => {
+    if (tags && tags.length > 0) {
+      return tags.map(tag => tag.name)
+    }
+    return null
   }
-  return null
-}
+)
 
 export const { setTags, addTag, removeTag } = tagReducer.actions
 

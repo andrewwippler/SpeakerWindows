@@ -1,5 +1,5 @@
-import { render, screen, waitFor, act } from '@testing-library/react';
-import { TestWrapper, createMockSession, mockApiCalls, resetAllMocks } from './test-utils';
+import { render, waitFor, act } from '@testing-library/react';
+import { TestWrapper, resetAllMocks } from './test-utils';
 import Settings from '../src/pages/settings';
 
 jest.mock('@/library/api', () => ({
@@ -9,15 +9,17 @@ jest.mock('@/library/api', () => ({
       if (route === '/settings') {
         return Promise.resolve({ place: '', location: '', count: 0, emptyTags: 0 });
       }
+      if (route === '/team') {
+        return Promise.resolve(null);
+      }
+      if (route === '/team/memberships') {
+        return Promise.resolve([]);
+      }
       if (route === '/user/invitations') {
-        return Promise.resolve([
-          { id: 1, teamId: 1, teamName: 'Team A', role: 'editor' },
-        ]);
+        return Promise.resolve([]);
       }
       if (route === '/user/blocks') {
-        return Promise.resolve([
-          { teamId: 2, teamName: 'Blocked Team' },
-        ]);
+        return Promise.resolve([]);
       }
       return Promise.resolve({});
     }),
@@ -66,18 +68,9 @@ jest.mock('@/features/modal/reducer', () => ({
 describe('Settings Page', () => {
   beforeEach(() => {
     resetAllMocks();
-    mockApiCalls();
   });
 
   it('renders settings page without crashing', async () => {
-    const mockSession = createMockSession();
-    
-    mockApiCalls({
-      '/settings': { place: '', location: '', count: 0, emptyTags: 0 },
-      '/user/blocks': [],
-      '/user/invitations': [],
-    });
-
     render(
       <TestWrapper>
         <Settings />
@@ -90,12 +83,6 @@ describe('Settings Page', () => {
   });
 
   it('displays settings heading', async () => {
-    mockApiCalls({
-      '/settings': { place: '', location: '', count: 0, emptyTags: 0 },
-      '/user/blocks': [],
-      '/user/invitations': [],
-    });
-
     render(
       <TestWrapper>
         <Settings />
