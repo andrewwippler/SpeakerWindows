@@ -1,5 +1,11 @@
 import { ChangeEvent, FormEvent, useState } from "react";
-import { ArrowLeftIcon, TrashIcon, PhotoIcon, PlusIcon, PencilSquareIcon } from "@heroicons/react/24/solid";
+import {
+  ArrowLeftIcon,
+  TrashIcon,
+  PhotoIcon,
+  PlusIcon,
+  PencilSquareIcon,
+} from "@heroicons/react/24/solid";
 import api from "@/library/api";
 import { useAppSelector, useAppDispatch } from "@/hooks";
 import { setFlashMessage } from "@/features/flash/reducer";
@@ -18,8 +24,8 @@ export default function IllustrationForm({
   illustration,
 }: {
   illustration?: illustrationType;
-  }) {
-    const { data: session, status } = useSession();
+}) {
+  const { data: session, status } = useSession();
   const router = useRouter();
   const dispatch = useAppDispatch();
   const formattedTags = useAppSelector(getFormattedTags);
@@ -33,9 +39,10 @@ export default function IllustrationForm({
   const [deleteUpload, setDeleteUpload] = useState<UploadType>();
 
   function handleFileChange(event: ChangeEvent<HTMLInputElement>) {
-
-    const files = event.target.files
-    if (!files) { return }
+    const files = event.target.files;
+    if (!files) {
+      return;
+    }
     const uploadedFile = files[0];
 
     if (
@@ -48,7 +55,7 @@ export default function IllustrationForm({
         setFlashMessage({
           severity: "danger",
           message: `Please choose a supported format: GIF, JPG, PDF, PNG`,
-        })
+        }),
       );
       return;
     }
@@ -58,7 +65,7 @@ export default function IllustrationForm({
         setFlashMessage({
           severity: "danger",
           message: `File size should not exceed 20MB.`,
-        })
+        }),
       );
       return;
     }
@@ -72,18 +79,18 @@ export default function IllustrationForm({
       .postMultipart(
         `/upload`,
         { illustration_image: uploadedFile, illustration_id: illustration?.id },
-        session?.accessToken
+        session?.accessToken,
       )
       .then((data) => {
         if (data.message != "File uploaded successfully") {
           dispatch(
-            setFlashMessage({ severity: "danger", message: data.message })
+            setFlashMessage({ severity: "danger", message: data.message }),
           );
           setFile(false);
           return;
         }
         dispatch(
-          setFlashMessage({ severity: "success", message: `Attachment added` })
+          setFlashMessage({ severity: "success", message: `Attachment added` }),
         );
         dispatch(setUpdateUI(true));
       });
@@ -105,7 +112,7 @@ export default function IllustrationForm({
       .then((data) => {
         if (data.message != "Updated successfully") {
           dispatch(
-            setFlashMessage({ severity: "danger", message: data.message })
+            setFlashMessage({ severity: "danger", message: data.message }),
           );
           return;
         }
@@ -113,7 +120,7 @@ export default function IllustrationForm({
           setFlashMessage({
             severity: "success",
             message: `Illustration "${illustration?.title}" was updated.`,
-          })
+          }),
         );
         dispatch(setIllustrationEdit(false));
         dispatch(setUpdateUI(true));
@@ -127,7 +134,7 @@ export default function IllustrationForm({
     api.post(`/illustration`, form, session?.accessToken).then((data) => {
       if (data.message != "Created successfully") {
         dispatch(
-          setFlashMessage({ severity: "danger", message: data.message })
+          setFlashMessage({ severity: "danger", message: data.message }),
         );
         return;
       }
@@ -135,7 +142,7 @@ export default function IllustrationForm({
         setFlashMessage({
           severity: "success",
           message: `Illustration "${form.title}" was created.`,
-        })
+        }),
       );
       dispatch(setUpdateUI(true));
       router.replace(`/illustration/${data.id}`);
@@ -149,7 +156,9 @@ export default function IllustrationForm({
       source: form.source.value.trim(),
       tags: formattedTags,
       content: form.content.value.trim(),
-      private: form.private.checked,
+      private: form.private
+        ? form.private.checked
+        : (illustration?.private ?? false),
     };
   };
 
@@ -161,7 +170,7 @@ export default function IllustrationForm({
         title: upload?.name,
         delete_name: "Attachment",
         redirect: false,
-      })
+      }),
     );
     dispatch(setModal(true));
   };
@@ -169,7 +178,11 @@ export default function IllustrationForm({
   return (
     <>
       <div className="mr-4 text-xl font-bold pb-4 text-sky-900 flex items-center">
-        {edit ? <PencilSquareIcon className="h-6 w-6 mr-2" /> : <PlusIcon className="h-6 w-6 mr-2" />}
+        {edit ? (
+          <PencilSquareIcon className="h-6 w-6 mr-2" />
+        ) : (
+          <PlusIcon className="h-6 w-6 mr-2" />
+        )}
         {edit ? "Edit" : "New"} Illustration
       </div>
 
@@ -178,21 +191,25 @@ export default function IllustrationForm({
           <div className="overflow-hidden shadow sm:rounded-md">
             <div className="bg-white px-4 py-5 sm:p-6">
               <div className="grid grid-cols-6 gap-6">
-
-                <div className="col-span-6 sm:col-span-6">
-                  <div className="mt-2 flex items-center">
-                    <input
-                      type="checkbox"
-                      name="private"
-                      id="private"
-                      defaultChecked={
-                        edit && illustration ? illustration.private : false
-                      }
-                      className="h-4 w-4 rounded border-sky-300 text-indigo-600 focus:ring-indigo-600"
-                    />
-                    <span className="ml-2 text-sm text-gray-500">Private/Personal illustration</span>
+                {(!edit ||
+                  session?.userId === Number(illustration?.userId)) && (
+                  <div className="col-span-6 sm:col-span-6">
+                    <div className="mt-2 flex items-center">
+                      <input
+                        type="checkbox"
+                        name="private"
+                        id="private"
+                        defaultChecked={
+                          edit && illustration ? illustration.private : false
+                        }
+                        className="h-4 w-4 rounded border-sky-300 text-indigo-600 focus:ring-indigo-600"
+                      />
+                      <span className="ml-2 text-sm text-gray-500">
+                        Private/Personal illustration
+                      </span>
+                    </div>
                   </div>
-                </div>
+                )}
 
                 <div className="col-span-6 sm:col-span-3">
                   <label
@@ -232,7 +249,6 @@ export default function IllustrationForm({
                     className="mt-2 block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
                   />
                 </div>
-
 
                 <div className="col-span-6">
                   <label

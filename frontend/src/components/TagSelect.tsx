@@ -5,6 +5,7 @@ import { tagType } from "@/library/tagtype";
 import { getTags, setTags, addTag, removeTag } from "@/features/tags/reducer";
 import { XMarkIcon } from "@heroicons/react/24/solid";
 import _ from "lodash";
+import { useSession } from "next-auth/react";
 
 export default function TagSelect({
   defaultValue,
@@ -14,6 +15,7 @@ export default function TagSelect({
   token: string | undefined;
 }) {
   const dispatch = useAppDispatch();
+  const { data: session, status } = useSession();
 
   const [tags, setLocalTags] = useState([]);
   const [isLoading, setLoading] = useState(false);
@@ -26,7 +28,10 @@ export default function TagSelect({
 
   useEffect(() => {
     setLoading(true);
-    api.get("/tags", "", userToken).then((tags) => {
+    const teamId = session?.team?.id;
+    // console.log("refreshing tag data with teamId: ", teamId, session);
+    const params = teamId ? { team_id: teamId } : {};
+    api.get("/tags", params, userToken).then((tags) => {
       setLocalTags(tags);
       dispatch(setTags(inheritedTags));
       setLoading(false);

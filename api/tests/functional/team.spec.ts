@@ -78,7 +78,10 @@ test.group('Teams', (group) => {
 
     const token = loginResponse.body().token
 
-    const updateResponse = await client.put('/team').bearerToken(token).json({ name: 'New Team Name' })
+    const updateResponse = await client
+      .put('/team')
+      .bearerToken(token)
+      .json({ name: 'New Team Name' })
     updateResponse.assertStatus(200)
     assert.equal(updateResponse.body().name, 'New Team Name')
   })
@@ -113,13 +116,13 @@ test.group('Teams', (group) => {
       password: member.password + '1A!a',
     })
 
-    const joinResponse = await client.post(`/teams/join/${inviteCode}`).bearerToken(memberLogin.body().token)
+    const joinResponse = await client
+      .post(`/teams/join/${inviteCode}`)
+      .bearerToken(memberLogin.body().token)
     joinResponse.assertStatus(200)
     assert.exists(joinResponse.body().message)
 
-    const membership = await TeamMember.query()
-      .where('user_id', memberLogin.body().id)
-      .first()
+    const membership = await TeamMember.query().where('user_id', memberLogin.body().id).first()
     assert.exists(membership)
   })
 
@@ -142,10 +145,13 @@ test.group('Teams', (group) => {
 
     const newMember = await UserFactory.create()
 
-    const addResponse = await client.post('/team/members').bearerToken(ownerLogin.body().token).json({
-      userId: newMember.id,
-      role: 'editor',
-    })
+    const addResponse = await client
+      .post('/team/members')
+      .bearerToken(ownerLogin.body().token)
+      .json({
+        userId: newMember.id,
+        role: 'editor',
+      })
     addResponse.assertStatus(200)
   })
 
@@ -170,9 +176,12 @@ test.group('Teams', (group) => {
       role: 'editor',
     })
 
-    const updateResponse = await client.put(`/team/members/${newMember.id}`).bearerToken(ownerLogin.body().token).json({
-      role: 'creator',
-    })
+    const updateResponse = await client
+      .put(`/team/members/${newMember.id}`)
+      .bearerToken(ownerLogin.body().token)
+      .json({
+        role: 'creator',
+      })
     updateResponse.assertStatus(200)
 
     const membership = await TeamMember.query().where('user_id', newMember.id).first()
@@ -202,7 +211,9 @@ test.group('Teams', (group) => {
       role: 'editor',
     })
 
-    const removeResponse = await client.delete(`/team/members/${newMember.id}`).bearerToken(ownerLogin.body().token)
+    const removeResponse = await client
+      .delete(`/team/members/${newMember.id}`)
+      .bearerToken(ownerLogin.body().token)
     removeResponse.assertStatus(200)
 
     const membership = await TeamMember.query().where('user_id', newMember.id).first()
@@ -230,11 +241,14 @@ test.group('Team Illustrations', (group) => {
       password: owner.password + '1A!a',
     })
 
-    const createResponse = await client.post('/illustration').bearerToken(ownerLogin.body().token).json({
-      title: 'Team Illustration',
-      content: 'Test content',
-      author: 'Test author',
-    })
+    const createResponse = await client
+      .post('/illustration')
+      .bearerToken(ownerLogin.body().token)
+      .json({
+        title: 'Team Illustration',
+        content: 'Test content',
+        author: 'Test author',
+      })
     createResponse.assertStatus(200)
 
     const illustration = await Illustration.find(createResponse.body().id)
@@ -276,11 +290,14 @@ test.group('Team Illustrations', (group) => {
       role: 'editor',
     })
 
-    const createResponse = await client.post('/illustration').bearerToken(editorLogin.body().token).json({
-      title: 'Editor Illustration',
-      content: 'Test content',
-      author: 'Test author',
-    })
+    const createResponse = await client
+      .post('/illustration')
+      .bearerToken(editorLogin.body().token)
+      .json({
+        title: 'Editor Illustration',
+        content: 'Test content',
+        author: 'Test author',
+      })
     createResponse.assertStatus(200)
 
     const illustration = await Illustration.find(createResponse.body().id)
@@ -301,10 +318,13 @@ test.group('Team Illustrations', (group) => {
       password: owner.password + '1A!a',
     })
 
-    const createResponse = await client.post('/illustration').bearerToken(ownerLogin.body().token).json({
-      title: 'Team Illustration',
-      content: 'Test content',
-    })
+    const createResponse = await client
+      .post('/illustration')
+      .bearerToken(ownerLogin.body().token)
+      .json({
+        title: 'Team Illustration',
+        content: 'Test content',
+      })
     const illustrationId = createResponse.body().id
 
     const team = await Team.query().where('user_id', ownerLogin.body().id).first()
@@ -328,7 +348,9 @@ test.group('Team Illustrations', (group) => {
       role: 'readonly',
     })
 
-    const getResponse = await client.get(`/illustration/${illustrationId}`).bearerToken(memberLogin.body().token)
+    const getResponse = await client
+      .get(`/illustration/${illustrationId}`)
+      .bearerToken(memberLogin.body().token)
     getResponse.assertStatus(200)
     assert.equal(getResponse.body().title, 'Team Illustration')
   })
@@ -347,10 +369,13 @@ test.group('Team Illustrations', (group) => {
       password: owner.password + '1A!a',
     })
 
-    const createResponse = await client.post('/illustration').bearerToken(ownerLogin.body().token).json({
-      title: 'Team Illustration',
-      content: 'Test content',
-    })
+    const createResponse = await client
+      .post('/illustration')
+      .bearerToken(ownerLogin.body().token)
+      .json({
+        title: 'Team Illustration',
+        content: 'Test content',
+      })
     const illustrationId = createResponse.body().id
 
     const outsider = await UserFactory.make()
@@ -366,7 +391,9 @@ test.group('Team Illustrations', (group) => {
       password: outsider.password + '1A!a',
     })
 
-    const getResponse = await client.get(`/illustration/${illustrationId}`).bearerToken(outsiderLogin.body().token)
+    const getResponse = await client
+      .get(`/illustration/${illustrationId}`)
+      .bearerToken(outsiderLogin.body().token)
     getResponse.assertStatus(403)
   })
 
@@ -386,11 +413,14 @@ test.group('Team Illustrations', (group) => {
 
     const team = await Team.query().where('user_id', ownerLogin.body().id).first()
 
-    const createResponse = await client.post('/illustration').bearerToken(ownerLogin.body().token).json({
-      title: 'Private Illustration',
-      content: 'Test content',
-      private: true,
-    })
+    const createResponse = await client
+      .post('/illustration')
+      .bearerToken(ownerLogin.body().token)
+      .json({
+        title: 'Private Illustration',
+        content: 'Test content',
+        private: true,
+      })
     const illustrationId = createResponse.body().id
 
     const member = await UserFactory.make()
@@ -412,10 +442,14 @@ test.group('Team Illustrations', (group) => {
       role: 'creator',
     })
 
-    const memberGetResponse = await client.get(`/illustration/${illustrationId}`).bearerToken(memberLogin.body().token)
+    const memberGetResponse = await client
+      .get(`/illustration/${illustrationId}`)
+      .bearerToken(memberLogin.body().token)
     memberGetResponse.assertStatus(403)
 
-    const ownerGetResponse = await client.get(`/illustration/${illustrationId}`).bearerToken(ownerLogin.body().token)
+    const ownerGetResponse = await client
+      .get(`/illustration/${illustrationId}`)
+      .bearerToken(ownerLogin.body().token)
     ownerGetResponse.assertStatus(200)
     assert.equal(ownerGetResponse.body().title, 'Private Illustration')
   })
@@ -434,10 +468,13 @@ test.group('Team Illustrations', (group) => {
       password: owner.password + '1A!a',
     })
 
-    const createResponse = await client.post('/illustration').bearerToken(ownerLogin.body().token).json({
-      title: 'Team Illustration',
-      content: 'Original content',
-    })
+    const createResponse = await client
+      .post('/illustration')
+      .bearerToken(ownerLogin.body().token)
+      .json({
+        title: 'Team Illustration',
+        content: 'Original content',
+      })
     const illustrationId = createResponse.body().id
 
     const team = await Team.query().where('user_id', ownerLogin.body().id).first()
@@ -461,10 +498,13 @@ test.group('Team Illustrations', (group) => {
       role: 'editor',
     })
 
-    const updateMetadataResponse = await client.put(`/illustration/${illustrationId}`).bearerToken(editorLogin.body().token).json({
-      title: 'Updated Title',
-      author: 'Updated Author',
-    })
+    const updateMetadataResponse = await client
+      .put(`/illustration/${illustrationId}`)
+      .bearerToken(editorLogin.body().token)
+      .json({
+        title: 'Updated Title',
+        author: 'Updated Author',
+      })
     updateMetadataResponse.assertStatus(200)
     assert.equal(updateMetadataResponse.body().illustration.title, 'Updated Title')
   })
@@ -483,10 +523,13 @@ test.group('Team Illustrations', (group) => {
       password: owner.password + '1A!a',
     })
 
-    const createResponse = await client.post('/illustration').bearerToken(ownerLogin.body().token).json({
-      title: 'Team Illustration',
-      content: 'Original content',
-    })
+    const createResponse = await client
+      .post('/illustration')
+      .bearerToken(ownerLogin.body().token)
+      .json({
+        title: 'Team Illustration',
+        content: 'Original content',
+      })
     const illustrationId = createResponse.body().id
 
     const team = await Team.query().where('user_id', ownerLogin.body().id).first()
@@ -510,9 +553,12 @@ test.group('Team Illustrations', (group) => {
       role: 'readonly',
     })
 
-    const updateResponse = await client.put(`/illustration/${illustrationId}`).bearerToken(readonlyLogin.body().token).json({
-      title: 'Updated Title',
-    })
+    const updateResponse = await client
+      .put(`/illustration/${illustrationId}`)
+      .bearerToken(readonlyLogin.body().token)
+      .json({
+        title: 'Updated Title',
+      })
     updateResponse.assertStatus(403)
   })
 
@@ -530,10 +576,13 @@ test.group('Team Illustrations', (group) => {
       password: owner.password + '1A!a',
     })
 
-    const createResponse = await client.post('/illustration').bearerToken(ownerLogin.body().token).json({
-      title: 'Team Illustration',
-      content: 'Test content',
-    })
+    const createResponse = await client
+      .post('/illustration')
+      .bearerToken(ownerLogin.body().token)
+      .json({
+        title: 'Team Illustration',
+        content: 'Test content',
+      })
     const illustrationId = createResponse.body().id
 
     const team = await Team.query().where('user_id', ownerLogin.body().id).first()
@@ -557,7 +606,9 @@ test.group('Team Illustrations', (group) => {
       role: 'creator',
     })
 
-    const deleteResponse = await client.delete(`/illustration/${illustrationId}`).bearerToken(creatorLogin.body().token)
+    const deleteResponse = await client
+      .delete(`/illustration/${illustrationId}`)
+      .bearerToken(creatorLogin.body().token)
     deleteResponse.assertStatus(200)
   })
 
@@ -575,10 +626,13 @@ test.group('Team Illustrations', (group) => {
       password: owner.password + '1A!a',
     })
 
-    const createResponse = await client.post('/illustration').bearerToken(ownerLogin.body().token).json({
-      title: 'Team Illustration',
-      content: 'Test content',
-    })
+    const createResponse = await client
+      .post('/illustration')
+      .bearerToken(ownerLogin.body().token)
+      .json({
+        title: 'Team Illustration',
+        content: 'Test content',
+      })
     const illustrationId = createResponse.body().id
 
     const team = await Team.query().where('user_id', ownerLogin.body().id).first()
@@ -602,7 +656,9 @@ test.group('Team Illustrations', (group) => {
       role: 'editor',
     })
 
-    const deleteResponse = await client.delete(`/illustration/${illustrationId}`).bearerToken(editorLogin.body().token)
+    const deleteResponse = await client
+      .delete(`/illustration/${illustrationId}`)
+      .bearerToken(editorLogin.body().token)
     deleteResponse.assertStatus(403)
   })
 
@@ -651,7 +707,9 @@ test.group('Team Illustrations', (group) => {
       password: owner3.password + '1A!a',
     })
 
-    const joinResponse = await client.post(`/teams/join/${inviteCode1}`).bearerToken(owner3Login.body().token)
+    const joinResponse = await client
+      .post(`/teams/join/${inviteCode1}`)
+      .bearerToken(owner3Login.body().token)
     joinResponse.assertStatus(200)
   })
 
@@ -706,9 +764,13 @@ test.group('Team Illustrations', (group) => {
     const teamResponse = await client.get('/team').bearerToken(owner1Login.body().token)
     const inviteCode = teamResponse.body().inviteCode
 
-    const joinResponse = await client.post(`/teams/join/${inviteCode}`).bearerToken(owner2Login.body().token)
+    const joinResponse = await client
+      .post(`/teams/join/${inviteCode}`)
+      .bearerToken(owner2Login.body().token)
     joinResponse.assertStatus(400)
-    joinResponse.assertBodyContains({ message: 'Cannot join another team while you have members in your own team' })
+    joinResponse.assertBodyContains({
+      message: 'Cannot join another team while you have members in your own team',
+    })
   })
 
   test('Owner with no members can join another team', async ({ client }) => {
@@ -741,7 +803,9 @@ test.group('Team Illustrations', (group) => {
     const teamResponse = await client.get('/team').bearerToken(owner2Login.body().token)
     const inviteCode = teamResponse.body().inviteCode
 
-    const joinResponse = await client.post(`/teams/join/${inviteCode}`).bearerToken(owner1Login.body().token)
+    const joinResponse = await client
+      .post(`/teams/join/${inviteCode}`)
+      .bearerToken(owner1Login.body().token)
     joinResponse.assertStatus(200)
     joinResponse.assertBodyContains({ message: 'Joined team successfully' })
   })
@@ -781,7 +845,9 @@ test.group('Team Illustrations', (group) => {
       role: 'readonly',
     })
 
-    const leaveResponse = await client.delete(`/team/memberships/${team!.id}`).bearerToken(memberLogin.body().token)
+    const leaveResponse = await client
+      .delete(`/team/memberships/${team!.id}`)
+      .bearerToken(memberLogin.body().token)
     leaveResponse.assertStatus(200)
     leaveResponse.assertBodyContains({ message: 'Left team successfully' })
   })
@@ -802,7 +868,9 @@ test.group('Team Illustrations', (group) => {
 
     const team = await Team.query().where('user_id', ownerLogin.body().id).first()
 
-    const leaveResponse = await client.delete(`/team/memberships/${team!.id}`).bearerToken(ownerLogin.body().token)
+    const leaveResponse = await client
+      .delete(`/team/memberships/${team!.id}`)
+      .bearerToken(ownerLogin.body().token)
     leaveResponse.assertStatus(400)
     leaveResponse.assertBodyContains({ message: 'Cannot leave your own team' })
   })
@@ -839,7 +907,9 @@ test.group('Team Illustrations', (group) => {
 
     await client.post(`/teams/join/${inviteCode}`).bearerToken(owner2Login.body().token)
 
-    const membershipsResponse = await client.get('/team/memberships').bearerToken(owner2Login.body().token)
+    const membershipsResponse = await client
+      .get('/team/memberships')
+      .bearerToken(owner2Login.body().token)
     membershipsResponse.assertStatus(200)
     const memberships = membershipsResponse.body()
     assert.equal(memberships.length, 1)
@@ -861,7 +931,9 @@ test.group('Team Illustrations', (group) => {
       password: user.password + '1A!a',
     })
 
-    const membershipsResponse = await client.get('/team/memberships').bearerToken(loginResponse.body().token)
+    const membershipsResponse = await client
+      .get('/team/memberships')
+      .bearerToken(loginResponse.body().token)
     membershipsResponse.assertStatus(200)
     assert.equal(membershipsResponse.body().length, 0)
   })
@@ -914,7 +986,8 @@ test.group('Team Illustrations', (group) => {
       password: member.password + '1A!a',
     })
 
-    const addMemberResponse = await client.post('/team/members')
+    const addMemberResponse = await client
+      .post('/team/members')
       .bearerToken(creatorLogin.body().token)
       .json({ userId: memberLogin.body().id, role: 'editor' })
     addMemberResponse.assertStatus(200)
@@ -956,7 +1029,8 @@ test.group('Team Illustrations', (group) => {
       role: 'creator',
     })
 
-    const updateResponse = await client.put(`/team/members/${ownerLogin.body().id}`)
+    const updateResponse = await client
+      .put(`/team/members/${ownerLogin.body().id}`)
       .bearerToken(creatorLogin.body().token)
       .json({ role: 'editor' })
     updateResponse.assertStatus(404)
@@ -1005,7 +1079,8 @@ test.group('Team Illustrations', (group) => {
 
     await client.post('/register').json(invitedUserData)
 
-    const inviteResponse = await client.post('/team/invitations')
+    const inviteResponse = await client
+      .post('/team/invitations')
       .bearerToken(ownerLogin.body().token)
       .json({ email: invitedUser.email, role: 'editor' })
     inviteResponse.assertStatus(200)
@@ -1026,7 +1101,8 @@ test.group('Team Illustrations', (group) => {
       password: owner.password + '1A!a',
     })
 
-    const inviteResponse = await client.post('/team/invitations')
+    const inviteResponse = await client
+      .post('/team/invitations')
       .bearerToken(ownerLogin.body().token)
       .json({ email: 'nonexistent@example.com', role: 'editor' })
     inviteResponse.assertStatus(404)
@@ -1047,7 +1123,8 @@ test.group('Team Illustrations', (group) => {
       password: owner.password + '1A!a',
     })
 
-    const inviteResponse = await client.post('/team/invitations')
+    const inviteResponse = await client
+      .post('/team/invitations')
       .bearerToken(ownerLogin.body().token)
       .json({ email: owner.email, role: 'editor' })
     inviteResponse.assertStatus(400)
@@ -1077,11 +1154,14 @@ test.group('Team Illustrations', (group) => {
 
     await client.post('/register').json(invitedUserData)
 
-    await client.post('/team/invitations')
+    await client
+      .post('/team/invitations')
       .bearerToken(ownerLogin.body().token)
       .json({ email: invitedUser.email, role: 'editor' })
 
-    const invitationsResponse = await client.get('/team/invitations').bearerToken(ownerLogin.body().token)
+    const invitationsResponse = await client
+      .get('/team/invitations')
+      .bearerToken(ownerLogin.body().token)
     invitationsResponse.assertStatus(200)
     const invitations = invitationsResponse.body()
     assert.equal(invitations.length, 1)
@@ -1111,14 +1191,19 @@ test.group('Team Illustrations', (group) => {
 
     await client.post('/register').json(invitedUserData)
 
-    const inviteResponse = await client.post('/team/invitations')
+    const inviteResponse = await client
+      .post('/team/invitations')
       .bearerToken(ownerLogin.body().token)
       .json({ email: invitedUser.email, role: 'editor' })
 
-    const invitationsResponse = await client.get('/team/invitations').bearerToken(ownerLogin.body().token)
+    const invitationsResponse = await client
+      .get('/team/invitations')
+      .bearerToken(ownerLogin.body().token)
     const invitationId = invitationsResponse.body()[0].id
 
-    const cancelResponse = await client.delete(`/team/invitations/${invitationId}`).bearerToken(ownerLogin.body().token)
+    const cancelResponse = await client
+      .delete(`/team/invitations/${invitationId}`)
+      .bearerToken(ownerLogin.body().token)
     cancelResponse.assertStatus(200)
     cancelResponse.assertBodyContains({ message: 'Invitation cancelled' })
   })
@@ -1150,14 +1235,19 @@ test.group('Team Illustrations', (group) => {
       password: invitedUser.password + '1A!a',
     })
 
-    await client.post('/team/invitations')
+    await client
+      .post('/team/invitations')
       .bearerToken(ownerLogin.body().token)
       .json({ email: invitedUser.email, role: 'editor' })
 
-    const userInvitationsResponse = await client.get('/user/invitations').bearerToken(invitedLogin.body().token)
+    const userInvitationsResponse = await client
+      .get('/user/invitations')
+      .bearerToken(invitedLogin.body().token)
     const invitationId = userInvitationsResponse.body()[0].id
 
-    const acceptResponse = await client.post(`/team/invitations/${invitationId}/accept`).bearerToken(invitedLogin.body().token)
+    const acceptResponse = await client
+      .post(`/team/invitations/${invitationId}/accept`)
+      .bearerToken(invitedLogin.body().token)
     acceptResponse.assertStatus(200)
     acceptResponse.assertBodyContains({ message: 'Joined team successfully' })
   })
@@ -1189,14 +1279,19 @@ test.group('Team Illustrations', (group) => {
       password: invitedUser.password + '1A!a',
     })
 
-    await client.post('/team/invitations')
+    await client
+      .post('/team/invitations')
       .bearerToken(ownerLogin.body().token)
       .json({ email: invitedUser.email, role: 'editor' })
 
-    const userInvitationsResponse = await client.get('/user/invitations').bearerToken(invitedLogin.body().token)
+    const userInvitationsResponse = await client
+      .get('/user/invitations')
+      .bearerToken(invitedLogin.body().token)
     const invitationId = userInvitationsResponse.body()[0].id
 
-    const declineResponse = await client.post(`/team/invitations/${invitationId}/decline`).bearerToken(invitedLogin.body().token)
+    const declineResponse = await client
+      .post(`/team/invitations/${invitationId}/decline`)
+      .bearerToken(invitedLogin.body().token)
     declineResponse.assertStatus(200)
     declineResponse.assertBodyContains({ message: 'Invitation declined' })
   })
@@ -1228,11 +1323,14 @@ test.group('Team Illustrations', (group) => {
       password: invitedUser.password + '1A!a',
     })
 
-    await client.post('/team/invitations')
+    await client
+      .post('/team/invitations')
       .bearerToken(ownerLogin.body().token)
       .json({ email: invitedUser.email, role: 'editor' })
 
-    const userInvitationsResponse = await client.get('/user/invitations').bearerToken(invitedLogin.body().token)
+    const userInvitationsResponse = await client
+      .get('/user/invitations')
+      .bearerToken(invitedLogin.body().token)
     userInvitationsResponse.assertStatus(200)
     const invitations = userInvitationsResponse.body()
     assert.equal(invitations.length, 1)
@@ -1268,11 +1366,13 @@ test.group('Team Illustrations', (group) => {
       password: blockedUser.password + '1A!a',
     })
 
-    await client.post('/user/blocks')
+    await client
+      .post('/user/blocks')
       .bearerToken(blockedLogin.body().token)
       .json({ teamId: team!.id })
 
-    const inviteResponse = await client.post('/team/invitations')
+    const inviteResponse = await client
+      .post('/team/invitations')
       .bearerToken(ownerLogin.body().token)
       .json({ email: blockedUser.email, role: 'editor' })
     inviteResponse.assertStatus(400)
@@ -1309,7 +1409,8 @@ test.group('Team Illustrations', (group) => {
       password: blocker.password + '1A!a',
     })
 
-    const blockResponse = await client.post('/user/blocks')
+    const blockResponse = await client
+      .post('/user/blocks')
       .bearerToken(blockerLogin.body().token)
       .json({ teamId })
     blockResponse.assertStatus(200)
@@ -1346,9 +1447,7 @@ test.group('Team Illustrations', (group) => {
       password: blocker.password + '1A!a',
     })
 
-    await client.post('/user/blocks')
-      .bearerToken(blockerLogin.body().token)
-      .json({ teamId })
+    await client.post('/user/blocks').bearerToken(blockerLogin.body().token).json({ teamId })
 
     const blocksResponse = await client.get('/user/blocks').bearerToken(blockerLogin.body().token)
     blocksResponse.assertStatus(200)
@@ -1386,11 +1485,11 @@ test.group('Team Illustrations', (group) => {
       password: blocker.password + '1A!a',
     })
 
-    await client.post('/user/blocks')
-      .bearerToken(blockerLogin.body().token)
-      .json({ teamId })
+    await client.post('/user/blocks').bearerToken(blockerLogin.body().token).json({ teamId })
 
-    const unblockResponse = await client.delete(`/user/blocks/${teamId}`).bearerToken(blockerLogin.body().token)
+    const unblockResponse = await client
+      .delete(`/user/blocks/${teamId}`)
+      .bearerToken(blockerLogin.body().token)
     unblockResponse.assertStatus(200)
     unblockResponse.assertBodyContains({ message: 'Team unblocked' })
   })
@@ -1425,15 +1524,16 @@ test.group('Team Illustrations', (group) => {
       password: blockedUser.password + '1A!a',
     })
 
-    await client.post('/team/invitations')
+    await client
+      .post('/team/invitations')
       .bearerToken(ownerLogin.body().token)
       .json({ email: blockedUser.email, role: 'editor' })
 
-    await client.post('/user/blocks')
-      .bearerToken(blockedLogin.body().token)
-      .json({ teamId })
+    await client.post('/user/blocks').bearerToken(blockedLogin.body().token).json({ teamId })
 
-    const userInvitationsResponse = await client.get('/user/invitations').bearerToken(blockedLogin.body().token)
+    const userInvitationsResponse = await client
+      .get('/user/invitations')
+      .bearerToken(blockedLogin.body().token)
     const invitations = userInvitationsResponse.body()
     assert.equal(invitations.length, 0)
   })
@@ -1468,11 +1568,10 @@ test.group('Team Illustrations', (group) => {
       password: blocker.password + '1A!a',
     })
 
-    await client.post('/user/blocks')
-      .bearerToken(blockerLogin.body().token)
-      .json({ teamId })
+    await client.post('/user/blocks').bearerToken(blockerLogin.body().token).json({ teamId })
 
-    const blockAgainResponse = await client.post('/user/blocks')
+    const blockAgainResponse = await client
+      .post('/user/blocks')
       .bearerToken(blockerLogin.body().token)
       .json({ teamId })
     blockAgainResponse.assertStatus(400)
@@ -1509,7 +1608,9 @@ test.group('Team Illustrations', (group) => {
       password: blocker.password + '1A!a',
     })
 
-    const unblockResponse = await client.delete(`/user/blocks/${teamId}`).bearerToken(blockerLogin.body().token)
+    const unblockResponse = await client
+      .delete(`/user/blocks/${teamId}`)
+      .bearerToken(blockerLogin.body().token)
     unblockResponse.assertStatus(404)
     unblockResponse.assertBodyContains({ message: 'Block not found' })
   })

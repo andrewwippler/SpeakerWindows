@@ -6,7 +6,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint",
+    "lint": "eslint .",
     "test": "jest",
     "test:coverage": "jest --coverage"
   },
@@ -37,8 +37,10 @@
     "typescript": "5.9.3"
   },
   "devDependencies": {
+    "@eslint/eslintrc": "^3.3.3",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.2",
+    "@testing-library/user-event": "^14.6.1",
     "@types/jest": "^30.0.0",
     "@types/lodash": "^4.17.7",
     "autoprefixer": "^10.4.19",
@@ -48,5 +50,6 @@
     "postcss": "^8.4.40",
     "tailwindcss": "^3.4.19",
     "ts-node": "^10.9.2"
-  }
+  },
+  "type": "module"
 }

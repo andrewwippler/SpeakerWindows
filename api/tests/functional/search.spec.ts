@@ -199,7 +199,9 @@ test.group('SearchIndexingService view count', (group) => {
 
     await indexing.incrementViewCount(ill.id, 5)
 
-    const rows = await db.rawQuery('SELECT view_count FROM document_search WHERE document_id = ?', [ill.id])
+    const rows = await db.rawQuery('SELECT view_count FROM document_search WHERE document_id = ?', [
+      ill.id,
+    ])
     assert.equal(rows.rows[0].view_count, 5)
   })
 
@@ -215,7 +217,10 @@ test.group('SearchIndexingService view count', (group) => {
 
     await indexing.updateUserInteractionScore(ill.id, 10)
 
-    const rows = await db.rawQuery('SELECT user_interaction_score FROM document_search WHERE document_id = ?', [ill.id])
+    const rows = await db.rawQuery(
+      'SELECT user_interaction_score FROM document_search WHERE document_id = ?',
+      [ill.id]
+    )
     assert.equal(rows.rows[0].user_interaction_score, 10)
   })
 })

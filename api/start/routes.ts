@@ -60,6 +60,7 @@ router
     router.get('/illustrations/:id', [IllustrationsController, 'showOld'])
     router.put('/illustration/:id', [IllustrationsController, 'update'])
     router.delete('/illustration/:id', [IllustrationsController, 'destroy'])
+    router.put('/illustrations/bulk', [IllustrationsController, 'bulk'])
 
     router.get('/author/:name', [AuthorsController, 'show'])
     router.put('/author/:name', [AuthorsController, 'update'])

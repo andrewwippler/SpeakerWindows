@@ -10,6 +10,7 @@ import {
   CheckCircleIcon,
   TrashIcon,
   MinusCircleIcon,
+  EyeSlashIcon,
 } from "@heroicons/react/24/solid";
 import { FormEvent } from "react";
 import Head from "next/head";
@@ -33,6 +34,7 @@ export default function Tag() {
   const [data, setData] = useState([]);
   const [editTag, setEditTag] = useState(false);
   const [showBulkRemove, setShowBulkRemove] = useState(false);
+  const [showBulkPrivacy, setShowBulkPrivacy] = useState(false);
   const [selectedIllustrations, setSelectedIllustrations] = useState<number[]>(
     [],
   );
@@ -113,9 +115,13 @@ export default function Tag() {
     if (selectedIllustrations.length === 0) return;
 
     api
-      .delete(
-        `/tags/${data.id}/illustrations`,
-        { illustration_ids: selectedIllustrations },
+      .put(
+        `/illustrations/bulk`,
+        {
+          illustrations: selectedIllustrations,
+          action: "remove_tag",
+          data: name,
+        },
         session?.accessToken,
       )
       .then((response) => {
@@ -127,13 +133,71 @@ export default function Tag() {
         );
         setSelectedIllustrations([]);
         setShowBulkRemove(false);
-        refreshData();
+        refreshData(session?.accessToken);
       })
       .catch((err) => {
         dispatch(
           setFlashMessage({
             severity: "danger",
             message: err.message || "Failed to remove illustrations",
+          }),
+        );
+      });
+  };
+
+  const handleBulkPrivacy = (makePrivate: boolean) => {
+    if (selectedIllustrations.length === 0) return;
+
+    const ownedSelections = selectedIllustrations.filter((id) => {
+      const ill = data.illustrations?.find((i: any) => i.id === id);
+      return Number(ill?.userId) === session?.userId;
+    });
+
+    if (ownedSelections.length === 0) {
+      dispatch(
+        setFlashMessage({
+          severity: "danger",
+          message: "You can only change privacy for illustrations you own",
+        }),
+      );
+      return;
+    }
+
+    if (ownedSelections.length < selectedIllustrations.length) {
+      dispatch(
+        setFlashMessage({
+          severity: "warning",
+          message: `Only changing privacy for ${ownedSelections.length} illustrations you own. ${selectedIllustrations.length - ownedSelections.length} items were skipped.`,
+        }),
+      );
+    }
+
+    api
+      .put(
+        `/illustrations/bulk`,
+        {
+          illustrations: ownedSelections,
+          action: "toggle_privacy",
+          data: makePrivate,
+        },
+        session?.accessToken,
+      )
+      .then((response) => {
+        dispatch(
+          setFlashMessage({
+            severity: "success",
+            message: response.message,
+          }),
+        );
+        setSelectedIllustrations([]);
+        setShowBulkPrivacy(false);
+        refreshData(session?.accessToken);
+      })
+      .catch((err) => {
+        dispatch(
+          setFlashMessage({
+            severity: "danger",
+            message: err.message || "Failed to update privacy",
           }),
         );
       });
@@ -174,7 +238,7 @@ export default function Tag() {
 
             <button
               type="submit"
-              className="px-4 py-2 mr-4 mt-2 font-semibold text-sm bg-green-300 hover:bg-green-500 text-white rounded-full shadow-sm inline-flex items-center"
+              className="px-4 py-2 mr-4 mt-2 font-semibold text-sm bg-green-500 hover:bg-green-600 text-white rounded-full shadow-sm inline-flex items-center"
             >
               <CheckCircleIcon className="h-4 w-4 mr-2" />
               Update Tag
@@ -185,14 +249,14 @@ export default function Tag() {
             <span className="mr-4">{name}</span>
             <button
               onClick={() => setEditTag(true)}
-              className="px-4 py-2 mr-4 mt-2 font-semibold text-sm bg-green-300 hover:bg-green-500 text-white rounded-full shadow-sm inline-flex items-center"
+              className="px-4 py-2 mr-4 mt-2 font-semibold text-sm bg-green-500 hover:bg-green-600 text-white rounded-full shadow-sm inline-flex items-center"
             >
               <PencilSquareIcon className="h-4 w-4 mr-2" />
               Edit Tag
             </button>
             <button
               onClick={handleDelete}
-              className="px-4 py-2 mr-4 mt-2 font-semibold text-sm bg-red-300 hover:bg-red-500 text-white rounded-full shadow-sm inline-flex items-center"
+              className="px-4 py-2 mr-4 mt-2 font-semibold text-sm bg-red-500 hover:bg-red-600 text-white rounded-full shadow-sm inline-flex items-center"
             >
               <TrashIcon className="h-4 w-4 mr-2" />
               Delete Tag
@@ -200,10 +264,19 @@ export default function Tag() {
             {!showBulkRemove && (
               <button
                 onClick={() => setShowBulkRemove(true)}
-                className="hidden md:inline-flex px-4 py-2 mr-4 mt-2 font-semibold text-sm bg-orange-300 hover:bg-orange-500 text-white rounded-full shadow-sm items-center"
+                className="hidden md:inline-flex px-4 py-2 mr-4 mt-2 font-semibold text-sm bg-orange-500 hover:bg-orange-600 text-white rounded-full shadow-sm items-center"
               >
                 <MinusCircleIcon className="h-4 w-4 mr-2" />
                 Remove Illustrations
+              </button>
+            )}
+            {!showBulkPrivacy && !showBulkRemove && (
+              <button
+                onClick={() => setShowBulkPrivacy(true)}
+                className="hidden md:inline-flex px-4 py-2 mr-4 mt-2 font-semibold text-sm bg-blue-500 hover:bg-blue-600 text-white rounded-full shadow-sm items-center"
+              >
+                <EyeSlashIcon className="h-4 w-4 mr-2" />
+                Toggle Privacy
               </button>
             )}
           </>
@@ -223,7 +296,7 @@ export default function Tag() {
           <button
             onClick={handleBulkRemove}
             disabled={selectedIllustrations.length === 0}
-            className="px-4 py-2 mr-4 mt-2 font-semibold text-sm bg-red-300 hover:bg-red-500 text-white rounded-full shadow-sm inline-flex items-center disabled:opacity-50 disabled:cursor-not-allowed"
+            className="px-4 py-2 mr-4 mt-2 font-semibold text-sm bg-red-500 hover:bg-red-600 text-white rounded-full shadow-sm inline-flex items-center disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <TrashIcon className="h-4 w-4 mr-2" />
             Remove Selected ({selectedIllustrations.length})
@@ -233,7 +306,44 @@ export default function Tag() {
               setShowBulkRemove(false);
               setSelectedIllustrations([]);
             }}
-            className="px-4 py-2 mr-4 mt-2 font-semibold text-sm bg-gray-300 hover:bg-gray-500 text-white rounded-full shadow-sm inline-flex items-center"
+            className="px-4 py-2 mr-4 mt-2 font-semibold text-sm bg-gray-500 hover:bg-gray-600 text-white rounded-full shadow-sm inline-flex items-center"
+          >
+            Cancel
+          </button>
+        </div>
+      )}
+
+      {showBulkPrivacy && (
+        <div className="pb-4">
+          <button
+            onClick={toggleAll}
+            className="mr-4 text-sm text-sky-600 hover:text-sky-800"
+          >
+            {selectedIllustrations.length === data.illustrations?.length
+              ? "Deselect All"
+              : "Select All"}
+          </button>
+          <button
+            onClick={() => handleBulkPrivacy(true)}
+            disabled={selectedIllustrations.length === 0}
+            className="px-4 py-2 mr-4 mt-2 font-semibold text-sm bg-yellow-500 hover:bg-yellow-600 text-white rounded-full shadow-sm inline-flex items-center disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <EyeSlashIcon className="h-4 w-4 mr-2" />
+            Make Private ({selectedIllustrations.length})
+          </button>
+          <button
+            onClick={() => handleBulkPrivacy(false)}
+            disabled={selectedIllustrations.length === 0}
+            className="px-4 py-2 mr-4 mt-2 font-semibold text-sm bg-green-500 hover:bg-green-600 text-white rounded-full shadow-sm inline-flex items-center disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            Make Public ({selectedIllustrations.length})
+          </button>
+          <button
+            onClick={() => {
+              setShowBulkPrivacy(false);
+              setSelectedIllustrations([]);
+            }}
+            className="px-4 py-2 mr-4 mt-2 font-semibold text-sm bg-gray-500 hover:bg-gray-600 text-white rounded-full shadow-sm inline-flex items-center"
           >
             Cancel
           </button>
@@ -247,13 +357,29 @@ export default function Tag() {
           data.illustrations.map((d, i) => (
             <li key={i} className="group/item hover:bg-slate-200">
               <div className="flex items-start gap-3">
-                {showBulkRemove && (
-                  <input
-                    type="checkbox"
-                    className="mt-1 h-4 w-4 rounded border-gray-300 text-sky-600 focus:ring-sky-500"
-                    checked={selectedIllustrations.includes(d.id)}
-                    onChange={() => handleToggleSelect(d.id)}
-                  />
+                {console.log("rendering ill with userId: ", d.userId, "session userId: ", session?.userId, "result: ", d.userId === session?.userId, "inverse: ", d.userId !== session?.userId)}
+                {(showBulkRemove || showBulkPrivacy) && (
+                  <>
+                    <input
+                      type="checkbox"
+                      className={`mt-1 h-4 w-4 rounded border-gray-300 ${
+                        Number(d.userId) === session?.userId
+                          ? "text-sky-600 focus:ring-sky-500"
+                          : "text-gray-300 cursor-not-allowed"
+                      }`}
+                      checked={selectedIllustrations.includes(d.id)}
+                      onChange={() =>
+                        Number(d.userId) === session?.userId && handleToggleSelect(d.id)
+                      }
+                      disabled={Number(d.userId) !== session?.userId}
+                    />
+
+                    {/* <span className="ml-2 text-xs text-gray-500">
+                      {Number(d.userId) === session?.userId
+                        ? `(my ill ${d.userId})`
+                        : `(user_id: ${d.userId} my user_id: ${session?.userId}) ${Number(d.userId) === session?.userId}`}
+                    </span> */}
+                  </>
                 )}
 
                 <div className="flex-1">

@@ -34,7 +34,14 @@ export const editUser = Bouncer.ability(() => {
   return true
 })
 
-export const editTag = Bouncer.ability((user: User, tag: Tag) => {
+export const editTag = Bouncer.ability(async (user: User, tag: Tag) => {
+  // get team id from tag
+  if (tag.team_id) {
+    const roleAllow = await getUserRoleInTeam(user, tag.team_id).then((role) => {
+      return role && ['owner', 'creator', 'editor'].includes(role)
+    })
+    return roleAllow || false
+  }
   return _.toInteger(user.id) === _.toInteger(tag.user_id)
 })
 
@@ -42,7 +49,10 @@ export const viewPlace = Bouncer.ability((user: User, place: Place) => {
   return _.toInteger(user.id) === _.toInteger(place.user_id)
 })
 
-export async function canEditIllustration(user: User, illustration: Illustration): Promise<boolean> {
+export async function canEditIllustration(
+  user: User,
+  illustration: Illustration
+): Promise<boolean> {
   if (_.toInteger(user.id) === _.toInteger(illustration.user_id)) {
     return true
   }
@@ -57,7 +67,10 @@ export async function canEditIllustration(user: User, illustration: Illustration
   return false
 }
 
-export async function canEditIllustrationContent(user: User, illustration: Illustration): Promise<boolean> {
+export async function canEditIllustrationContent(
+  user: User,
+  illustration: Illustration
+): Promise<boolean> {
   if (_.toInteger(user.id) === _.toInteger(illustration.user_id)) {
     return true
   }
@@ -72,7 +85,10 @@ export async function canEditIllustrationContent(user: User, illustration: Illus
   return false
 }
 
-export async function canDeleteIllustration(user: User, illustration: Illustration): Promise<boolean> {
+export async function canDeleteIllustration(
+  user: User,
+  illustration: Illustration
+): Promise<boolean> {
   if (_.toInteger(user.id) === _.toInteger(illustration.user_id)) {
     return true
   }
@@ -87,7 +103,10 @@ export async function canDeleteIllustration(user: User, illustration: Illustrati
   return false
 }
 
-export async function canViewIllustration(user: User, illustration: Illustration): Promise<boolean> {
+export async function canViewIllustration(
+  user: User,
+  illustration: Illustration
+): Promise<boolean> {
   if (_.toInteger(user.id) === _.toInteger(illustration.user_id)) {
     return true
   }

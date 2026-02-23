@@ -64,9 +64,14 @@ export default function Settings() {
   const router = useRouter();
 
   const dispatch = useAppDispatch();
-  dispatch(getThunkSettings(session?.accessToken));
   const settings = useAppSelector(getSettings);
   const invitations = useAppSelector(selectInvitations);
+
+  useEffect(() => {
+    if (session?.accessToken) {
+      dispatch(getThunkSettings(session.accessToken));
+    }
+  }, [session?.accessToken, dispatch]);
 
   const [team, setTeam] = useState<Team | null>(null);
   const [memberships, setMemberships] = useState<TeamMembership[]>([]);
@@ -81,9 +86,18 @@ export default function Settings() {
 
   useEffect(() => {
     if (session?.accessToken) {
-      if (session.team) {
+      if (session.team?.members?.[0]?.email) {
         setTeam(session.team);
         setTeamName(session.team.name);
+      } else {
+        api.get("/team", {}, session.accessToken).then((data) => {
+          if (data && !data.message) {
+            setTeam(data);
+            setTeamName(data.name);
+            // set session team to avoid another fetch on next load
+            session.team = data;
+          }
+        });
       }
       if (session.memberships) {
         setMemberships(session.memberships);
@@ -133,7 +147,7 @@ export default function Settings() {
   const copyInviteLink = () => {
     const link = `${window.location.origin}/join/${team?.inviteCode}`;
     navigator.clipboard.writeText(link);
-    dispatch(setFlashMessage({ severity: "info", message: "Invite link copied!" }));
+    dispatch(setFlashMessage({ severity: "info", message: "Invite link copied to clipboard" }));
   };
 
   const updateMemberRole = (userId: number, role: string) => {
@@ -399,7 +413,10 @@ export default function Settings() {
                         <div className="mb-4">
                           <p className="text-sm text-gray-500 mb-2">Invite Code: {team?.inviteCode}</p>
                           <button
-                            onClick={copyInviteLink}
+                            onClick={(e) => {
+                                e.preventDefault();
+                                copyInviteLink();
+                            }}
                             className="text-sm bg-indigo-600 text-white px-3 py-1 rounded-md hover:bg-indigo-500"
                           >
                             Copy Invite Link
@@ -412,13 +429,19 @@ export default function Settings() {
                           </p>
                           <div className="flex gap-2">
                             <button
-                              onClick={() => setShowInviteModal(true)}
+                              onClick={(e) => {
+                                e.preventDefault();
+                                setShowInviteModal(true);
+                              }}
                               className="text-sm text-indigo-600 hover:text-indigo-500"
                             >
                               Invite by Email
                             </button>
                             <button
-                              onClick={() => setShowMembersModal(true)}
+                              onClick={(e) => {
+                                e.preventDefault();
+                                setShowMembersModal(true);
+                              }}
                               className="text-sm text-indigo-600 hover:text-indigo-500"
                             >
                               Edit Members
@@ -485,28 +508,25 @@ export default function Settings() {
               <div className="mt-6 grid grid-cols-1 gap-x-6 gap-y-4 sm:grid-cols-6">
                 <div className="sm:col-span-6">
                   <h3 className="text-sm font-medium text-gray-900 mb-2">Join a Team</h3>
-                  <form
-                    onSubmit={(e) => {
-                      e.preventDefault();
-                      const input = e.currentTarget.elements.namedItem('inviteCode') as HTMLInputElement;
-                      handleJoinTeam(input.value);
-                      input.value = '';
-                    }}
-                    className="flex gap-2"
-                  >
+                  <div className="flex gap-2">
                     <input
+                      id="inviteCode"
                       type="text"
-                      name="inviteCode"
                       placeholder="Enter invite code"
                       className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
                     />
                     <button
-                      type="submit"
+                      type="button"
                       className="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500"
+                      onClick={() => {
+                        const input = document.getElementById('inviteCode') as HTMLInputElement;
+                        handleJoinTeam(input.value);
+                        input.value = '';
+                      }}
                     >
                       Join
                     </button>
-                  </form>
+                  </div>
                 </div>
               </div>
             )}

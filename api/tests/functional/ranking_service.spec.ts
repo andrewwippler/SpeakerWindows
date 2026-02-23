@@ -291,7 +291,13 @@ test.group('RankingService', (group) => {
 
     const ranker = new RankingService()
     const cand: CandidateRank[] = [
-      { illustrationId: ilModel.id, ftsTitleRank: 1, ftsBodyRank: 2, fuzzyRank: 3, semanticRank: 4 },
+      {
+        illustrationId: ilModel.id,
+        ftsTitleRank: 1,
+        ftsBodyRank: 2,
+        fuzzyRank: 3,
+        semanticRank: 4,
+      },
     ]
     const map = new Map<number, Illustration>([[ilModel.id, ilModel]])
 
@@ -304,9 +310,7 @@ test.group('RankingService', (group) => {
 
   test('ranker handles missing illustration gracefully', async ({ assert }) => {
     const ranker = new RankingService()
-    const cand: CandidateRank[] = [
-      { illustrationId: 99999, ftsTitleRank: 1 },
-    ]
+    const cand: CandidateRank[] = [{ illustrationId: 99999, ftsTitleRank: 1 }]
     const map = new Map<number, Illustration>()
 
     const res = await ranker.rank(cand, map)
