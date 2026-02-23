@@ -1,4 +1,6 @@
-name: Deploy to Wippler k8s
+# Deploy to Wippler k8s
+
+name: Deploy
 
 on:
   push:
@@ -14,38 +16,16 @@ permissions:
   packages: write
 
 jobs:
-  build-and-deploy:
+  deploy:
     name: Deploy
     runs-on: ubuntu-latest
     environment: production
+    needs: [build_api_container, build_frontend_container]
+    if: github.event_name == 'push'
 
     steps:
       - name: Checkout
         uses: actions/checkout@v3
-
-      - name: Log in to the Container registry
-        uses: docker/login-action@f054a8b539a109f9f41c372932f1ae047eff08c9
-        with:
-          registry: ${{ env.REGISTRY }}
-          username: ${{ secrets.REG_USER  }}
-          password: ${{ secrets.REG_PW }}
-
-      - name: Build and push Api image
-        uses: docker/build-push-action@v6
-        with:
-          context: api/.
-          push: true
-          tags: ${{ env.REGISTRY }}/${{ env.REPOSITORY }}:api-${{ github.sha }},${{ env.REGISTRY }}/${{ env.REPOSITORY }}:api-latest
-
-      - name: Echo public API
-        run: echo "NEXT_PUBLIC_HOST_URL=https://sw-api.wplr.rocks" > frontend/.env.local
-
-      - name: Build and push Frontend image
-        uses: docker/build-push-action@v6
-        with:
-          context: frontend/.
-          push: true
-          tags: ${{ env.REGISTRY }}/${{ env.REPOSITORY }}:frontend-${{ github.sha }},${{ env.REGISTRY }}/${{ env.REPOSITORY }}:frontend-latest
 
       - name: Updating API
         uses: appleboy/ssh-action@master

@@ -1,0 +1,58 @@
+# Docker Build and Push
+
+name: Docker Build and Push
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  build_api_container:
+    runs-on: ubuntu-latest
+    needs: [test_api, test_db]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Log in to the Container registry
+        uses: docker/login-action@v3
+        with:
+          registry: d.wplr.rocks
+          username: ${{ secrets.REG_USER }}
+          password: ${{ secrets.REG_PW }}
+
+      - name: Build and push Api image
+        uses: docker/build-push-action@v6
+        with:
+          context: api/.
+          push: true
+          tags: d.wplr.rocks/speakerwindows:api-${{ github.sha }},d.wplr.rocks/speakerwindows:api-latest
+
+  build_frontend_container:
+    runs-on: ubuntu-latest
+    needs: [test_frontend, build_frontend]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Log in to the Container registry
+        uses: docker/login-action@v3
+        with:
+          registry: d.wplr.rocks
+          username: ${{ secrets.REG_USER }}
+          password: ${{ secrets.REG_PW }}
+
+      - name: Echo public API
+        run: echo "NEXT_PUBLIC_HOST_URL=https://sw-api.wplr.rocks" > frontend/.env.local
+
+      - name: Build and push Frontend image
+        uses: docker/build-push-action@v6
+        with:
+          context: frontend/.
+          push: true
+          tags: d.wplr.rocks/speakerwindows:frontend-${{ github.sha }},d.wplr.rocks/speakerwindows:frontend-latest
