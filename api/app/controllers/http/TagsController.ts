@@ -1,11 +1,10 @@
 import type { HttpContext } from '@adonisjs/core/http'
-import _, { orderBy } from 'lodash'
+import _ from 'lodash'
 import Tag from '#models/tag'
 import TeamMember from '#models/team_member'
 import Team from '#models/team'
 import { TagValidator } from '#validators/TagValidator'
 import { editTag } from '#app/abilities/main'
-import { QueryClient } from '@adonisjs/lucid/database'
 
 export default class TagsController {
   /**
@@ -19,24 +18,47 @@ export default class TagsController {
    */
   public async index({ auth, request }: HttpContext) {
     const rawTeamId = request.input('team_id')
+    const teamId = rawTeamId ? Number(rawTeamId) : null
+    const user = auth.user! // Assuming user is logged in
 
-    const teamId = rawTeamId && !isNaN(Number(rawTeamId)) ? Number(rawTeamId) : null
-
-    const userId = auth.user?.id
-
-    if (teamId === null) {
-      return await Tag.query().where('user_id', `${userId}`).andWhereNull('team_id').orderBy('name')
+    if (!teamId) {
+      // Fetch personal tags where team_id is null
+      return await Tag.query()
+        .where('user_id', user.id) // Lucid handles the mapping to user_id
+        .whereNull('team_id')
+        .orderBy('name', 'asc')
     }
 
-    const team = await Team.query().where('id', teamId).preload('members').first()
-    const isOwner = team?.userId === userId
-    const isMember = team?.members.some((m) => m.userId === userId)
+    // Check if user belongs to the team via a relationship query (more efficient)
+    const isMember = await Team.query()
+      .where('id', teamId)
+      .where((query) => {
+        query.where('user_id', user.id).orWhereHas('members', (m) => {
+          m.where('user_id', user.id)
+        })
+      })
+      .first()
 
-    if (!isMember && !isOwner) {
+    if (!isMember) {
       return []
     }
 
-    return await Tag.query().where('team_id', teamId).orderBy('name')
+    const tagsToReturn = await Tag.query().where('team_id', teamId).orderBy('name', 'asc')
+
+    // loop over tagsToReturn and remove duplicate tags with the same name, keeping the one with the lowest id
+    // in teams, it's possible to have multiple tags with the same name but different ids. We want to return only one tag per unique name, and we want to keep the one with the lowest id (the first one created).
+    const uniqueTagsMap: Record<string, Tag> = {}
+    tagsToReturn.forEach((tag) => {
+      if (!uniqueTagsMap[tag.name]) {
+        uniqueTagsMap[tag.name] = tag
+      } else {
+        if (tag.id < uniqueTagsMap[tag.name].id) {
+          uniqueTagsMap[tag.name] = tag
+        }
+      }
+    })
+
+    return Object.values(uniqueTagsMap)
   }
 
   /**
@@ -51,7 +73,7 @@ export default class TagsController {
   public async search({ params, auth, request, response }: HttpContext) {
     const tag = _.get(params, 'name', '')
     const user_id = `${auth.user?.id}`
-    const teamIdQuery = request.qs().team_id
+    const teamIdQuery = request.input('team_id')
     let teamId: number | null = null
     if (teamIdQuery !== undefined && teamIdQuery !== '' && teamIdQuery !== 'null') {
       teamId = Number(teamIdQuery)
@@ -233,7 +255,7 @@ export default class TagsController {
    * @param {Request} ctx.request
    * @param {Response} ctx.response
    */
-  public async removeIllustrations({ params, auth, bouncer, request, response }: HttpContext) {
+  public async removeIllustrations({ params, bouncer, request, response }: HttpContext) {
     const tag = await Tag.findOrFail(params.id)
 
     if (await bouncer.denies(editTag, tag)) {

@@ -191,8 +191,9 @@ export default function IllustrationForm({
           <div className="overflow-hidden shadow sm:rounded-md">
             <div className="bg-white px-4 py-5 sm:p-6">
               <div className="grid grid-cols-6 gap-6">
-                <div className="col-span-6 sm:col-span-6">
-                  {(!edit || session?.userId === illustration?.owner_id) && (
+                {(!edit ||
+                  session?.userId === Number(illustration?.userId)) && (
+                  <div className="col-span-6 sm:col-span-6">
                     <div className="mt-2 flex items-center">
                       <input
                         type="checkbox"
@@ -207,8 +208,8 @@ export default function IllustrationForm({
                         Private/Personal illustration
                       </span>
                     </div>
-                  )}
-                </div>
+                  </div>
+                )}
 
                 <div className="col-span-6 sm:col-span-3">
                   <label

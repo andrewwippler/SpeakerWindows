@@ -94,6 +94,8 @@ export default function Settings() {
           if (data && !data.message) {
             setTeam(data);
             setTeamName(data.name);
+            // set session team to avoid another fetch on next load
+            session.team = data;
           }
         });
       }
@@ -145,7 +147,7 @@ export default function Settings() {
   const copyInviteLink = () => {
     const link = `${window.location.origin}/join/${team?.inviteCode}`;
     navigator.clipboard.writeText(link);
-    dispatch(setFlashMessage({ severity: "info", message: "Invite link copied!" }));
+    dispatch(setFlashMessage({ severity: "info", message: "Invite link copied to clipboard" }));
   };
 
   const updateMemberRole = (userId: number, role: string) => {
@@ -411,7 +413,10 @@ export default function Settings() {
                         <div className="mb-4">
                           <p className="text-sm text-gray-500 mb-2">Invite Code: {team?.inviteCode}</p>
                           <button
-                            onClick={copyInviteLink}
+                            onClick={(e) => {
+                                e.preventDefault();
+                                copyInviteLink();
+                            }}
                             className="text-sm bg-indigo-600 text-white px-3 py-1 rounded-md hover:bg-indigo-500"
                           >
                             Copy Invite Link
@@ -424,13 +429,19 @@ export default function Settings() {
                           </p>
                           <div className="flex gap-2">
                             <button
-                              onClick={() => setShowInviteModal(true)}
+                              onClick={(e) => {
+                                e.preventDefault();
+                                setShowInviteModal(true);
+                              }}
                               className="text-sm text-indigo-600 hover:text-indigo-500"
                             >
                               Invite by Email
                             </button>
                             <button
-                              onClick={() => setShowMembersModal(true)}
+                              onClick={(e) => {
+                                e.preventDefault();
+                                setShowMembersModal(true);
+                              }}
                               className="text-sm text-indigo-600 hover:text-indigo-500"
                             >
                               Edit Members

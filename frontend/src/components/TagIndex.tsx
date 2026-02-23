@@ -30,6 +30,7 @@ export default function Tags({ token }: TagsProps) {
         .get("/tags", params, token)
         .then((tags: Tag[]) => {
           setData(tags);
+          console.log("Fetched tags:", tags);
           setLoading(false);
         })
         .catch((err) => {
