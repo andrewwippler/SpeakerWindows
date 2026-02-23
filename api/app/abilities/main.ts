@@ -42,7 +42,10 @@ export const viewPlace = Bouncer.ability((user: User, place: Place) => {
   return _.toInteger(user.id) === _.toInteger(place.user_id)
 })
 
-export async function canEditIllustration(user: User, illustration: Illustration): Promise<boolean> {
+export async function canEditIllustration(
+  user: User,
+  illustration: Illustration
+): Promise<boolean> {
   if (_.toInteger(user.id) === _.toInteger(illustration.user_id)) {
     return true
   }
@@ -57,7 +60,10 @@ export async function canEditIllustration(user: User, illustration: Illustration
   return false
 }
 
-export async function canEditIllustrationContent(user: User, illustration: Illustration): Promise<boolean> {
+export async function canEditIllustrationContent(
+  user: User,
+  illustration: Illustration
+): Promise<boolean> {
   if (_.toInteger(user.id) === _.toInteger(illustration.user_id)) {
     return true
   }
@@ -72,7 +78,10 @@ export async function canEditIllustrationContent(user: User, illustration: Illus
   return false
 }
 
-export async function canDeleteIllustration(user: User, illustration: Illustration): Promise<boolean> {
+export async function canDeleteIllustration(
+  user: User,
+  illustration: Illustration
+): Promise<boolean> {
   if (_.toInteger(user.id) === _.toInteger(illustration.user_id)) {
     return true
   }
@@ -87,7 +96,10 @@ export async function canDeleteIllustration(user: User, illustration: Illustrati
   return false
 }
 
-export async function canViewIllustration(user: User, illustration: Illustration): Promise<boolean> {
+export async function canViewIllustration(
+  user: User,
+  illustration: Illustration
+): Promise<boolean> {
   if (_.toInteger(user.id) === _.toInteger(illustration.user_id)) {
     return true
   }

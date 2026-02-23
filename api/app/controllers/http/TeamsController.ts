@@ -197,7 +197,9 @@ export default class TeamsController {
         .first()
 
       if (teamMemberCount && Number(teamMemberCount.$extras.total) > 0) {
-        return response.status(400).send({ message: 'Cannot join another team while you have members in your own team' })
+        return response
+          .status(400)
+          .send({ message: 'Cannot join another team while you have members in your own team' })
       }
 
       const membershipInOtherTeam = await TeamMember.query()
@@ -206,7 +208,10 @@ export default class TeamsController {
         .first()
 
       if (membershipInOtherTeam) {
-        return response.status(400).send({ message: 'Already a member of another team. Leave your current team first before joining another.' })
+        return response.status(400).send({
+          message:
+            'Already a member of another team. Leave your current team first before joining another.',
+        })
       }
     }
 
@@ -216,12 +221,9 @@ export default class TeamsController {
       role: 'readonly',
     })
 
-    const personalTags = await Tag.query()
-      .where('user_id', user.id)
-      .where('team_id', null)
+    const personalTags = await Tag.query().where('user_id', user.id).where('team_id', null)
 
-    const teamTags = await Tag.query()
-      .where('team_id', team.id)
+    const teamTags = await Tag.query().where('team_id', team.id)
 
     for (const personalTag of personalTags) {
       const matchingTeamTag = teamTags.find(
@@ -311,9 +313,7 @@ export default class TeamsController {
 
     await membership.delete()
 
-    const teamTags = await Tag.query()
-      .where('user_id', user.id)
-      .where('team_id', teamId)
+    const teamTags = await Tag.query().where('user_id', user.id).where('team_id', teamId)
 
     for (const tag of teamTags) {
       await Tag.create({
@@ -583,10 +583,7 @@ export default class TeamsController {
     const user = auth.user!
     const { teamId } = params
 
-    const block = await TeamBlock.query()
-      .where('team_id', teamId)
-      .where('user_id', user.id)
-      .first()
+    const block = await TeamBlock.query().where('team_id', teamId).where('user_id', user.id).first()
 
     if (!block) {
       return response.status(404).send({ message: 'Block not found' })

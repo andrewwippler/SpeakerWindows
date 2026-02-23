@@ -8,13 +8,19 @@ import { SearchIndexingService } from '#services/search_indexing_service'
 import LocalEmbeddingProvider from '#services/local_embedding_provider'
 import _ from 'lodash'
 import { DateTime } from 'luxon'
-import { canEditIllustration, canEditIllustrationContent, canDeleteIllustration, canViewIllustration } from '#app/abilities/main'
+import {
+  canEditIllustration,
+  canEditIllustrationContent,
+  canDeleteIllustration,
+  canViewIllustration,
+} from '#app/abilities/main'
 import Upload from '#models/upload'
 import app from '@adonisjs/core/services/app'
 import fs from 'fs/promises'
 import env from '#start/env'
 import TeamMember from '#models/team_member'
 import Team from '#models/team'
+import User from '#models/user'
 
 async function getUserTeamIds(userId: number): Promise<number[]> {
   const memberships = await TeamMember.query().where('user_id', userId)
@@ -145,7 +151,17 @@ export default class IllustrationsController {
    * @param {View} ctx.view
    */
   public async store({ request, bouncer, auth, response }: HttpContext) {
-    const { author, title, source, content, tags, places, legacy_id, private: isPrivate, team_id } = request.all()
+    const {
+      author,
+      title,
+      source,
+      content,
+      tags,
+      places,
+      legacy_id,
+      private: isPrivate,
+      team_id,
+    } = request.all()
     const user_id = auth.user!.id
 
     // Get user's team membership to determine role
@@ -154,8 +170,7 @@ export default class IllustrationsController {
 
     // First check if user is a member of any team (not their own)
     // Check all memberships and find one where team.user_id != user_id
-    const allMemberships = await TeamMember.query()
-      .where('user_id', user_id)
+    const allMemberships = await TeamMember.query().where('user_id', user_id)
 
     for (const membership of allMemberships) {
       const team = await Team.find(membership.teamId)
@@ -209,9 +224,26 @@ export default class IllustrationsController {
       finalTeamId = userTeamId
     }
 
-    let create_data: any = { author, title, source, content, user_id, team_id: finalTeamId, private: shouldBePrivate }
+    let create_data: any = {
+      author,
+      title,
+      source,
+      content,
+      user_id,
+      team_id: finalTeamId,
+      private: shouldBePrivate,
+    }
     if (!!legacy_id) {
-      create_data = { author, title, source, content, user_id, legacy_id, team_id: finalTeamId, private: shouldBePrivate }
+      create_data = {
+        author,
+        title,
+        source,
+        content,
+        user_id,
+        legacy_id,
+        team_id: finalTeamId,
+        private: shouldBePrivate,
+      }
     }
 
     // checks if create data items are empty and inserts default values
@@ -250,7 +282,9 @@ export default class IllustrationsController {
     if (tags && tags.length > 0) {
       const newTags = [...new Set(tags)].map((tag) => {
         return {
-          slug: TagSlugSanitizer(tag + '-' + auth.user?.id + (finalTeamId ? '-team-' + finalTeamId : '')),
+          slug: TagSlugSanitizer(
+            tag + '-' + auth.user?.id + (finalTeamId ? '-team-' + finalTeamId : '')
+          ),
           name: tag,
           user_id: auth.user?.id,
           team_id: finalTeamId ?? null,
@@ -263,7 +297,9 @@ export default class IllustrationsController {
     } else {
       const newTags = [
         {
-          slug: TagSlugSanitizer('untitled-' + auth.user?.id + (finalTeamId ? '-team-' + finalTeamId : '')),
+          slug: TagSlugSanitizer(
+            'untitled-' + auth.user?.id + (finalTeamId ? '-team-' + finalTeamId : '')
+          ),
           name: 'untitled',
           user_id: auth.user?.id,
           team_id: finalTeamId ?? null,
@@ -305,6 +341,102 @@ export default class IllustrationsController {
     return response.send({ message: 'Created successfully', id: illustration.id })
   }
 
+  public async bulk({ request, response, auth }: HttpContext) {
+    const { illustrations: illustrationIds, action, data } = request.all()
+
+    if (!illustrationIds || !Array.isArray(illustrationIds) || illustrationIds.length === 0) {
+      return response.badRequest({ message: 'illustrations array is required' })
+    }
+
+    if (!action || !['toggle_privacy', 'remove_tag'].includes(action)) {
+      return response.badRequest({
+        message: 'Invalid action. Must be toggle_privacy or remove_tag',
+      })
+    }
+
+    const illustrations = await Illustration.query().whereIn('id', illustrationIds)
+
+    if (illustrations.length !== illustrationIds.length) {
+      return response.badRequest({ message: 'One or more illustrations not found' })
+    }
+
+    if (action === 'toggle_privacy') {
+      const newPrivacy = data === true
+
+      for (const illustration of illustrations) {
+        const canToggle = await this.canTogglePrivacy(auth.user!, illustration)
+        if (!canToggle) {
+          return response.status(403).send({
+            message: `You do not have permission to change privacy of illustration ${illustration.id}`,
+          })
+        }
+        illustration.private = newPrivacy
+        await illustration.save()
+      }
+
+      return response.send({ message: `Updated privacy for ${illustrations.length} illustrations` })
+    }
+
+    if (action === 'remove_tag') {
+      const tagName = data
+
+      if (!tagName || typeof tagName !== 'string') {
+        return response.badRequest({ message: 'Tag name is required for remove_tag action' })
+      }
+
+      for (const illustration of illustrations) {
+        const canRemoveTag = await this.canRemoveTag(auth.user!, illustration)
+        if (!canRemoveTag) {
+          return response.status(403).send({
+            message: `You do not have permission to remove tags from illustration ${illustration.id}`,
+          })
+        }
+
+        const tags = await illustration.related('tags').query()
+        const tagToRemove = tags.find((t) => t.name.toLowerCase() === tagName.toLowerCase())
+
+        if (!tagToRemove) {
+          return response.badRequest({
+            message: `Tag "${tagName}" not found on illustration ${illustration.id}`,
+          })
+        }
+
+        if (tags.length === 1) {
+          return response.badRequest({
+            message: `Cannot remove the last tag from illustration ${illustration.id}`,
+          })
+        }
+
+        await illustration.related('tags').detach([tagToRemove.id])
+      }
+
+      return response.send({
+        message: `Removed tag "${tagName}" from ${illustrations.length} illustrations`,
+      })
+    }
+
+    return response.badRequest({ message: 'Invalid action' })
+  }
+
+  private async canTogglePrivacy(user: User, illustration: Illustration): Promise<boolean> {
+    return _.toInteger(user.id) === _.toInteger(illustration.user_id)
+  }
+
+  private async canRemoveTag(user: User, illustration: Illustration): Promise<boolean> {
+    if (_.toInteger(user.id) === _.toInteger(illustration.user_id)) {
+      return true
+    }
+
+    if (illustration.team_id) {
+      const role = await getUserRoleInTeam(user.id, illustration.team_id)
+      if (role && ['owner', 'creator', 'editor'].includes(role)) {
+        return true
+      }
+    }
+
+    return false
+  }
+
   /**
    * Update illustration details.
    * PUT or PATCH illustration/:id
@@ -313,15 +445,25 @@ export default class IllustrationsController {
    * @param {Request} ctx.request
    * @param {Response} ctx.response
    */
-  public async update({ params, auth, bouncer, request, response }: HttpContext) {
-    const { author, title, source, content, tags, private: isPrivate } = request.all()
-    // console.log('Update request body:', { author, title, source, content, tags, isPrivate })
-    // console.log('Update request params:', request.all())
-    // places are on their own URI. Tags can be in the illustration post
+  public async update({ params, auth, request, response }: HttpContext) {
+    const allParams = request.all()
+    const author = allParams.author
+    const title = allParams.title
+    const source = allParams.source
+    const content = allParams.content
+    const tags = allParams.tags
+    const isPrivate = allParams.private
+
+    const body = request.body() || {}
+    const hasAuthor = 'author' in body
+    const hasTitle = 'title' in body
+    const hasSource = 'source' in body
+    const hasContent = 'content' in body
+    const hasTags = 'tags' in body
+    const hasPrivate = 'private' in body
 
     let illustration = await Illustration.findByOrFail('id', _.get(params, 'id', 0))
 
-    // Check if user can edit metadata (more permissive)
     const canEdit = await canEditIllustration(auth.user!, illustration)
     if (!canEdit) {
       return response.forbidden({
@@ -329,38 +471,36 @@ export default class IllustrationsController {
       })
     }
 
-    // Check if user can edit content (more restrictive)
     const canEditContent = await canEditIllustrationContent(auth.user!, illustration)
 
-    // Always allow updating metadata
-    illustration.author = author
-    illustration.title = title
-    illustration.source = source
+    if (hasAuthor) {
+      illustration.author = author
+    }
+    if (hasTitle) {
+      illustration.title = title
+    }
+    if (hasSource) {
+      illustration.source = source
+    }
 
-    // Only allow content update if user has content editing permission
-    if (canEditContent) {
+    if (hasContent && canEditContent) {
       illustration.content = content
     }
 
-    // Handle private flag change
-    if (isPrivate !== undefined && isPrivate !== illustration.private) {
-      // Get user's team
+    if (hasPrivate && isPrivate !== illustration.private) {
       const userTeam = await Team.query().where('user_id', auth.user!.id).first()
 
       if (isPrivate === true) {
-        // Making private: use user's own team
         illustration.private = true
         if (userTeam) {
           illustration.team_id = userTeam.id
         }
       } else {
-        // Making public: need to check if user can create for team
         if (illustration.team_id) {
           const role = await getUserRoleInTeam(auth.user!.id, illustration.team_id)
           if (role && ['owner', 'creator'].includes(role)) {
             illustration.private = false
           } else {
-            // Can't share to team, keep private
             illustration.private = true
           }
         } else {
@@ -371,17 +511,20 @@ export default class IllustrationsController {
 
     await illustration.save()
 
-    if (tags && tags.length > 0) {
+    if (hasTags && tags && tags.length > 0) {
       const newTags = [...new Set(tags)].map((tag) => {
         return {
-          slug: TagSlugSanitizer(tag + '-' + auth.user?.id + (illustration.team_id ? '-team-' + illustration.team_id : '')),
+          slug: TagSlugSanitizer(
+            tag +
+              '-' +
+              auth.user?.id +
+              (illustration.team_id ? '-team-' + illustration.team_id : '')
+          ),
           name: tag,
           user_id: auth.user?.id,
           team_id: illustration.team_id ?? null,
         }
       })
-      // console.log(newTags)
-      // @ts-ignore
       const allTags = await Tag.fetchOrCreateMany('slug', newTags)
       await illustration.related('tags').detach()
       await illustration.related('tags').saveMany(await allTags)
@@ -391,14 +534,12 @@ export default class IllustrationsController {
     returnValue.tags = tags
     returnValue.canEditContent = canEditContent
 
-    // Get user role for this illustration's team
     let userRole: string | null = null
     if (illustration.team_id) {
       userRole = await getUserRoleInTeam(auth.user!.id, illustration.team_id)
     }
     returnValue.userRole = userRole
 
-    // Re-index updated illustration to refresh hybrid index
     try {
       const indexingService = new SearchIndexingService(LocalEmbeddingProvider)
       await indexingService.indexIllustration(illustration.id)
@@ -455,7 +596,6 @@ export default class IllustrationsController {
   }
 
   public async index({ auth }: HttpContext) {
-
     const userId = auth.user?.id
 
     // Get all team IDs the user belongs to

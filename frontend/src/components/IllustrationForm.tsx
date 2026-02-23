@@ -180,18 +180,20 @@ export default function IllustrationForm({
               <div className="grid grid-cols-6 gap-6">
 
                 <div className="col-span-6 sm:col-span-6">
-                  <div className="mt-2 flex items-center">
-                    <input
-                      type="checkbox"
-                      name="private"
-                      id="private"
-                      defaultChecked={
-                        edit && illustration ? illustration.private : false
-                      }
-                      className="h-4 w-4 rounded border-sky-300 text-indigo-600 focus:ring-indigo-600"
-                    />
-                    <span className="ml-2 text-sm text-gray-500">Private/Personal illustration</span>
-                  </div>
+                  {(!edit || (session?.userId === illustration?.owner_id)) && (
+                    <div className="mt-2 flex items-center">
+                      <input
+                        type="checkbox"
+                        name="private"
+                        id="private"
+                        defaultChecked={
+                          edit && illustration ? illustration.private : false
+                        }
+                        className="h-4 w-4 rounded border-sky-300 text-indigo-600 focus:ring-indigo-600"
+                      />
+                      <span className="ml-2 text-sm text-gray-500">Private/Personal illustration</span>
+                    </div>
+                  )}
                 </div>
 
                 <div className="col-span-6 sm:col-span-3">

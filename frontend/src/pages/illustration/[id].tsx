@@ -75,7 +75,7 @@ export default function IllustrationWrapper() {
         );
         router.replace("/");
       } else {
-        // console.log(data);
+        data.owner_id = data.user_id;
         setData(data);
         setLoading(false);
         dispatch(setUpdateUI(false));

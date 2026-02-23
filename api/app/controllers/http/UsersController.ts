@@ -68,9 +68,7 @@ export default class UsersController {
         }
       }
 
-      const memberships = await TeamMember.query()
-        .where('user_id', user.id)
-        .preload('team')
+      const memberships = await TeamMember.query().where('user_id', user.id).preload('team')
 
       const membershipsData = memberships.map((m) => ({
         teamId: m.teamId,

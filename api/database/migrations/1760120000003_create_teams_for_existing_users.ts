@@ -19,13 +19,16 @@ export default class extends BaseSchema {
     for (const user of users) {
       const inviteCode = generateInviteCode()
 
-      const teamId = await db.table('teams').insert({
-        invite_code: inviteCode,
-        name: 'My Team',
-        user_id: user.id,
-        created_at: new Date(),
-        updated_at: new Date(),
-      }).returning('id')
+      const teamId = await db
+        .table('teams')
+        .insert({
+          invite_code: inviteCode,
+          name: 'My Team',
+          user_id: user.id,
+          created_at: new Date(),
+          updated_at: new Date(),
+        })
+        .returning('id')
 
       await db.table('team_members').insert({
         team_id: teamId[0].id,

@@ -18,5 +18,7 @@ export class illustrationType {
   id!: number ;
   userRole?: string;
   private: boolean = false;
+  owner_id?: number;
+  team_id?: number;
 
 }

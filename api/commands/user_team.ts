@@ -129,12 +129,11 @@ export default class UserTeam extends BaseCommand {
     }
 
     const teamIds = memberships.map((m) => m.teamId)
-    await TeamMember.query()
-      .where('userId', user.id)
-      .whereNot('role', 'owner')
-      .delete()
+    await TeamMember.query().where('userId', user.id).whereNot('role', 'owner').delete()
 
-    this.logger.success(`Removed user ${user.id} from ${teamIds.length} team(s): ${teamIds.join(', ')}`)
+    this.logger.success(
+      `Removed user ${user.id} from ${teamIds.length} team(s): ${teamIds.join(', ')}`
+    )
   }
 
   private async addToTeam(user: User) {

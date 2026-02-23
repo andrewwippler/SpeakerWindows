@@ -75,10 +75,11 @@ export const authOptions: NextAuthOptions = {
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
-        token.accessToken = (user as any).token || user.id;  // use API token if available, fallback to user ID
+        token.accessToken = (user as any).token || user.id;
         token.settings = (user as any).settings || [];
         token.team = (user as any).team || null;
         token.memberships = (user as any).memberships || [];
+        token.userId = (user as any).id;
       }
       return token;
     },
@@ -88,6 +89,7 @@ export const authOptions: NextAuthOptions = {
       session.settings = Array.isArray(token.settings) ? token.settings : [];
       session.team = token.team as Team | null;
       session.memberships = token.memberships as TeamMembership[];
+      session.userId = token.userId as number;
       return session;
     },
     // redirect to last viewed page after Login
@@ -111,6 +113,7 @@ declare module "next-auth" {
     settings?: Array<any>;
     team?: Team | null;
     memberships?: TeamMembership[];
+    userId?: number;
   }
   interface User {
     settings?: Array<any>;

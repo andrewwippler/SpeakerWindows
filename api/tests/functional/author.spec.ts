@@ -103,7 +103,9 @@ test.group('Authors', (group) => {
       .post('/login')
       .json({ email: goodUser.email, password: 'oasssadfasdf' })
 
-    const response = await client.get('/illustration/authors').bearerToken(loggedInUser.body().token)
+    const response = await client
+      .get('/illustration/authors')
+      .bearerToken(loggedInUser.body().token)
     response.assertStatus(204)
   })
 

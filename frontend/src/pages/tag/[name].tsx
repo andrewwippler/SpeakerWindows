@@ -10,6 +10,7 @@ import {
   CheckCircleIcon,
   TrashIcon,
   MinusCircleIcon,
+  EyeSlashIcon,
 } from "@heroicons/react/24/solid";
 import { FormEvent } from "react";
 import Head from "next/head";
@@ -33,6 +34,7 @@ export default function Tag() {
   const [data, setData] = useState([]);
   const [editTag, setEditTag] = useState(false);
   const [showBulkRemove, setShowBulkRemove] = useState(false);
+  const [showBulkPrivacy, setShowBulkPrivacy] = useState(false);
   const [selectedIllustrations, setSelectedIllustrations] = useState<number[]>(
     [],
   );
@@ -113,9 +115,9 @@ export default function Tag() {
     if (selectedIllustrations.length === 0) return;
 
     api
-      .delete(
-        `/tags/${data.id}/illustrations`,
-        { illustration_ids: selectedIllustrations },
+      .put(
+        `/illustrations/bulk`,
+        { illustrations: selectedIllustrations, action: "remove_tag", data: name },
         session?.accessToken,
       )
       .then((response) => {
@@ -127,13 +129,67 @@ export default function Tag() {
         );
         setSelectedIllustrations([]);
         setShowBulkRemove(false);
-        refreshData();
+        refreshData(session?.accessToken);
       })
       .catch((err) => {
         dispatch(
           setFlashMessage({
             severity: "danger",
             message: err.message || "Failed to remove illustrations",
+          }),
+        );
+      });
+  };
+
+  const handleBulkPrivacy = (makePrivate: boolean) => {
+    if (selectedIllustrations.length === 0) return;
+
+    const ownedSelections = selectedIllustrations.filter((id) => {
+      const ill = data.illustrations?.find((i: any) => i.id === id);
+      return ill?.user_id === session?.userId;
+    });
+
+    if (ownedSelections.length === 0) {
+      dispatch(
+        setFlashMessage({
+          severity: "danger",
+          message: "You can only change privacy for illustrations you own",
+        }),
+      );
+      return;
+    }
+
+    if (ownedSelections.length < selectedIllustrations.length) {
+      dispatch(
+        setFlashMessage({
+          severity: "warning",
+          message: `Only changing privacy for ${ownedSelections.length} illustrations you own. ${selectedIllustrations.length - ownedSelections.length} items were skipped.`,
+        }),
+      );
+    }
+
+    api
+      .put(
+        `/illustrations/bulk`,
+        { illustrations: ownedSelections, action: "toggle_privacy", data: makePrivate },
+        session?.accessToken,
+      )
+      .then((response) => {
+        dispatch(
+          setFlashMessage({
+            severity: "success",
+            message: response.message,
+          }),
+        );
+        setSelectedIllustrations([]);
+        setShowBulkPrivacy(false);
+        refreshData(session?.accessToken);
+      })
+      .catch((err) => {
+        dispatch(
+          setFlashMessage({
+            severity: "danger",
+            message: err.message || "Failed to update privacy",
           }),
         );
       });
@@ -206,6 +262,15 @@ export default function Tag() {
                 Remove Illustrations
               </button>
             )}
+            {!showBulkPrivacy && !showBulkRemove && (
+              <button
+                onClick={() => setShowBulkPrivacy(true)}
+                className="hidden md:inline-flex px-4 py-2 mr-4 mt-2 font-semibold text-sm bg-blue-300 hover:bg-blue-500 text-white rounded-full shadow-sm items-center"
+              >
+                <EyeSlashIcon className="h-4 w-4 mr-2" />
+                Toggle Privacy
+              </button>
+            )}
           </>
         )}
       </div>
@@ -240,6 +305,43 @@ export default function Tag() {
         </div>
       )}
 
+      {showBulkPrivacy && (
+        <div className="pb-4">
+          <button
+            onClick={toggleAll}
+            className="mr-4 text-sm text-sky-600 hover:text-sky-800"
+          >
+            {selectedIllustrations.length === data.illustrations?.length
+              ? "Deselect All"
+              : "Select All"}
+          </button>
+          <button
+            onClick={() => handleBulkPrivacy(true)}
+            disabled={selectedIllustrations.length === 0}
+            className="px-4 py-2 mr-4 mt-2 font-semibold text-sm bg-yellow-300 hover:bg-yellow-500 text-white rounded-full shadow-sm inline-flex items-center disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <EyeSlashIcon className="h-4 w-4 mr-2" />
+            Make Private ({selectedIllustrations.length})
+          </button>
+          <button
+            onClick={() => handleBulkPrivacy(false)}
+            disabled={selectedIllustrations.length === 0}
+            className="px-4 py-2 mr-4 mt-2 font-semibold text-sm bg-green-300 hover:bg-green-500 text-white rounded-full shadow-sm inline-flex items-center disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            Make Public ({selectedIllustrations.length})
+          </button>
+          <button
+            onClick={() => {
+              setShowBulkPrivacy(false);
+              setSelectedIllustrations([]);
+            }}
+            className="px-4 py-2 mr-4 mt-2 font-semibold text-sm bg-gray-300 hover:bg-gray-500 text-white rounded-full shadow-sm inline-flex items-center"
+          >
+            Cancel
+          </button>
+        </div>
+      )}
+
       <ul role="list">
         {!data.illustrations ? (
           <div>Loading...</div>
@@ -247,7 +349,7 @@ export default function Tag() {
           data.illustrations.map((d, i) => (
             <li key={i} className="group/item hover:bg-slate-200">
               <div className="flex items-start gap-3">
-                {showBulkRemove && (
+                {(showBulkRemove || showBulkPrivacy) && (
                   <input
                     type="checkbox"
                     className="mt-1 h-4 w-4 rounded border-gray-300 text-sky-600 focus:ring-sky-500"
