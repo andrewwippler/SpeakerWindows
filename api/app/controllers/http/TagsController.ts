@@ -105,15 +105,16 @@ export default class TagsController {
 
     // search for members of team
     // if members exist, search for tag by team id, otherwise search for tag by user id
-    const members = await Team.query().where('userId', userId).preload('members').first()
+    const members = await Team.query().where('userId', userId)
+      .preload('members')
+      .first()
 
-    if (
-      !teamIdQuery ||
-      teamIdQuery === 'null' ||
-      (teamIdQuery === userId && members?.members.length === 0)
-    ) {
+    if (!teamIdQuery || teamIdQuery === 'null' || (teamIdQuery === userId && members?.members.length === 0)) {
       // console.log('searching for tag by user id')
-      tag = await Tag.query().where('name', thetag).where('user_id', userId).first()
+      tag = await Tag.query()
+        .where('name', thetag)
+        .where('user_id', userId)
+        .first()
     } else {
       const teamId = Number(teamIdQuery)
 
@@ -136,7 +137,10 @@ export default class TagsController {
       return response.status(404).send({ message: 'Tag not found' })
     }
 
-    const tagQuery = await tag.related('illustrations').query().orderBy('title')
+    const tagQuery = await tag
+      .related('illustrations')
+      .query()
+      .orderBy('title')
 
     if (tagQuery.length < 1) {
       return {

@@ -170,7 +170,9 @@ export default class IllustrationsController {
 
     // First check if user is a member of any team (not their own)
     // Check all memberships and find one where team.user_id != user_id
-    const allMemberships = await TeamMember.query().where('user_id', user_id)
+
+    const allMemberships = await TeamMember.query()
+      .where('user_id', user_id)
 
     for (const membership of allMemberships) {
       const team = await Team.find(membership.teamId)
