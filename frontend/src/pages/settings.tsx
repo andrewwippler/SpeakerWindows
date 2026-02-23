@@ -64,9 +64,14 @@ export default function Settings() {
   const router = useRouter();
 
   const dispatch = useAppDispatch();
-  dispatch(getThunkSettings(session?.accessToken));
   const settings = useAppSelector(getSettings);
   const invitations = useAppSelector(selectInvitations);
+
+  useEffect(() => {
+    if (session?.accessToken) {
+      dispatch(getThunkSettings(session.accessToken));
+    }
+  }, [session?.accessToken, dispatch]);
 
   const [team, setTeam] = useState<Team | null>(null);
   const [memberships, setMemberships] = useState<TeamMembership[]>([]);
