@@ -14,8 +14,6 @@ permissions:
 jobs:
   build_api_container:
     runs-on: ubuntu-latest
-    needs: [test_api, test_db]
-
     steps:
       - uses: actions/checkout@v4
 
@@ -46,7 +44,6 @@ jobs:
 
   build_frontend_container:
     runs-on: ubuntu-latest
-    needs: [test_frontend, build_frontend]
 
     steps:
       - uses: actions/checkout@v4
@@ -78,3 +75,32 @@ jobs:
             d.wplr.rocks/speakerwindows:frontend-latest
             ghcr.io/${{ github.repository }}/frontend-${{ github.sha }}
             ghcr.io/${{ github.repository }}/frontend-latest
+
+  deploy:
+    name: Deploy
+    runs-on: ubuntu-latest
+    environment: production
+    needs: [build_api_container, build_frontend_container]
+    if: github.event_name == 'push'
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Updating API
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.HOST }}
+          username: kubedeploy
+          key: ${{ secrets.SSH_KEY }}
+          port: 22
+          script: kubectl --namespace web set image deployment/speakerwindows-api api=${{ env.REGISTRY }}/${{ env.REPOSITORY }}:api-${{ github.sha }}
+
+      - name: Updating Frontend
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.HOST }}
+          username: kubedeploy
+          key: ${{ secrets.SSH_KEY }}
+          port: 22
+          script: kubectl --namespace web set image deployment/speakerwindows-frontend frontend=${{ env.REGISTRY }}/${{ env.REPOSITORY }}:frontend-${{ github.sha }}
