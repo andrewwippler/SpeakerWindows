@@ -1,6 +1,6 @@
 # Docker Build and Push
 
-name: Docker Build and Push
+name: Build, Push, and Deploy
 
 on:
   push:
@@ -10,6 +10,10 @@ on:
 permissions:
   contents: read
   packages: write
+
+env:
+  REGISTRY: d.wplr.rocks
+  REPOSITORY: speakerwindows
 
 jobs:
   build_api_container:
