@@ -428,6 +428,11 @@ export default class IllustrationsController {
     }
 
     if (illustration.team_id) {
+      const team = await Team.find(illustration.team_id)
+      if (team && _.toInteger(team.userId) === _.toInteger(user.id)) {
+        return true
+      }
+
       const role = await getUserRoleInTeam(user.id, illustration.team_id)
       if (role && ['owner', 'creator', 'editor'].includes(role)) {
         return true
