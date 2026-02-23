@@ -34,7 +34,14 @@ export const editUser = Bouncer.ability(() => {
   return true
 })
 
-export const editTag = Bouncer.ability((user: User, tag: Tag) => {
+export const editTag = Bouncer.ability(async (user: User, tag: Tag) => {
+  // get team id from tag
+  if (tag.team_id) {
+    const roleAllow = await getUserRoleInTeam(user, tag.team_id).then((role) => {
+      return role && ['owner', 'creator', 'editor'].includes(role)
+    })
+    return roleAllow || false
+  }
   return _.toInteger(user.id) === _.toInteger(tag.user_id)
 })
 
