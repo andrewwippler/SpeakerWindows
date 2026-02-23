@@ -7,46 +7,48 @@ import IllustrationFactory from '#database/factories/IllustrationFactory'
 import PlaceFactory from '#database/factories/PlaceFactory'
 import _ from 'lodash'
 
-function getTags(userId: number) {
-  if (userId === 1) {
-    return [
-      { name: 'Abomasum', user_id: userId },
-      { name: 'Absquatulate', user_id: userId },
-      { name: 'Adagio', user_id: userId },
-      { name: 'Alfresco', user_id: userId },
-      { name: 'Alcazar', user_id: userId },
-      { name: 'Amok', user_id: userId },
-      { name: 'Amphisbaena', user_id: userId },
-      { name: 'Antimacassar', user_id: userId },
-      { name: 'Atingle', user_id: userId },
-      { name: 'Bailiwick', user_id: userId },
-    ]
-  }
-  if (userId === 2) {
-    return [
-      { name: 'Bafflegab', user_id: userId },
-      { name: 'Ballistic', user_id: userId },
-      { name: 'Bamboozle', user_id: userId },
-      { name: 'Bedlam', user_id: userId },
-      { name: 'Bugbear', user_id: userId },
-      { name: 'Bulbous', user_id: userId },
-      { name: 'Calamity', user_id: userId },
-      { name: 'Calliope', user_id: userId },
-      { name: 'Catamaran', user_id: userId },
-      { name: 'Convivial', user_id: userId },
-    ]
-  }
+function getPrivateTags(userId: number) {
   return [
-    { name: 'Cornucopia', user_id: userId },
-    { name: 'Dazzle', user_id: userId },
-    { name: 'Ebullient', user_id: userId },
-    { name: 'Effervescent', user_id: userId },
-    { name: 'Flabbergasted', user_id: userId },
-    { name: 'Gargantuan', user_id: userId },
-    { name: 'Hullabaloo', user_id: userId },
-    { name: 'Jubilation', user_id: userId },
-    { name: 'Kaleidoscope', user_id: userId },
-    { name: 'Luminous', user_id: userId },
+    { name: 'Abomasum', user_id: userId, team_id: null },
+    { name: 'Absquatulate', user_id: userId, team_id: null },
+    { name: 'Adagio', user_id: userId, team_id: null },
+    { name: 'Alfresco', user_id: userId, team_id: null },
+    { name: 'Alcazar', user_id: userId, team_id: null },
+    { name: 'Amok', user_id: userId, team_id: null },
+    { name: 'Amphisbaena', user_id: userId, team_id: null },
+    { name: 'Antimacassar', user_id: userId, team_id: null },
+    { name: 'Atingle', user_id: userId, team_id: null },
+    { name: 'Bailiwick', user_id: userId, team_id: null },
+  ]
+}
+
+function getTeamTags(userId: number, teamId: number) {
+  return [
+    { name: 'Bafflegab', user_id: userId, team_id: teamId },
+    { name: 'Ballistic', user_id: userId, team_id: teamId },
+    { name: 'Bamboozle', user_id: userId, team_id: teamId },
+    { name: 'Bedlam', user_id: userId, team_id: teamId },
+    { name: 'Bugbear', user_id: userId, team_id: teamId },
+    { name: 'Bulbous', user_id: userId, team_id: teamId },
+    { name: 'Calamity', user_id: userId, team_id: teamId },
+    { name: 'Calliope', user_id: userId, team_id: teamId },
+    { name: 'Catamaran', user_id: userId, team_id: teamId },
+    { name: 'Convivial', user_id: userId, team_id: teamId },
+  ]
+}
+
+function getUser3TeamTags(userId: number, teamId: number) {
+  return [
+    { name: 'Cornucopia', user_id: userId, team_id: teamId },
+    { name: 'Dazzle', user_id: userId, team_id: teamId },
+    { name: 'Ebullient', user_id: userId, team_id: teamId },
+    { name: 'Effervescent', user_id: userId, team_id: teamId },
+    { name: 'Flabbergasted', user_id: userId, team_id: teamId },
+    { name: 'Gargantuan', user_id: userId, team_id: teamId },
+    { name: 'Hullabaloo', user_id: userId, team_id: teamId },
+    { name: 'Jubilation', user_id: userId, team_id: teamId },
+    { name: 'Kaleidoscope', user_id: userId, team_id: teamId },
+    { name: 'Luminous', user_id: userId, team_id: teamId },
   ]
 }
 
@@ -57,10 +59,6 @@ export default class IndexSeeder extends BaseSeeder {
       { email: 'test2@test.com', password: 'Test12345' },
       { email: 'test3@test.com', password: 'Test123456' },
     ])
-
-    const tags1 = await Tag.fetchOrCreateMany('name', getTags(1))
-    const tags2 = await Tag.fetchOrCreateMany('name', getTags(2))
-    const tags3 = await Tag.fetchOrCreateMany('name', getTags(3))
 
     const user1 = await User.find(1)
     const user2 = await User.find(2)
@@ -87,6 +85,10 @@ export default class IndexSeeder extends BaseSeeder {
       userId: user3.id,
       role: 'editor',
     })
+
+    const tags1 = await Tag.createMany(getPrivateTags(1))
+    const tags2 = await Tag.createMany(getTeamTags(2, team.id))
+    const tags3 = await Tag.createMany(getUser3TeamTags(3, team.id))
 
     const users = [
       { user: user1, tags: tags1, teamId: null },
