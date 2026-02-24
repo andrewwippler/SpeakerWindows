@@ -13,7 +13,6 @@ import { DbAccessTokensProvider } from '@adonisjs/auth/access_tokens'
 import { withAuthFinder } from '@adonisjs/auth/mixins/lucid'
 import Team from './team.js'
 import TeamMember from './team_member.js'
-import type { BelongsTo } from '@adonisjs/lucid/types/relations'
 
 const AuthFinder = withAuthFinder(() => hash.use('bcrypt'), {
   uids: ['email'],
@@ -23,9 +22,6 @@ const AuthFinder = withAuthFinder(() => hash.use('bcrypt'), {
 export default class User extends compose(BaseModel, AuthFinder) {
   @column({ isPrimary: true })
   declare id: number
-
-  @column()
-  declare username: string
 
   @column()
   declare email: string

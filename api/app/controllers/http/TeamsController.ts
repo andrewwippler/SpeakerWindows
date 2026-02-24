@@ -20,7 +20,7 @@ export default class TeamsController {
     const members = await TeamMember.query()
       .where('team_id', team.id)
       .preload('user', (query) => {
-        query.select('id', 'username', 'email')
+        query.select('id', 'email')
       })
 
     return {
@@ -30,7 +30,6 @@ export default class TeamsController {
       role: 'owner',
       members: members.map((m) => ({
         userId: m.userId,
-        username: m.user.username,
         email: m.user.email,
         role: m.role,
       })),
@@ -63,12 +62,11 @@ export default class TeamsController {
     const members = await TeamMember.query()
       .where('team_id', team.id)
       .preload('user', (query) => {
-        query.select('id', 'username', 'email')
+        query.select('id', 'email')
       })
 
     return members.map((m) => ({
       userId: m.userId,
-      username: m.user.username,
       email: m.user.email,
       role: m.role,
     }))
@@ -257,7 +255,7 @@ export default class TeamsController {
       .whereIn('team_id', teamIds)
       .andWhere('private', false)
       .preload('user', (query) => {
-        query.select('id', 'username')
+        query.select('id', 'email')
       })
 
     return illustrations.map((ill) => ({
@@ -265,8 +263,8 @@ export default class TeamsController {
       title: ill.title,
       author: ill.author,
       source: ill.source,
-      user_id: ill.userId,
-      team_id: ill.teamId,
+      user_id: ill.user_id,
+      team_id: ill.team_id,
       private: ill.private,
       createdAt: ill.createdAt,
       user: ill.user,
@@ -353,13 +351,12 @@ export default class TeamsController {
       .where('team_id', team.id)
       .where('status', 'pending')
       .preload('user', (query) => {
-        query.select('id', 'username', 'email')
+        query.select('id', 'email')
       })
 
     return invitations.map((inv) => ({
       id: inv.id,
       userId: inv.userId,
-      username: inv.user?.username,
       email: inv.user?.email,
       role: inv.role,
     }))

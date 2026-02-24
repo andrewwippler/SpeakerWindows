@@ -10,7 +10,6 @@ export interface TeamMembership {
 
 export interface TeamMember {
   userId: number;
-  username: string;
   email: string;
   role: string;
 }
