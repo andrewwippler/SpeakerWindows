@@ -9,7 +9,6 @@ export default Factory.define(User, ({ faker }) => {
   })
   return {
     email: faker.internet.email(),
-    username: faker.internet.username(),
     password: same_password,
     // password_confirmation: same_password,
   }

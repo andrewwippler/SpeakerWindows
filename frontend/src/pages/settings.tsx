@@ -28,7 +28,6 @@ import { useRouter } from "next/router";
 
 interface TeamMember {
   userId: number;
-  username: string;
   email: string;
   role: string;
 }
@@ -651,7 +650,6 @@ export default function Settings() {
                       {team?.members?.map((member) => (
                         <div key={member.userId} className="flex items-center justify-between border-b pb-2">
                           <div>
-                            <p className="text-sm font-medium text-gray-900">{member.username}</p>
                             <p className="text-xs text-gray-500">{member.email}</p>
                           </div>
                           <div className="flex items-center gap-2">

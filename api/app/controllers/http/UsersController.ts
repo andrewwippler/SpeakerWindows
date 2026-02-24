@@ -61,7 +61,6 @@ export default class UsersController {
           role: 'owner',
           members: team.members.map((m) => ({
             userId: m.userId,
-            username: m.user?.username ?? null,
             email: m.user?.email ?? null,
             role: m.role,
           })),
@@ -80,7 +79,6 @@ export default class UsersController {
         id: user.id,
         token: sharedToken,
         settings,
-        name: user.username,
         email: user.email,
         uid: user.uid,
         team: teamData,
@@ -91,7 +89,7 @@ export default class UsersController {
       await locallimit.increment(throttleKey)
     }
 
-    return response.status(401).send({ message: 'Username or password is incorrect' })
+    return response.status(401).send({ message: 'Email or password is incorrect' })
   }
 
   public show({ auth, params, response }: HttpContext) {

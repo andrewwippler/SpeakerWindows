@@ -13,7 +13,6 @@ export interface MockTeam {
 
 export interface MockTeamMember {
   userId: number;
-  username: string;
   email: string;
   role: string;
 }
@@ -34,11 +33,11 @@ export interface MockSession {
 const mockInitialState = {
   flash: { show: false, object: { message: '', severity: '' } },
   ui: { illustrationEdit: false, updateUI: false, redirect: '/' },
-  user: { 
-    apitoken: null, 
-    settings: { place: '', location: '', count: 0 }, 
-    invitations: [], 
-    invitationsFetchedAt: null 
+  user: {
+    apitoken: null,
+    settings: { place: '', location: '', count: 0 },
+    invitations: [],
+    invitationsFetchedAt: null
   },
   modal: { show: false, itemToDelete: null },
   search: {},
@@ -84,7 +83,7 @@ jest.mock('next-auth/react', () => {
     team: null,
     memberships: [],
   };
-  
+
   return {
     __esModule: true,
     SessionProvider: ({ children }: { children: React.ReactNode }) => children,
@@ -119,7 +118,6 @@ export function createMockTeam(overrides: Partial<MockTeam> = {}): MockTeam {
 export function createMockTeamMember(overrides: Partial<MockTeamMember> = {}): MockTeamMember {
   return {
     userId: 2,
-    username: 'testuser',
     email: 'test@test.com',
     role: 'editor',
     ...overrides,
@@ -174,10 +172,10 @@ const mockApiResponses: Record<string, any> = {
 
 export function mockApiCalls(responses: Record<string, any> = {}) {
   const mergedResponses = { ...mockApiResponses, ...responses };
-  
+
   global.fetch = jest.fn((url: string | URL, options?: RequestInit) => {
     let urlStr = url.toString();
-    
+
     // Handle URLs like "undefined/tag/path" or "http://localhost:3000/tag/path"
     // Extract just the path portion
     const undefinedMatch = urlStr.match(/^undefined(\/.*)$/);
@@ -193,21 +191,21 @@ export function mockApiCalls(responses: Record<string, any> = {}) {
         urlStr = urlStr.replace(/^https?:\/\/[^/]+/, '');
       }
     }
-    
+
     // Check for next-auth session endpoint
     if (urlStr.includes('auth/session') || urlStr.endsWith('/api/auth/session')) {
       return Promise.resolve({
         ok: true,
-        json: () => Promise.resolve({ 
-          accessToken: 'mock-token', 
-          userId: 1, 
-          team: null, 
-          memberships: [] 
+        json: () => Promise.resolve({
+          accessToken: 'mock-token',
+          userId: 1,
+          team: null,
+          memberships: []
         }),
         headers: new Headers({ 'content-type': 'application/json' }),
       });
     }
-    
+
     for (const [pattern, response] of Object.entries(mergedResponses)) {
       if (urlStr.includes(pattern)) {
         return Promise.resolve({
@@ -217,7 +215,7 @@ export function mockApiCalls(responses: Record<string, any> = {}) {
         });
       }
     }
-    
+
     console.warn(`No mock response found for URL: ${urlStr}`);
     return Promise.resolve({
       ok: false,

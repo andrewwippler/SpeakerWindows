@@ -163,7 +163,7 @@ test.group('Users', (group) => {
 
     const login = await client.post('/login').json(baduser)
     login.assertStatus(401)
-    assert.equal(login.body().message, 'Username or password is incorrect')
+    assert.equal(login.body().message, 'Email or password is incorrect')
   })
 
   test('User is locked out after 5 invalid attemps', async ({ client, assert }) => {
