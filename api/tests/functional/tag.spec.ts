@@ -620,4 +620,154 @@ test.group('Tag - Team Scoped', (group) => {
       .sort()
     assert.deepEqual(ownerTagNamesAfterDelete, ['Alpha', 'Beta', 'Owner-Tag'])
   })
+
+  test('Tag page merges illustrations from team tag and personal tag with same name', async ({
+    client,
+    assert,
+  }) => {
+    const user = await UserFactory.merge({ password: 'oasssadfasdf' }).create()
+    const login = await client.post('/login').json({ email: user.email, password: 'oasssadfasdf' })
+    const token = login.body().token
+
+    const team = await TeamFactory.merge({ userId: user.id }).create()
+
+    const ill1 = await IllustrationFactory.merge({
+      title: 'Illustration 1',
+      user_id: user.id,
+    }).create()
+    const ill2 = await IllustrationFactory.merge({
+      title: 'Illustration 2',
+      user_id: user.id,
+    }).create()
+    const ill3 = await IllustrationFactory.merge({
+      title: 'Illustration 3',
+      user_id: user.id,
+    }).create()
+
+    const teamTag = await Tag.create({
+      name: 'Jesus',
+      user_id: user.id,
+      team_id: team.id,
+    })
+    await ill1.related('tags').attach([teamTag.id])
+    await ill2.related('tags').attach([teamTag.id])
+
+    const personalTag = await Tag.create({
+      name: 'Jesus',
+      user_id: user.id,
+      team_id: null,
+    })
+    await ill3.related('tags').attach([personalTag.id])
+
+    const response = await client.get('/tag/jesus').qs({ team_id: team.id }).bearerToken(token)
+
+    response.assertStatus(200)
+    assert.equal(response.body().name, 'Jesus')
+    assert.equal(response.body().illustrations.length, 3)
+
+    const titles = response
+      .body()
+      .illustrations.map((i: any) => i.title)
+      .sort()
+    assert.deepEqual(titles, ['Illustration 1', 'Illustration 2', 'Illustration 3'])
+  })
+
+  test('Tag page returns only team tag illustrations when no personal tag exists', async ({
+    client,
+    assert,
+  }) => {
+    const user = await UserFactory.merge({ password: 'oasssadfasdf' }).create()
+    const login = await client.post('/login').json({ email: user.email, password: 'oasssadfasdf' })
+    const token = login.body().token
+
+    const team = await TeamFactory.merge({ userId: user.id }).create()
+
+    const ill1 = await IllustrationFactory.merge({
+      title: 'Team Illustration',
+      user_id: user.id,
+    }).create()
+
+    const teamTag = await Tag.create({
+      name: 'Team-Only',
+      user_id: user.id,
+      team_id: team.id,
+    })
+    await ill1.related('tags').attach([teamTag.id])
+
+    const response = await client.get('/tag/team-only').qs({ team_id: team.id }).bearerToken(token)
+
+    response.assertStatus(200)
+    assert.equal(response.body().name, 'Team-Only')
+    assert.equal(response.body().illustrations.length, 1)
+    assert.equal(response.body().illustrations[0].title, 'Team Illustration')
+  })
+
+  test('Tag page returns only personal tag illustrations when no team tag exists', async ({
+    client,
+    assert,
+  }) => {
+    const user = await UserFactory.merge({ password: 'oasssadfasdf' }).create()
+    const login = await client.post('/login').json({ email: user.email, password: 'oasssadfasdf' })
+    const token = login.body().token
+
+    const team = await TeamFactory.merge({ userId: user.id }).create()
+
+    const ill1 = await IllustrationFactory.merge({
+      title: 'Personal Illustration',
+      user_id: user.id,
+    }).create()
+
+    const personalTag = await Tag.create({
+      name: 'Personal-Only',
+      user_id: user.id,
+      team_id: null,
+    })
+    await ill1.related('tags').attach([personalTag.id])
+
+    const response = await client
+      .get('/tag/personal-only')
+      .qs({ team_id: team.id })
+      .bearerToken(token)
+
+    response.assertStatus(200)
+    assert.equal(response.body().name, 'Personal-Only')
+    assert.equal(response.body().illustrations.length, 1)
+    assert.equal(response.body().illustrations[0].title, 'Personal Illustration')
+  })
+
+  test('Deduplicates illustrations when same illustration is tagged with both team and personal tag', async ({
+    client,
+    assert,
+  }) => {
+    const user = await UserFactory.merge({ password: 'oasssadfasdf' }).create()
+    const login = await client.post('/login').json({ email: user.email, password: 'oasssadfasdf' })
+    const token = login.body().token
+
+    const team = await TeamFactory.merge({ userId: user.id }).create()
+
+    const ill = await IllustrationFactory.merge({
+      title: 'Shared Illustration',
+      user_id: user.id,
+    }).create()
+
+    const teamTag = await Tag.create({
+      name: 'Shared-Tag',
+      user_id: user.id,
+      team_id: team.id,
+    })
+    const personalTag = await Tag.create({
+      name: 'Shared-Tag',
+      user_id: user.id,
+      team_id: null,
+    })
+    await ill.related('tags').attach([teamTag.id])
+    await ill.related('tags').attach([personalTag.id])
+
+    const response = await client.get('/tag/shared-tag').qs({ team_id: team.id }).bearerToken(token)
+
+    response.assertStatus(200)
+    assert.equal(response.body().name, 'Shared-Tag')
+    assert.equal(response.body().illustrations.length, 1)
+    assert.equal(response.body().illustrations[0].id, ill.id)
+  })
 })

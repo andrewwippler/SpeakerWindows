@@ -123,61 +123,94 @@ export default class TagsController {
 
     const userId = auth.user?.id
 
-    let tag: Tag | null = null
+    let tags: Tag[] = []
+    let teamTag: Tag | null = null
+    let personalTag: Tag | null = null
 
-    // search for members of team
-    // if members exist, search for tag by team id, otherwise search for tag by user id
-    const members = await Team.query().where('userId', userId)
-      .preload('members')
-      .first()
-
-    if (!teamIdQuery || teamIdQuery === 'null' || (teamIdQuery === userId && members?.members.length === 0)) {
-      // console.log('searching for tag by user id')
-      tag = await Tag.query()
-        .where('name', thetag)
-        .where('user_id', userId)
-        .first()
-    } else {
+    if (teamIdQuery && teamIdQuery !== 'null') {
       const teamId = Number(teamIdQuery)
 
-      const isMember = await TeamMember.query()
-        .where('team_id', teamId)
-        .where('user_id', userId)
-        .first()
+      if (String(teamId) !== String(userId)) {
+        const isMember = await TeamMember.query()
+          .where('team_id', teamId)
+          .where('user_id', userId)
+          .first()
 
-      const team = await Team.find(teamId)
-      const isOwner = team?.userId === userId
+        const team = await Team.find(teamId)
+        const isOwner = team?.userId === userId
 
-      if (!isMember && !isOwner) {
-        return response.status(403).send({ message: 'Not a team member' })
+        if (!isMember && !isOwner) {
+          return response.status(403).send({ message: 'Not a team member' })
+        }
       }
 
-      tag = await Tag.query().where('name', thetag).where('team_id', teamId).first()
+      teamTag = await Tag.query().where('name', 'ILIKE', thetag).where('team_id', teamId).first()
+      if (teamTag) {
+        tags.push(teamTag)
+      }
+
+      // Also get ALL other tags with the same name (same name, different IDs)
+      const allTeamTags = await Tag.query()
+        .where('name', 'ILIKE', thetag)
+        .where('team_id', teamId)
+      for (const t of allTeamTags) {
+        if (!tags.find((existing) => existing.id === t.id)) {
+          tags.push(t)
+        }
+      }
     }
 
-    if (!tag) {
+    personalTag = await Tag.query()
+      .where('name', 'ILIKE', thetag)
+      .where('user_id', userId)
+      .whereNull('team_id')
+      .first()
+
+    if (personalTag) {
+      tags.push(personalTag)
+    }
+
+    // Also get ALL personal tags with the same name
+    const allPersonalTags = await Tag.query()
+      .where('name', 'ILIKE', thetag)
+      .where('user_id', userId)
+      .whereNull('team_id')
+    for (const t of allPersonalTags) {
+      if (!tags.find((existing) => existing.id === t.id)) {
+        tags.push(t)
+      }
+    }
+
+    if (tags.length === 0) {
       return response.status(404).send({ message: 'Tag not found' })
     }
 
-    const tagQuery = await tag
-      .related('illustrations')
-      .query()
-      .orderBy('title')
-
-    if (tagQuery.length < 1) {
-      return {
-        id: tag.id,
-        name: tag.name,
+    const illustrationMap = new Map<number, any>()
+    for (const tag of tags) {
+      const tagIllustrations = await tag.related('illustrations').query().orderBy('title')
+      for (const ill of tagIllustrations) {
+        if (!illustrationMap.has(ill.id)) {
+          illustrationMap.set(ill.id, ill)
+        }
       }
     }
 
-    const returnTags = {
-      id: tag.id,
-      name: tag.name,
-      illustrations: tagQuery,
+    const mergedIllustrations = Array.from(illustrationMap.values()).sort((a, b) =>
+      a.title.localeCompare(b.title)
+    )
+
+    if (mergedIllustrations.length === 0) {
+      return {
+        id: tags[0].id,
+        name: tags[0].name,
+      }
     }
 
-    return returnTags
+    return {
+      id: tags[0].id,
+      name: tags[0].name,
+      illustrations: mergedIllustrations,
+    }
   }
 
   /**
