@@ -52,7 +52,7 @@
   "dependencies": {
     "@adonisjs/auth": "^9.6.0",
     "@adonisjs/bouncer": "^3.1.6",
-    "@adonisjs/core": "^6.20.0",
+    "@adonisjs/core": "^7.3.1",
     "@adonisjs/cors": "^2.2.1",
     "@adonisjs/limiter": "^2.4.0",
     "@adonisjs/lucid": "^21.8.2",
