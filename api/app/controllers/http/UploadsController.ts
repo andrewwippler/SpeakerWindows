@@ -1,6 +1,6 @@
 import { canEditIllustration } from '#app/abilities/main'
 import Illustration from '#models/illustration'
-import { cuid } from '@adonisjs/core/helpers'
+import { randomUUID } from 'node:crypto'
 import { HttpContext } from '@adonisjs/core/http'
 import app from '@adonisjs/core/services/app'
 import env from '#start/env'
@@ -34,7 +34,7 @@ export default class UploadsController {
     }
     const pathEnv = env.get('NODE_ENV')
     await sentFile.move(app.makePath('uploads', pathEnv), {
-      name: `${auth.user!.id}/${illustration_id}/${cuid()}.${sentFile.extname}`,
+      name: `${auth.user!.id}/${illustration_id}/${randomUUID()}.${sentFile.extname}`,
     })
 
     await illustration.related('uploads').create({

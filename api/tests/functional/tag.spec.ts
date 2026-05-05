@@ -4,11 +4,11 @@ import Tag from '#models/tag'
 import TagFactory from '#database/factories/TagFactory'
 import IllustrationFactory from '#database/factories/IllustrationFactory'
 import TeamFactory from '#database/factories/TeamFactory'
-import TeamMemberFactory from '#database/factories/TeamMemberFactory'
 import db from '@adonisjs/lucid/services/db'
 import Team from '#models/team'
-let goodUser
-let badUser
+import User from '#models/user'
+let goodUser: User
+let badUser: User
 
 test.group('Tag', (group) => {
   // Write your test here
@@ -438,14 +438,11 @@ test.group('Tag - Team Scoped', (group) => {
     const loginA = await client
       .post('/login')
       .json({ email: userA.email, password: 'oasssadfasdf' })
-    loginA.assertStatus(200)
     const tokenA = loginA.body().token
-
     const loginB = await client
       .post('/login')
       .json({ email: userB.email, password: 'oasssadfasdf' })
     loginB.assertStatus(200)
-    const tokenB = loginB.body().token
 
     const teamB = await TeamFactory.merge({ userId: userB.id }).create()
 
@@ -553,10 +550,10 @@ test.group('Tag - Team Scoped', (group) => {
 
     const teamB = await TeamFactory.merge({ userId: userB.id }).create()
 
-    const ownerTag = await Tag.create({ name: 'Owner-Tag', user_id: userB.id, team_id: teamB.id })
+    await Tag.create({ name: 'Owner-Tag', user_id: userB.id, team_id: teamB.id })
 
-    const alphaTag = await Tag.create({ name: 'Alpha', user_id: userA.id, team_id: null })
-    const betaTag = await Tag.create({ name: 'Beta', user_id: userA.id, team_id: null })
+    await Tag.create({ name: 'Alpha', user_id: userA.id, team_id: null })
+    await Tag.create({ name: 'Beta', user_id: userA.id, team_id: null })
 
     const joinResponse = await client.post(`/teams/join/${teamB.inviteCode}`).bearerToken(tokenA)
     assert.equal(joinResponse.body().message, 'Joined team successfully')

@@ -92,7 +92,7 @@ test.group('Users', (group) => {
     const match = await client.post('/register').json(fixedUser)
 
     match.assertStatus(400)
-    assert.equal(match.body()[0].message, 'The password fields do not match')
+    assert.equal(match.body()[0].message, 'The password field and password_confirmation field must be the same')
   })
 
   test('Bad emails', async ({ client, assert }) => {

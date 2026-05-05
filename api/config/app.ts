@@ -11,21 +11,6 @@ import { defineConfig } from '@adonisjs/core/http'
 
 /*
 |--------------------------------------------------------------------------
-| Application secret key
-|--------------------------------------------------------------------------
-|
-| The secret to encrypt and sign different values in your application.
-| Make sure to keep the `APP_KEY` as an environment variable and secure.
-|
-| Note: Changing the application key for an existing app will make all
-| the cookies invalid and also the existing encrypted data will not
-| be decrypted.
-|
-*/
-export const appKey: string = env.get('APP_KEY')
-
-/*
-|--------------------------------------------------------------------------
 | Http server configuration
 |--------------------------------------------------------------------------
 |

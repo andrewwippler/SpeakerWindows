@@ -13,7 +13,6 @@ let goodUser: User
 let testIllustration: Illustration
 let badUser: User
 
-const filename = fileURLToPath(import.meta.url) // get the resolved path to the file
 const dirname = fileURLToPath(import.meta.url)
   .split('/')
   .slice(0, -1)
@@ -147,10 +146,10 @@ test.group('UploadsController', (group) => {
       .bearerToken(goodLoggedInUser.body().token)
       .send()
 
-    const uploadId = await Upload.findBy('illustration_id', testIllustration.id)
+    const uploadRecord = await Upload.findBy('illustration_id', testIllustration.id)
 
     const response = await client
-      .delete(`/upload/${uploadId.id}`)
+      .delete(`/upload/${uploadRecord!.id}`)
       .bearerToken(badLoggedInUser.body().token)
       .send()
     response.assertStatus(403)
@@ -171,13 +170,13 @@ test.group('UploadsController', (group) => {
       .bearerToken(goodLoggedInUser.body().token)
       .send()
 
-    const uploadId = await Upload.findBy('illustration_id', testIllustration.id)
+    const uploadRecord = await Upload.findBy('illustration_id', testIllustration.id)
 
     const response = await client
-      .delete(`/upload/${uploadId.id}`)
+      .delete(`/upload/${uploadRecord!.id}`)
       .bearerToken(goodLoggedInUser.body().token)
       .send()
     response.assertStatus(200)
-    assert.equal(response.body().message, `Deleted Upload id: ${uploadId.id}`)
+    assert.equal(response.body().message, `Deleted Upload id: ${uploadRecord!.id}`)
   })
 })

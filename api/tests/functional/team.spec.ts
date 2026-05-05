@@ -1,20 +1,9 @@
 import { test } from '@japa/runner'
 import db from '@adonisjs/lucid/services/db'
 import UserFactory from '#database/factories/UserFactory'
-import TeamFactory from '#database/factories/TeamFactory'
-import TeamMemberFactory from '#database/factories/TeamMemberFactory'
 import Team from '#models/team'
 import TeamMember from '#models/team_member'
 import Illustration from '#models/illustration'
-
-function generateInviteCode(): string {
-  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
-  let code = ''
-  for (let i = 0; i < 8; i++) {
-    code += chars.charAt(Math.floor(Math.random() * chars.length))
-  }
-  return code
-}
 
 test.group('Teams', (group) => {
   group.each.setup(async () => {
@@ -47,7 +36,7 @@ test.group('Teams', (group) => {
       password_confirmation: user.password + '1A!a',
     }
 
-    const registerResponse = await client.post('/register').json(fixedUser)
+    await client.post('/register').json(fixedUser)
     const loginResponse = await client.post('/login').json({
       email: user.email,
       password: user.password + '1A!a',

@@ -1,4 +1,5 @@
 import { defineConfig } from '@adonisjs/core/app'
+import { indexEntities } from '@adonisjs/core'
 
 export default defineConfig({
   /*
@@ -15,6 +16,19 @@ export default defineConfig({
     () => import('@adonisjs/lucid/commands'),
     () => import('@adonisjs/bouncer/commands'),
   ],
+  /*
+  |--------------------------------------------------------------------------
+  | Hooks
+  |--------------------------------------------------------------------------
+  |
+  | List of hooks to run during the application lifecycle.
+  |
+  */
+  hooks: {
+    init: [
+      indexEntities(),
+    ],
+  },
   /*
   |--------------------------------------------------------------------------
   | Preloads
@@ -64,7 +78,7 @@ export default defineConfig({
     suites: [
       {
         name: 'functional',
-        files: ['tests/functional/**/*.spec(.ts|.js)'],
+        files: ['tests/functional/**/*.spec.{ts,js}'],
         timeout: 60000,
       },
     ],
