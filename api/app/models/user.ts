@@ -6,7 +6,7 @@ import Token from './token.js'
 import Illustration from './illustration.js'
 import Tag from './tag.js'
 import Place from './place.js'
-import { v4 } from 'uuid'
+import { randomUUID } from 'node:crypto'
 import Setting from './setting.js'
 import type { HasMany, HasOne } from '@adonisjs/lucid/types/relations'
 import { DbAccessTokensProvider } from '@adonisjs/auth/access_tokens'
@@ -81,7 +81,7 @@ export default class User extends compose(BaseModel, AuthFinder) {
   @beforeSave()
   public static async UidGen(user: User) {
     if (!user.uid || user.uid == '00000000-0000-0000-0000-000000000000') {
-      user.uid = v4()
+      user.uid = randomUUID()
     }
   }
 

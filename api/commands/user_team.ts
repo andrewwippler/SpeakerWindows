@@ -4,7 +4,7 @@ import db from '@adonisjs/lucid/services/db'
 import User from '#models/user'
 import Team from '#models/team'
 import TeamMember from '#models/team_member'
-import { v4 as uuid } from 'uuid'
+import { randomUUID } from 'node:crypto'
 import type { TeamRole } from '#models/team'
 
 export default class UserTeam extends BaseCommand {
@@ -95,7 +95,7 @@ export default class UserTeam extends BaseCommand {
         {
           name: this.name,
           userId: user.id,
-          inviteCode: uuid(),
+          inviteCode: randomUUID(),
         },
         { client: trx }
       )
