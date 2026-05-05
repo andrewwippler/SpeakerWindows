@@ -1,5 +1,5 @@
 # From https://docs.adonisjs.com/cookbooks/dockerizing-adonis
-ARG NODE_IMAGE=node:22-bookworm-slim
+ARG NODE_IMAGE=node:24-slim
 
 FROM $NODE_IMAGE AS base
 RUN apt-get update && apt-get install -y dumb-init && rm -rf /var/lib/apt/lists/*
@@ -11,7 +11,6 @@ RUN mkdir tmp
 FROM base AS dependencies
 COPY --chown=node:node ./package*.json ./
 RUN npm ci
-COPY --chown=node:node . .
 
 FROM dependencies AS build
 RUN npm run build
@@ -25,7 +24,7 @@ ENV APP_URL=http://${HOST}:${PORT}
 ENV HASH_DRIVER=bcrypt
 COPY --chown=node:node ./package*.json ./
 RUN npm ci --omit=dev
-COPY --chown=node:node --from=build /home/node/app/build .
+COPY --chown=node:node --from=build /home/node/app/build ./
 EXPOSE 3333
 CMD [ "dumb-init", "node", "bin/server.js" ]
 
