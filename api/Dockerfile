@@ -21,6 +21,7 @@ COPY --chown=node:node ./start ./start
 COPY --chown=node:node ./database ./database
 COPY --chown=node:node ./contracts ./contracts
 COPY --chown=node:node ./commands ./commands
+COPY --chown=node:node ./providers ./providers
 RUN npm run build
 
 FROM base AS production
