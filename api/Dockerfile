@@ -13,6 +13,14 @@ COPY --chown=node:node ./package*.json ./
 RUN npm ci
 
 FROM dependencies AS build
+COPY --chown=node:node ./adonisrc.ts ./tsconfig.json ./ace.js ./
+COPY --chown=node:node ./bin ./bin
+COPY --chown=node:node ./app ./app
+COPY --chown=node:node ./config ./config
+COPY --chown=node:node ./start ./start
+COPY --chown=node:node ./database ./database
+COPY --chown=node:node ./contracts ./contracts
+COPY --chown=node:node ./commands ./commands
 RUN npm run build
 
 FROM base AS production
