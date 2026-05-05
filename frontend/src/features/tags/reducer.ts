@@ -1,5 +1,4 @@
 import { createSlice, createSelector } from '@reduxjs/toolkit'
-import { HYDRATE } from 'next-redux-wrapper';
 import type { AppState } from '@/store'
 import { tagType } from '@/library/tagtype'
 
