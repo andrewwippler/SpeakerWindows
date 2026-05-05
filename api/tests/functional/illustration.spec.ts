@@ -9,11 +9,11 @@ import Tag from '#models/tag'
 import Place from '#models/place'
 import User from '#models/user'
 import { ModelObject } from '@adonisjs/lucid/types/model'
-let goodUser: User,
-  badUser: User,
-  testTagIdOne: string | number | ModelObject,
-  testTagIdTwo: number,
-  illustration
+let goodUser: User
+let badUser: User
+let testTagIdOne: string | number | ModelObject
+let testTagIdTwo: number
+let testIllustration: any
 
 test.group('Illustrations', (group) => {
   group.each.setup(async () => {
@@ -22,7 +22,7 @@ test.group('Illustrations', (group) => {
     goodUser = await UserFactory.merge({ password: 'oasssadfasdf' }).create()
     badUser = await UserFactory.merge({ password: 'oasssadfasdf' }).create()
 
-    illustration = await IllustrationFactory.merge({
+    testIllustration = await IllustrationFactory.merge({
       title: 'Illustrations Test',
       user_id: goodUser.id,
     }).create()
@@ -31,26 +31,26 @@ test.group('Illustrations', (group) => {
     const place3 = await PlaceFactory.merge({ user_id: goodUser.id }).make()
     const place4 = await PlaceFactory.merge({ user_id: goodUser.id }).make()
     const place5 = await PlaceFactory.merge({ user_id: goodUser.id }).make()
-    illustration.related('places').saveMany([place1, place2, place3, place4, place5])
+    testIllustration.related('places').saveMany([place1, place2, place3, place4, place5])
 
     const tags = await TagFactory.createMany(3)
 
     testTagIdOne = tags[0].id
     testTagIdTwo = tags[1].id
 
-    await illustration.related('tags').attach([testTagIdOne])
+    await testIllustration.related('tags').attach([testTagIdOne])
 
     return () => db.rollbackGlobalTransaction()
   })
 
   test('Unauthenticated creation fails', async ({ client, assert }) => {
-    const illustration = {
+    const testIll = {
       author: 'testy mctest',
       title: 'New Post',
       source: 'test',
       content: 'this shall pass as new',
     }
-    const response = await client.post('/illustration').json(illustration)
+    const response = await client.post('/illustration').json(testIll)
     response.assertStatus(401)
 
     // console.log(response.body())
@@ -62,7 +62,7 @@ test.group('Illustrations', (group) => {
       .post('/login')
       .json({ email: goodUser.email, password: 'oasssadfasdf' })
 
-    const illustration = {
+    const testIll = {
       author: 'testy mctest',
       title: 'New Post',
       source: 'test',
@@ -71,7 +71,7 @@ test.group('Illustrations', (group) => {
     const response = await client
       .post('/illustration')
       .bearerToken(loggedInUser.body().token)
-      .json(illustration)
+      .json(testIll)
 
     response.assertStatus(200)
     assert.equal(response.body().message, 'Created successfully')
@@ -80,7 +80,7 @@ test.group('Illustrations', (group) => {
     const verify = await client
       .get(`/illustration/${response.body().id}`)
       .bearerToken(loggedInUser.body().token)
-    verify.assertBodyContains(illustration)
+    verify.assertBodyContains(testIll)
   })
 
   test('Duplicate illustration cannot be imported', async ({ client, assert }) => {
@@ -88,7 +88,7 @@ test.group('Illustrations', (group) => {
       .post('/login')
       .json({ email: goodUser.email, password: 'oasssadfasdf' })
 
-    const illustration = {
+    const testIll = {
       author: 'dup author',
       title: 'Dup Post',
       source: 'dup-source',
@@ -98,13 +98,13 @@ test.group('Illustrations', (group) => {
     const first = await client
       .post('/illustration')
       .bearerToken(loggedInUser.body().token)
-      .json(illustration)
+      .json(testIll)
     first.assertStatus(200)
 
     const second = await client
       .post('/illustration')
       .bearerToken(loggedInUser.body().token)
-      .json(illustration)
+      .json(testIll)
     second.assertStatus(409)
     assert.equal(second.body().message, 'Duplicate illustration')
   })
@@ -114,7 +114,7 @@ test.group('Illustrations', (group) => {
       .post('/login')
       .json({ email: goodUser.email, password: 'oasssadfasdf' })
 
-    const illustration = {
+    const testIll = {
       legacy_id: 123,
       author: 'testy mctest',
       title: 'New Post',
@@ -124,7 +124,7 @@ test.group('Illustrations', (group) => {
     const response = await client
       .post('/illustration')
       .bearerToken(loggedInUser.body().token)
-      .json(illustration)
+      .json(testIll)
 
     response.assertStatus(200)
     assert.equal(response.body().message, 'Created successfully')
@@ -138,19 +138,19 @@ test.group('Illustrations', (group) => {
     const loggedInUser = await client
       .post('/login')
       .json({ email: badUser.email, password: 'oasssadfasdf' })
-    const illustration = await IllustrationFactory.merge({
+    const testIll = await IllustrationFactory.merge({
       title: 'Illustrations Test2',
       legacy_id: 899,
       user_id: goodUser.id,
     }).create()
     const response = await client
-      .get(`/illustration/${illustration.id}`)
+      .get(`/illustration/${testIll.id}`)
       .bearerToken(loggedInUser.body().token)
     response.assertStatus(403)
     assert.equal(response.body().message, 'You do not have permission to access this resource')
 
     const legacy = await client
-      .get(`/illustrations/${illustration.legacy_id}`)
+      .get(`/illustrations/${testIll.legacy_id}`)
       .bearerToken(loggedInUser.body().token)
     legacy.assertStatus(403)
     assert.equal(legacy.body().message, 'You do not have permission to access this resource')

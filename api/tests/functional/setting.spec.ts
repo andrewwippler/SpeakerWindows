@@ -3,7 +3,8 @@ import Contact from '#models/contact'
 import db from '@adonisjs/lucid/services/db'
 import UserFactory from '#database/factories/UserFactory'
 
-let goodUser, badUser
+let goodUser
+let badUser
 
 test.group('Contact', (group) => {
   group.each.setup(async () => {

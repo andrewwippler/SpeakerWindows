@@ -11,7 +11,8 @@ test.group('RankingService', (group) => {
   })
 
   test('recency boost and user affinity boost combine', async ({ assert }) => {
-    const ill = (await IllustrationFactory.create()).toJSON() as any
+    const created = await IllustrationFactory.create()
+    const ill = created.toJSON() as any
     const ilModel = await Illustration.findOrFail(ill.id)
 
     // make illustration very recent
@@ -31,7 +32,8 @@ test.group('RankingService', (group) => {
   })
 
   test('no boost when disabled', async ({ assert }) => {
-    const ill = (await IllustrationFactory.create()).toJSON() as any
+    const created = await IllustrationFactory.create()
+    const ill = created.toJSON() as any
     const ilModel = await Illustration.findOrFail(ill.id)
 
     const ranker = new RankingService({ boostFactors: { enabled: false } })
@@ -43,7 +45,8 @@ test.group('RankingService', (group) => {
   })
 
   test('multiple boosts combined produce larger score', async ({ assert }) => {
-    const ill = (await IllustrationFactory.create()).toJSON() as any
+    const created = await IllustrationFactory.create()
+    const ill = created.toJSON() as any
     const ilModel = await Illustration.findOrFail(ill.id)
 
     ilModel.createdAt = DateTime.now()
@@ -272,7 +275,8 @@ test.group('RankingService', (group) => {
   })
 
   test('ranker uses custom weights', async ({ assert }) => {
-    const ill = (await IllustrationFactory.create()).toJSON() as any
+    const created = await IllustrationFactory.create()
+    const ill = created.toJSON() as any
     const ilModel = await Illustration.findOrFail(ill.id)
 
     const ranker = new RankingService({
@@ -286,7 +290,8 @@ test.group('RankingService', (group) => {
   })
 
   test('ranker handles candidates with different ranks', async ({ assert }) => {
-    const ill = (await IllustrationFactory.create()).toJSON() as any
+    const created = await IllustrationFactory.create()
+    const ill = created.toJSON() as any
     const ilModel = await Illustration.findOrFail(ill.id)
 
     const ranker = new RankingService()

@@ -7,7 +7,8 @@ import TeamFactory from '#database/factories/TeamFactory'
 import TeamMemberFactory from '#database/factories/TeamMemberFactory'
 import db from '@adonisjs/lucid/services/db'
 import Team from '#models/team'
-let goodUser, badUser
+let goodUser
+let badUser
 
 test.group('Tag', (group) => {
   // Write your test here
@@ -103,7 +104,7 @@ test.group('Tag', (group) => {
     const responseTwo = await client.get('/tags').qs({ team_id: null }).bearerToken(body.token)
 
     responseTwo.assertStatus(200)
-    assert.isTrue(responseTwo.body().length == 0)
+    assert.isTrue(responseTwo.body().length === 0)
   })
 
   test('Can get list of my illustrations (i.e. tag index page)', async ({ client, assert }) => {
@@ -154,9 +155,9 @@ test.group('Tag', (group) => {
 
     response.assertStatus(200)
     // console.log(response.body())
-    assert.isTrue(response.body().name == 'Searching')
-    assert.isTrue(response.body().id == tags.id)
-    assert.isTrue(response.body().illustrations.length == 1)
+    assert.isTrue(response.body().name === 'Searching')
+    assert.isTrue(response.body().id === tags.id)
+    assert.isTrue(response.body().illustrations.length === 1)
   })
 
   test('Cannot get list of your tags', async ({ client, assert }) => {
@@ -212,7 +213,7 @@ test.group('Tag', (group) => {
     const response = await client.get('/tags/a').bearerToken(loggedInUser.body().token)
 
     response.assertStatus(200)
-    assert.isTrue(response.body().length == 1)
+    assert.isTrue(response.body().length === 1)
     assert.equal(response.body()[0].name, 'Adonis-Is-Not-Cool')
   })
 

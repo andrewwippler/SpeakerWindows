@@ -19,10 +19,9 @@
 */
 import router from '@adonisjs/core/services/router'
 import { middleware } from '#start/kernel'
-import { sep, normalize } from 'node:path'
+import { sep, normalize, join } from 'node:path'
 import app from '@adonisjs/core/services/app'
 import env from '#start/env'
-import { join } from 'path'
 
 const HealthChecksController = () => import('#controllers/health_checks_controller')
 const UsersController = () => import('#controllers/http/UsersController')

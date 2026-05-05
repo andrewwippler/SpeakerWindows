@@ -9,11 +9,11 @@ import Tag from '#models/tag'
 import Place from '#models/place'
 import User from '#models/user'
 import { ModelObject } from '@adonisjs/lucid/types/model'
-let goodUser: User,
-  badUser: User,
-  testTagIdOne: string | number | ModelObject,
-  testTagIdTwo: number,
-  illustration
+let goodUser: User
+let badUser: User
+let testTagIdOne: string | number | ModelObject
+let testTagIdTwo: number
+let testIllustration: any
 
 test.group('Authors', (group) => {
   group.each.setup(async () => {
@@ -33,13 +33,13 @@ test.group('Authors', (group) => {
       .post('/login')
       .json({ email: badUser.email, password: 'oasssadfasdf' })
 
-    const illustration = {
+    testIllustration = {
       author: 'testy mctest',
       title: 'New Post',
       source: 'test',
       content: 'this shall pass as new',
     }
-    await client.post('/illustration').bearerToken(loggedInUser.body().token).json(illustration)
+    await client.post('/illustration').bearerToken(loggedInUser.body().token).json(testIllustration)
 
     const second = {
       author: 'test2',
@@ -64,7 +64,7 @@ test.group('Authors', (group) => {
     assert.equal(one.body().length, 1)
 
     const response = await client
-      .get('/author/' + illustration.author)
+      .get('/author/' + testIllustration.author)
       .bearerToken(loggedInUser.body().token)
     response.assertStatus(200)
     assert.equal(response.body().length, 1)
@@ -77,16 +77,16 @@ test.group('Authors', (group) => {
       .post('/login')
       .json({ email: goodUser.email, password: 'oasssadfasdf' })
 
-    const illustration = {
+    testIllustration = {
       author: 'testy mctest',
       title: 'New Post',
       source: 'test',
       content: 'this shall pass as new',
     }
-    await client.post('/illustration').bearerToken(loggedInUser.body().token).json(illustration)
+    await client.post('/illustration').bearerToken(loggedInUser.body().token).json(testIllustration)
 
     const response = await client
-      .put('/author/' + illustration.author)
+      .put('/author/' + testIllustration.author)
       .bearerToken(loggedInUser.body().token)
       .json({ author: 'new author' })
     response.assertStatus(200)

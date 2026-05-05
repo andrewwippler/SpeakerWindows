@@ -1,6 +1,6 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import Contact from '#models/contact'
-import CreateContactValidator from '#validators/CreateContactValidator'
+import { CreateContactValidator } from '#validators/CreateContactValidator'
 
 export default class ContactsController {
   // public async index({}: HttpContextContract) {}
@@ -8,12 +8,7 @@ export default class ContactsController {
   // public async create({}: HttpContextContract) {}
 
   public async store({ request, response }: HttpContext) {
-    try {
-      await request.validate(CreateContactValidator)
-    } catch (error) {
-      return response.status(400).send(error.messages)
-    }
-    const { email, reason, message } = request.all()
+    const { email, reason, message } = await CreateContactValidator.validate(request.all())
 
     const contact = await Contact.create({
       email,

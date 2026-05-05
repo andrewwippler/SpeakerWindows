@@ -7,7 +7,6 @@
 
 import proxyAddr from 'proxy-addr'
 import env from '#start/env'
-import { ValidatorConfig } from '@adonisjs/validator/types'
 import { defineConfig } from '@adonisjs/core/http'
 
 /*
@@ -126,14 +125,3 @@ export const http = defineConfig({
   */
   forceContentNegotiationTo: 'application/json',
 })
-
-/*
-|--------------------------------------------------------------------------
-| Validator
-|--------------------------------------------------------------------------
-|
-| Configure the global configuration for the validator. Here's the reference
-| to the default config https://git.io/JT0WE
-|
-*/
-export const validator: ValidatorConfig = {}

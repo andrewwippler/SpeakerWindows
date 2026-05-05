@@ -5,7 +5,8 @@ import Illustration from '#models/illustration'
 import UserFactory from '#database/factories/UserFactory'
 import Place from '#models/place'
 import db from '@adonisjs/lucid/services/db'
-let goodUser, badUser
+let goodUser
+let badUser
 
 test.group('Place', (group) => {
   // Write your test here
@@ -197,7 +198,7 @@ test.group('Place', (group) => {
 
     // check to see the place is no longer there
     const deletedPlace = await Place.findBy('illustration_id', illustration.id)
-    assert.isTrue(!deletedPlace)
+    assert.isFalse(!!deletedPlace)
   })
 
   test('Cannot delete place on your illustration', async ({ client, assert }) => {

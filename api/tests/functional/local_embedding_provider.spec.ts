@@ -37,8 +37,8 @@ test.group('LocalEmbeddingProvider', (group) => {
     assert.isTrue(Array.isArray(result2))
 
     let similarity = 0
-    for (let i = 0; i < result1.length; i++) {
-      similarity += result1[i] * result2[i]
+    for (const [i, val] of result1.entries()) {
+      similarity += val * result2[i]
     }
 
     assert.isTrue(similarity > 0.5, 'Similar text should have high cosine similarity')

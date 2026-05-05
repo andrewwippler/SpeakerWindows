@@ -1,19 +1,23 @@
 import { test } from '@japa/runner'
-import { join } from 'path'
+import { join } from 'node:path'
 import app from '@adonisjs/core/services/app'
-import fs from 'fs/promises'
-import path from 'path'
-import { fileURLToPath } from 'url'
+import fs from 'node:fs/promises'
+import { fileURLToPath } from 'node:url'
 import UserFactory from '#database/factories/UserFactory'
 import db from '@adonisjs/lucid/services/db'
 import User from '#models/user'
 import IllustrationFactory from '#database/factories/IllustrationFactory'
 import Illustration from '#models/illustration'
 import Upload from '#models/upload'
-let goodUser: User, illustration: Illustration, badUser: User
+let goodUser: User
+let testIllustration: Illustration
+let badUser: User
 
-const __filename = fileURLToPath(import.meta.url) // get the resolved path to the file
-const __dirname = path.dirname(__filename) // get the name of the directory
+const filename = fileURLToPath(import.meta.url) // get the resolved path to the file
+const dirname = fileURLToPath(import.meta.url)
+  .split('/')
+  .slice(0, -1)
+  .join('/') // get the name of the directory
 
 test.group('UploadsController', (group) => {
   group.each.setup(async () => {
@@ -30,7 +34,7 @@ test.group('UploadsController', (group) => {
   group.setup(async () => {
     goodUser = await UserFactory.merge({ password: 'oasssadfasdf' }).create()
     badUser = await UserFactory.merge({ password: 'oasssadfasdf' }).create()
-    illustration = await IllustrationFactory.merge({
+    testIllustration = await IllustrationFactory.merge({
       title: 'Illustrations Test',
       user_id: goodUser.id,
     }).create()
@@ -40,12 +44,12 @@ test.group('UploadsController', (group) => {
     const loggedInUser = await client
       .post('/login')
       .json({ email: goodUser.email, password: 'oasssadfasdf' })
-    const filePath = join(__dirname, '..', 'assets', '1kb.png')
+    const filePath = join(dirname, '..', 'assets', '1kb.png')
     const response = await client
       .post('/upload')
       .file('illustration_image', filePath)
       .fields({
-        illustration_id: illustration.id,
+        illustration_id: testIllustration.id,
       })
       .bearerToken(loggedInUser.body().token)
       .send()
@@ -54,7 +58,7 @@ test.group('UploadsController', (group) => {
     response.assertBodyContains({ message: 'File uploaded successfully' })
 
     const verify = await client
-      .get(`/illustration/${illustration.id}`)
+      .get(`/illustration/${testIllustration.id}`)
       .bearerToken(loggedInUser.body().token)
 
     const uploadsPath = app.makePath('uploads', 'test', verify.body().uploads[0].name)
@@ -73,7 +77,7 @@ test.group('UploadsController', (group) => {
     const response = await client
       .post('/upload')
       .fields({
-        illustration_id: illustration.id,
+        illustration_id: testIllustration.id,
       })
       .bearerToken(loggedInUser.body().token)
       .send()
@@ -87,12 +91,12 @@ test.group('UploadsController', (group) => {
       .post('/login')
       .json({ email: goodUser.email, password: 'oasssadfasdf' })
 
-    const filePath = join(__dirname, '..', 'assets', 'sample.txt')
+    const filePath = join(dirname, '..', 'assets', 'sample.txt')
     const response = await client
       .post('/upload')
       .file('illustration_image', filePath)
       .fields({
-        illustration_id: illustration.id,
+        illustration_id: testIllustration.id,
       })
       .bearerToken(loggedInUser.body().token)
       .send()
@@ -110,12 +114,12 @@ test.group('UploadsController', (group) => {
     const loggedInUser = await client
       .post('/login')
       .json({ email: badUser.email, password: 'oasssadfasdf' })
-    const filePath = join(__dirname, '..', 'assets', '1kb.png')
+    const filePath = join(dirname, '..', 'assets', '1kb.png')
     const response = await client
       .post('/upload')
       .file('illustration_image', filePath)
       .fields({
-        illustration_id: illustration.id,
+        illustration_id: testIllustration.id,
       })
       .bearerToken(loggedInUser.body().token)
       .send()
@@ -133,17 +137,17 @@ test.group('UploadsController', (group) => {
     const badLoggedInUser = await client
       .post('/login')
       .json({ email: badUser.email, password: 'oasssadfasdf' })
-    const filePath = join(__dirname, '..', 'assets', '1kb.png')
+    const filePath = join(dirname, '..', 'assets', '1kb.png')
     await client
       .post('/upload')
       .file('illustration_image', filePath)
       .fields({
-        illustration_id: illustration.id,
+        illustration_id: testIllustration.id,
       })
       .bearerToken(goodLoggedInUser.body().token)
       .send()
 
-    const uploadId = await Upload.findBy('illustration_id', illustration.id)
+    const uploadId = await Upload.findBy('illustration_id', testIllustration.id)
 
     const response = await client
       .delete(`/upload/${uploadId.id}`)
@@ -157,17 +161,17 @@ test.group('UploadsController', (group) => {
     const goodLoggedInUser = await client
       .post('/login')
       .json({ email: goodUser.email, password: 'oasssadfasdf' })
-    const filePath = join(__dirname, '..', 'assets', '1kb.png')
+    const filePath = join(dirname, '..', 'assets', '1kb.png')
     await client
       .post('/upload')
       .file('illustration_image', filePath)
       .fields({
-        illustration_id: illustration.id,
+        illustration_id: testIllustration.id,
       })
       .bearerToken(goodLoggedInUser.body().token)
       .send()
 
-    const uploadId = await Upload.findBy('illustration_id', illustration.id)
+    const uploadId = await Upload.findBy('illustration_id', testIllustration.id)
 
     const response = await client
       .delete(`/upload/${uploadId.id}`)
