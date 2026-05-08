@@ -79,7 +79,7 @@ function MobileNavLink({
   children,
 }: {
   href: string;
-  icon: any;
+  icon?: any;
   children: React.ReactNode;
 }) {
   const router = useRouter();
