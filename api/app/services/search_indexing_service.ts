@@ -127,7 +127,7 @@ export class SearchIndexingService {
    */
   private buildEmbeddingLiteral(embedding: number[]): string {
     const parts = embedding.map((n) => {
-      if (!isFinite(n)) return '0'
+      if (!Number.isFinite(n)) return '0'
       return String(n)
     })
     return `'[${parts.join(',')}]'::vector`

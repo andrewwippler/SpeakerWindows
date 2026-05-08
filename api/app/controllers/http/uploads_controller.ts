@@ -1,17 +1,17 @@
 import { canEditIllustration } from '#app/abilities/main'
 import Illustration from '#models/illustration'
 import { randomUUID } from 'node:crypto'
-import { HttpContext } from '@adonisjs/core/http'
+import { type HttpContext } from '@adonisjs/core/http'
 import app from '@adonisjs/core/services/app'
 import env from '#start/env'
 import Upload from '#models/upload'
-import fs from 'fs/promises'
+import fs from 'node:fs/promises'
 import _ from 'lodash'
 
 export default class UploadsController {
   public async store({ auth, request, response }: HttpContext) {
-    const { illustration_id } = request.all()
-    const illustration = await Illustration.findOrFail(illustration_id)
+    const { illustration_id: illustrationId } = request.all()
+    const illustration = await Illustration.findOrFail(illustrationId)
 
     const canEdit = await canEditIllustration(auth.user!, illustration)
     if (!canEdit) {
@@ -34,7 +34,7 @@ export default class UploadsController {
     }
     const pathEnv = env.get('NODE_ENV')
     await sentFile.move(app.makePath('uploads', pathEnv), {
-      name: `${auth.user!.id}/${illustration_id}/${randomUUID()}.${sentFile.extname}`,
+      name: `${auth.user!.id}/${illustrationId}/${randomUUID()}.${sentFile.extname}`,
     })
 
     await illustration.related('uploads').create({
@@ -57,7 +57,7 @@ export default class UploadsController {
     let id = _.get(params, 'id', 0)
     let upload = await Upload.query().where('id', id).preload('illustration')
 
-    if (upload[0].illustration.user_id != auth.user?.id) {
+    if (_.toInteger(upload[0].illustration.user_id) !== _.toInteger(auth.user?.id)) {
       return response
         .status(403)
         .send({ message: 'You do not have permission to access this resource' })

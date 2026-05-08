@@ -1,12 +1,12 @@
 import { test } from '@japa/runner'
 import db from '@adonisjs/lucid/services/db'
-import UserFactory from '#database/factories/UserFactory'
-import IllustrationFactory from '#database/factories/IllustrationFactory'
+import UserFactory from '#database/factories/user_factory'
+import IllustrationFactory from '#database/factories/illustration_factory'
 import Illustration from '#models/illustration'
-import IllustrationsController from '#controllers/http/IllustrationsController'
-import TeamFactory from '#database/factories/TeamFactory'
-import TeamMemberFactory from '#database/factories/TeamMemberFactory'
-import TagFactory from '#database/factories/TagFactory'
+import IllustrationsController from '#controllers/http/illustrations_controller'
+import TeamFactory from '#database/factories/team_factory'
+import TeamMemberFactory from '#database/factories/team_member_factory'
+import TagFactory from '#database/factories/tag_factory'
 import Tag from '#models/tag'
 
 test.group('IllustrationsController.search', (group) => {

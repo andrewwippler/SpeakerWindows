@@ -44,7 +44,10 @@ export default class PlacesController {
       return response.status(404).send({ message: 'Illustration does not exist' })
     }
 
-    if (!illustration.toJSON()[0] && illustration.user_id != auth.user?.id) {
+    if (
+      !illustration.toJSON()[0] &&
+      _.toInteger(illustration.user_id) !== _.toInteger(auth.user?.id)
+    ) {
       return response
         .status(403)
         .send({ message: 'You do not have permission to access this resource' })
@@ -73,11 +76,11 @@ export default class PlacesController {
     place.location = _.get(post, 'location', place.location)
     place.used = _.get(post, 'used', place.used)
 
-    if (post.illustration_id != place.illustration_id) {
+    if (post.illustration_id !== place.illustration_id) {
       return response.status(403).send({ message: 'Error: Mismatched illustration_id' })
     }
 
-    if (place.user_id != auth.user?.id) {
+    if (_.toInteger(place.user_id) !== _.toInteger(auth.user?.id)) {
       return response
         .status(403)
         .send({ message: 'You do not have permission to access this resource' })
@@ -98,7 +101,7 @@ export default class PlacesController {
   public async destroy({ params, auth, response }: HttpContext) {
     let place = await Place.findOrFail(params.id)
 
-    if (place.user_id != auth.user?.id) {
+    if (_.toInteger(place.user_id) !== _.toInteger(auth.user?.id)) {
       return response
         .status(403)
         .send({ message: 'You do not have permission to access this resource' })

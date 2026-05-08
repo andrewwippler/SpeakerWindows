@@ -1,13 +1,13 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import TagSlugSanitizer from '#app/helpers/tag'
 import Illustration from '#models/illustration'
-import crypto from 'crypto'
+import crypto from 'node:crypto'
 import Place from '#models/place'
 import Tag from '#models/tag'
 import { SearchIndexingService } from '#services/search_indexing_service'
 import LocalEmbeddingProvider from '#services/local_embedding_provider'
 import _ from 'lodash'
-import { DateTime } from 'luxon'
+import { type DateTime } from 'luxon'
 import {
   canEditIllustration,
   canEditIllustrationContent,
@@ -16,11 +16,11 @@ import {
 } from '#app/abilities/main'
 import Upload from '#models/upload'
 import app from '@adonisjs/core/services/app'
-import fs from 'fs/promises'
+import fs from 'node:fs/promises'
 import env from '#start/env'
 import TeamMember from '#models/team_member'
 import Team from '#models/team'
-import User from '#models/user'
+import type User from '#models/user'
 
 async function getUserTeamIds(userId: number): Promise<number[]> {
   const memberships = await TeamMember.query().where('user_id', userId)
@@ -48,7 +48,7 @@ export default class IllustrationsController {
   public async show({ params, auth, response }: HttpContext) {
     // validate id to avoid DB errors on out-of-range values
     const rawId = _.get(params, 'id', 0)
-    const id = parseInt(rawId, 10) || 0
+    const id = Number.parseInt(rawId, 10) || 0
     if (id > 2147483647 || id < -2147483648) {
       return response.status(500).send({ message: 'Invalid id' })
     }
@@ -108,7 +108,7 @@ export default class IllustrationsController {
    */
   public async showOld({ params, auth, response }: HttpContext) {
     const rawId = _.get(params, 'id', 0)
-    const id = parseInt(rawId, 10) || 0
+    const id = Number.parseInt(rawId, 10) || 0
     if (id > 2147483647 || id < -2147483648) {
       return response.status(500).send({ message: 'Invalid id' })
     }
@@ -129,7 +129,7 @@ export default class IllustrationsController {
         })
 
       // console.log(_.get(params, 'id', 0),auth.user?.id,!!illustrationQuery[0],!illustrationQuery[0])
-      if (!!illustrationQuery[0]) {
+      if (illustrationQuery[0]) {
         const illustration = illustrationQuery[0].toJSON()
         return illustration
       }
@@ -158,11 +158,11 @@ export default class IllustrationsController {
       content,
       tags,
       places,
-      legacy_id,
+      legacy_id: legacyId,
       private: isPrivate,
-      team_id,
+      team_id: teamId,
     } = request.all()
-    const user_id = auth.user!.id
+    const userId = auth.user!.id
 
     // Get user's team membership to determine role
     let userRole: string | null = null
@@ -171,11 +171,11 @@ export default class IllustrationsController {
     // First check if user is a member of any team (not their own)
     // Check all memberships and find one where team.user_id != user_id
 
-    const allMemberships = await TeamMember.query().where('user_id', user_id)
+    const allMemberships = await TeamMember.query().where('user_id', userId)
 
     for (const membership of allMemberships) {
       const team = await Team.find(membership.teamId)
-      if (team && team.userId !== user_id) {
+      if (team && team.userId !== userId) {
         userTeamId = membership.teamId
         userRole = membership.role
         break
@@ -184,7 +184,7 @@ export default class IllustrationsController {
 
     // If not a member of someone else's team, check if user owns a team
     if (!userTeamId) {
-      const ownedTeam = await Team.query().where('user_id', user_id).first()
+      const ownedTeam = await Team.query().where('user_id', userId).first()
       if (ownedTeam) {
         userTeamId = ownedTeam.id
         userRole = 'owner'
@@ -206,10 +206,10 @@ export default class IllustrationsController {
 
     // If creating for a team, check permissions
     let finalTeamId: number | null = null
-    if (team_id) {
-      const role = await getUserRoleInTeam(user_id, team_id)
+    if (teamId) {
+      const role = await getUserRoleInTeam(userId, teamId)
       if (role && ['owner', 'creator'].includes(role)) {
-        finalTeamId = team_id
+        finalTeamId = teamId
         // If team illustration, it can't be private
         shouldBePrivate = false
       } else {
@@ -225,51 +225,51 @@ export default class IllustrationsController {
       finalTeamId = userTeamId
     }
 
-    let create_data: any = {
+    let createData: any = {
       author,
       title,
       source,
       content,
-      user_id,
+      user_id: userId,
       team_id: finalTeamId,
       private: shouldBePrivate,
     }
-    if (!!legacy_id) {
-      create_data = {
+    if (legacyId) {
+      createData = {
         author,
         title,
         source,
         content,
-        user_id,
-        legacy_id,
+        user_id: userId,
+        legacy_id: legacyId,
         team_id: finalTeamId,
         private: shouldBePrivate,
       }
     }
 
     // checks if create data items are empty and inserts default values
-    if (!create_data.author) {
-      create_data.author = 'Unknown'
+    if (!createData.author) {
+      createData.author = 'Unknown'
     }
-    if (!create_data.title) {
-      create_data.title = 'Untitled'
+    if (!createData.title) {
+      createData.title = 'Untitled'
     }
-    if (!create_data.content) {
-      create_data.content = 'No description'
+    if (!createData.content) {
+      createData.content = 'No description'
     }
 
     // normalize content and compute hash for duplicate detection
-    const normalizedContent = (create_data.content || '')
+    const normalizedContent = (createData.content || '')
       .toString()
       .trim()
       .replace(/\s+/g, ' ')
       .toLowerCase()
-    const content_hash = crypto.createHash('sha256').update(normalizedContent).digest('hex')
+    const contentHash = crypto.createHash('sha256').update(normalizedContent).digest('hex')
     // check for duplicates for this user and source
     const existing = await Illustration.query()
-      .where('user_id', user_id)
-      .where('source', create_data.source || '')
-      .andWhere('content_hash', content_hash)
+      .where('user_id', userId)
+      .where('source', createData.source || '')
+      .andWhere('content_hash', contentHash)
       .first()
 
     if (existing) {
@@ -277,9 +277,9 @@ export default class IllustrationsController {
     }
 
     // include hash in create payload
-    create_data.content_hash = content_hash
+    createData.content_hash = contentHash
 
-    const illustration = await Illustration.create(create_data)
+    const illustration = await Illustration.create(createData)
     if (tags && tags.length > 0) {
       const newTags = [...new Set(tags)].map((tag) => {
         return {
@@ -326,7 +326,7 @@ export default class IllustrationsController {
             used: DateTime<boolean>
           }>
         ) => {
-          await Place.create({ ...place, illustration_id: illustration.id, user_id })
+          await Place.create({ ...place, illustration_id: illustration.id, user_id: userId })
         }
       )
     }

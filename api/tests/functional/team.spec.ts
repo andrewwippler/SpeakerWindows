@@ -1,6 +1,6 @@
 import { test } from '@japa/runner'
 import db from '@adonisjs/lucid/services/db'
-import UserFactory from '#database/factories/UserFactory'
+import UserFactory from '#database/factories/user_factory'
 import Team from '#models/team'
 import TeamMember from '#models/team_member'
 import Illustration from '#models/illustration'

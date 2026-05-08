@@ -1,6 +1,6 @@
 import { test } from '@japa/runner'
-import UserFactory from '#database/factories/UserFactory'
-import IllustrationFactory from '#database/factories/IllustrationFactory'
+import UserFactory from '#database/factories/user_factory'
+import IllustrationFactory from '#database/factories/illustration_factory'
 import db from '@adonisjs/lucid/services/db'
 import { IndexIllustrationJob } from '#jobs/index_illustration_job'
 

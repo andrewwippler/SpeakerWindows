@@ -1,6 +1,6 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import User from '#models/user'
-import { CreateUserValidator } from '#validators/CreateUserValidator'
+import { CreateUserValidator } from '#validators/create_user_validator'
 import Setting from '#models/setting'
 import Team from '#models/team'
 import TeamMember from '#models/team_member'
@@ -100,9 +100,13 @@ export default class UsersController {
   }
 
   public async store({ response, request }: HttpContext) {
-    const { email, password, password_confirmation } = request.all()
+    const { email, password, password_confirmation: passwordConfirmation } = request.all()
     try {
-      const payload = await CreateUserValidator.validate({ email, password, password_confirmation })
+      const payload = await CreateUserValidator.validate({
+        email,
+        password,
+        password_confirmation: passwordConfirmation,
+      })
     } catch (error) {
       return response.status(400).send(error.messages)
     }

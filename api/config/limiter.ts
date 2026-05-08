@@ -1,6 +1,6 @@
 import env from '#start/env'
 import { defineConfig, stores } from '@adonisjs/limiter'
-import { InferLimiters } from '@adonisjs/limiter/types'
+import { type InferLimiters } from '@adonisjs/limiter/types'
 
 const limiterConfig = defineConfig({
   default: env.get('LIMITER_STORE'),

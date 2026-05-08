@@ -1,6 +1,6 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import Contact from '#models/contact'
-import { CreateContactValidator } from '#validators/CreateContactValidator'
+import { CreateContactValidator } from '#validators/create_contact_validator'
 
 export default class ContactsController {
   // public async index({}: HttpContextContract) {}

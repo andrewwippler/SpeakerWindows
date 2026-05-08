@@ -10,6 +10,7 @@
     "test:coverage": "c8 npm run test",
     "coverage": "c8 check-coverage --lines 95 node ./test.ts && c8 report",
     "lint": "eslint . ",
+    "lint:fix": "eslint . --fix",
     "format": "prettier --write ."
   },
   "eslintConfig": {

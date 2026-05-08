@@ -3,8 +3,8 @@ import User from '#models/user'
 import Tag from '#models/tag'
 import Team from '#models/team'
 import TeamMember from '#models/team_member'
-import IllustrationFactory from '#database/factories/IllustrationFactory'
-import PlaceFactory from '#database/factories/PlaceFactory'
+import IllustrationFactory from '#database/factories/illustration_factory'
+import PlaceFactory from '#database/factories/place_factory'
 import _ from 'lodash'
 
 function getPrivateTags(userId: number) {

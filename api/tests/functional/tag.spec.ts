@@ -1,12 +1,12 @@
 import { test } from '@japa/runner'
-import UserFactory from '#database/factories/UserFactory'
+import UserFactory from '#database/factories/user_factory'
 import Tag from '#models/tag'
-import TagFactory from '#database/factories/TagFactory'
-import IllustrationFactory from '#database/factories/IllustrationFactory'
-import TeamFactory from '#database/factories/TeamFactory'
+import TagFactory from '#database/factories/tag_factory'
+import IllustrationFactory from '#database/factories/illustration_factory'
+import TeamFactory from '#database/factories/team_factory'
 import db from '@adonisjs/lucid/services/db'
 import Team from '#models/team'
-import User from '#models/user'
+import type User from '#models/user'
 let goodUser: User
 let badUser: User
 

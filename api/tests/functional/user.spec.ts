@@ -1,6 +1,6 @@
 //@ts-nocheck
 import { processCliArgs, test } from '@japa/runner'
-import UserFactory from '#database/factories/UserFactory'
+import UserFactory from '#database/factories/user_factory'
 import User from '#models/user'
 import db from '@adonisjs/lucid/services/db'
 
@@ -92,7 +92,10 @@ test.group('Users', (group) => {
     const match = await client.post('/register').json(fixedUser)
 
     match.assertStatus(400)
-    assert.equal(match.body()[0].message, 'The password field and password_confirmation field must be the same')
+    assert.equal(
+      match.body()[0].message,
+      'The password field and password_confirmation field must be the same'
+    )
   })
 
   test('Bad emails', async ({ client, assert }) => {

@@ -25,9 +25,7 @@ export default defineConfig({
   |
   */
   hooks: {
-    init: [
-      indexEntities(),
-    ],
+    init: [indexEntities()],
   },
   /*
   |--------------------------------------------------------------------------
@@ -53,7 +51,7 @@ export default defineConfig({
   |
   */
   providers: [
-    () => import('./providers/AppProvider.js'),
+    () => import('./providers/app_provider.js'),
     () => import('@adonisjs/lucid/database_provider'),
     () => import('@adonisjs/core/providers/app_provider'),
     () => import('@adonisjs/core/providers/hash_provider'),

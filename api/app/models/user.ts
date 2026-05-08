@@ -80,7 +80,7 @@ export default class User extends compose(BaseModel, AuthFinder) {
 
   @beforeSave()
   public static async UidGen(user: User) {
-    if (!user.uid || user.uid == '00000000-0000-0000-0000-000000000000') {
+    if (!user.uid || user.uid === '00000000-0000-0000-0000-000000000000') {
       user.uid = randomUUID()
     }
   }

@@ -15,7 +15,7 @@ import Illustration from '#models/illustration'
 import Tag from '#models/tag'
 import Place from '#models/place'
 import _ from 'lodash'
-import { HybridSearchValidator } from '#validators/HybridSearchValidator'
+import { HybridSearchValidator } from '#validators/hybrid_search_validator'
 
 export default class HybridSearchController {
   private hybridSearch = HybridSearchService
@@ -91,7 +91,17 @@ export default class HybridSearchController {
       // Step 5: Limit ranked results
       const limitedIllustrations = sortedResults.slice(0, limit).map((r) => r.illustration)
 
-      // Step 5: Fetch tags (case-insensitive)
+      // Step 5b: Fetch illustrations where content matches LIKE query (prepend to results)
+      const contentMatches = await Illustration.query()
+        .where('content', 'LIKE', `%${query}%`)
+        .where('user_id', auth.user?.id)
+        .limit(limit)
+
+      const contentMatchIds = new Set(contentMatches.map((il: any) => il.id))
+      const dedupedLimited = limitedIllustrations.filter((il: any) => !contentMatchIds.has(il.id))
+      const finalIllustrations = [...contentMatches, ...dedupedLimited].slice(0, limit)
+
+      // Step 6: Fetch tags (case-insensitive)
       const tagSanitizedSearch = _.kebabCase(query) + '-' + (auth.user?.id || '0')
       const qLower = query.toLowerCase()
       const tagSlugLower = tagSanitizedSearch.toLowerCase()
@@ -103,7 +113,7 @@ export default class HybridSearchController {
         })
         .andWhere('user_id', `${auth.user?.id}`)
 
-      // Step 6: Fetch places
+      // Step 7: Fetch places
       const places = await Place.query()
         .preload('illustration')
         .where('place', 'LIKE', `%${query}%`)
@@ -113,7 +123,7 @@ export default class HybridSearchController {
         message: 'success',
         searchString: query,
         data: {
-          illustrations: limitedIllustrations,
+          illustrations: finalIllustrations,
           places,
           tags,
         },

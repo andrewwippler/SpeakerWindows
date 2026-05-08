@@ -1,8 +1,8 @@
 import { test } from '@japa/runner'
-import IllustrationFactory from '#database/factories/IllustrationFactory'
-import PlaceFactory from '#database/factories/PlaceFactory'
+import IllustrationFactory from '#database/factories/illustration_factory'
+import PlaceFactory from '#database/factories/place_factory'
 import Illustration from '#models/illustration'
-import UserFactory from '#database/factories/UserFactory'
+import UserFactory from '#database/factories/user_factory'
 import Place from '#models/place'
 import db from '@adonisjs/lucid/services/db'
 let goodUser

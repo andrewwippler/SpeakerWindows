@@ -1,7 +1,7 @@
 import { test } from '@japa/runner'
-import IllustrationFactory from '#database/factories/IllustrationFactory'
+import IllustrationFactory from '#database/factories/illustration_factory'
 import { RankingService } from '#services/ranking_service'
-import { CandidateRank } from '#services/hybrid_search_service'
+import { type CandidateRank } from '#services/hybrid_search_service'
 import Illustration from '#models/illustration'
 import { DateTime } from 'luxon'
 

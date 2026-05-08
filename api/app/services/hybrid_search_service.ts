@@ -122,7 +122,7 @@ export class HybridSearchService {
    * Returns candidates with per-method rank positions
    */
   async retrieve(query: string, embedding: number[]): Promise<CandidateRank[]> {
-    const [fts_title, fts_body, fuzzy, semantic] = await Promise.all([
+    const [ftsTitle, ftsBody, fuzzy, semantic] = await Promise.all([
       this.retrieveFTS_Title(query),
       this.retrieveFTS_Body(query),
       this.retrieveFuzzy(query),
@@ -133,7 +133,7 @@ export class HybridSearchService {
     const candidateMap = new Map<number, CandidateRank>()
 
     // Merge all retrieval results
-    for (const result of fts_title) {
+    for (const result of ftsTitle) {
       const candidate = candidateMap.get(result.illustrationId) || {
         illustrationId: result.illustrationId,
       }
@@ -141,7 +141,7 @@ export class HybridSearchService {
       candidateMap.set(result.illustrationId, candidate)
     }
 
-    for (const result of fts_body) {
+    for (const result of ftsBody) {
       const candidate = candidateMap.get(result.illustrationId) || {
         illustrationId: result.illustrationId,
       }

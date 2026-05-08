@@ -1,4 +1,4 @@
-import { ApplicationService } from '@adonisjs/core/types'
+import { type ApplicationService } from '@adonisjs/core/types'
 import LocalEmbeddingProvider from '#services/local_embedding_provider'
 
 export default class AppProvider {

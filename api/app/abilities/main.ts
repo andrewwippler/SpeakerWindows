@@ -13,11 +13,11 @@
 */
 
 import { Bouncer } from '@adonisjs/bouncer'
-import User from '#models/user'
-import Tag from '#models/tag'
+import type User from '#models/user'
+import type Tag from '#models/tag'
 import _ from 'lodash'
-import Illustration from '#models/illustration'
-import Place from '#models/place'
+import type Illustration from '#models/illustration'
+import type Place from '#models/place'
 import TeamMember from '#models/team_member'
 import Team from '#models/team'
 import type { TeamRole } from '#models/team'

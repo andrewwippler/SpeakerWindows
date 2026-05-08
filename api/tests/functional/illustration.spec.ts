@@ -1,14 +1,14 @@
 import { test } from '@japa/runner'
 import db from '@adonisjs/lucid/services/db'
-import IllustrationFactory from '#database/factories/IllustrationFactory'
-import UserFactory from '#database/factories/UserFactory'
-import PlaceFactory from '#database/factories/PlaceFactory'
+import IllustrationFactory from '#database/factories/illustration_factory'
+import UserFactory from '#database/factories/user_factory'
+import PlaceFactory from '#database/factories/place_factory'
 import Illustration from '#models/illustration'
-import TagFactory from '#database/factories/TagFactory'
+import TagFactory from '#database/factories/tag_factory'
 import Tag from '#models/tag'
 import Place from '#models/place'
-import User from '#models/user'
-import { ModelObject } from '@adonisjs/lucid/types/model'
+import type User from '#models/user'
+import { type ModelObject } from '@adonisjs/lucid/types/model'
 let goodUser: User
 let badUser: User
 let testTagIdOne: string | number | ModelObject

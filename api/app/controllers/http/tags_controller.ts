@@ -3,7 +3,7 @@ import _ from 'lodash'
 import Tag from '#models/tag'
 import TeamMember from '#models/team_member'
 import Team from '#models/team'
-import { TagValidator } from '#validators/TagValidator'
+import { TagValidator } from '#validators/tag_validator'
 import { editTag } from '#app/abilities/main'
 
 export default class TagsController {
@@ -72,7 +72,7 @@ export default class TagsController {
    */
   public async search({ params, auth, request, response }: HttpContext) {
     const tag = _.get(params, 'name', '')
-    const user_id = `${auth.user?.id}`
+    const userId = `${auth.user?.id}`
     const teamIdQuery = request.input('team_id')
     let teamId: number | null = null
     if (teamIdQuery !== undefined && teamIdQuery !== '' && teamIdQuery !== 'null') {
@@ -84,7 +84,7 @@ export default class TagsController {
     // @ts-ignore
     let tagQuery = Tag.query()
       .where('name', 'ILIKE', `${tag}%`)
-      .andWhere('user_id', user_id)
+      .andWhere('user_id', userId)
       .orderBy('name')
       .limit(10)
 
@@ -150,9 +150,7 @@ export default class TagsController {
       }
 
       // Also get ALL other tags with the same name (same name, different IDs)
-      const allTeamTags = await Tag.query()
-        .where('name', 'ILIKE', thetag)
-        .where('team_id', teamId)
+      const allTeamTags = await Tag.query().where('name', 'ILIKE', thetag).where('team_id', teamId)
       for (const t of allTeamTags) {
         if (!tags.find((existing) => existing.id === t.id)) {
           tags.push(t)
@@ -270,7 +268,7 @@ export default class TagsController {
   public async destroy({ params, auth, response }: HttpContext) {
     let tag = await Tag.findOrFail(params.id)
 
-    if (!tag.toJSON()[0] && tag.user_id != auth.user?.id) {
+    if (!tag.toJSON()[0] && _.toInteger(tag.user_id) !== _.toInteger(auth.user?.id)) {
       return response
         .status(403)
         .send({ message: 'You do not have permission to access this resource' })
@@ -297,9 +295,9 @@ export default class TagsController {
       })
     }
 
-    const { illustration_ids } = request.only(['illustration_ids'])
+    const { illustration_ids: illustrationIds } = request.only(['illustration_ids'])
 
-    if (!Array.isArray(illustration_ids) || illustration_ids.length === 0) {
+    if (!Array.isArray(illustrationIds) || illustrationIds.length === 0) {
       return response.status(400).send({
         message: 'illustration_ids must be a non-empty array',
       })
@@ -308,7 +306,7 @@ export default class TagsController {
     const illustrations = await tag
       .related('illustrations')
       .query()
-      .whereIn('illustrations.id', illustration_ids)
+      .whereIn('illustrations.id', illustrationIds)
 
     await tag.related('illustrations').detach(illustrations.map((i) => i.id))
 

@@ -217,15 +217,15 @@ export default function Header() {
                       <MobileNavLink href="/authors" icon={UserGroupIcon}>
                         Authors
                       </MobileNavLink>
-                      <MobileNavLink href="/settings" icon={CogIcon}>
-                        <span className="relative">
-                          <CogIcon className="h-5 w-5 mr-3" />
+                      <MobileNavLink href="/settings">
+                        <span className="relative mr-3">
+                          <CogIcon className="h-5 w-5" />
             {(invitationCount ?? 0) > 0 && (
-                            <BellIcon className="h-3 w-3 absolute -top-1 -right-2 text-red-500" />
-                          )}
-                        </span>
-                        Settings
-                      </MobileNavLink>
+                              <BellIcon className="h-3 w-3 absolute -top-1 -right-2 text-red-500" />
+                            )}
+                          </span>
+                          Settings
+                        </MobileNavLink>
                       <MobileNavLink href="/search" icon={MagnifyingGlassIcon}>
                         Search
                       </MobileNavLink>

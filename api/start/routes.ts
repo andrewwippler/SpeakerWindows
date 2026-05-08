@@ -24,16 +24,16 @@ import app from '@adonisjs/core/services/app'
 import env from '#start/env'
 
 const HealthChecksController = () => import('#controllers/health_checks_controller')
-const UsersController = () => import('#controllers/http/UsersController')
-const IllustrationsController = () => import('#controllers/http/IllustrationsController')
-const AuthorsController = () => import('#controllers/http/AuthorsController')
-const SettingsController = () => import('#controllers/http/SettingsController')
-const TagsController = () => import('#controllers/http/TagsController')
-const PlacesController = () => import('#controllers/http/PlacesController')
-const HybridSearchController = () => import('#controllers/http/HybridSearchController')
-const UploadsController = () => import('#controllers/http/UploadsController')
-const ContactsController = () => import('#controllers/http/ContactsController')
-const TeamsController = () => import('#controllers/http/TeamsController')
+const UsersController = () => import('#controllers/http/users_controller')
+const IllustrationsController = () => import('#controllers/http/illustrations_controller')
+const AuthorsController = () => import('#controllers/http/authors_controller')
+const SettingsController = () => import('#controllers/http/settings_controller')
+const TagsController = () => import('#controllers/http/tags_controller')
+const PlacesController = () => import('#controllers/http/places_controller')
+const HybridSearchController = () => import('#controllers/http/hybrid_search_controller')
+const UploadsController = () => import('#controllers/http/uploads_controller')
+const ContactsController = () => import('#controllers/http/contacts_controller')
+const TeamsController = () => import('#controllers/http/teams_controller')
 
 const PATH_TRAVERSAL_REGEX = /(?:^|[\\/])\.\.(?:[\\/]|$)/
 

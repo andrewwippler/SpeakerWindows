@@ -1,7 +1,7 @@
 import { test } from '@japa/runner'
 import Contact from '#models/contact'
 import db from '@adonisjs/lucid/services/db'
-import UserFactory from '#database/factories/UserFactory'
+import UserFactory from '#database/factories/user_factory'
 
 let goodUser
 let badUser

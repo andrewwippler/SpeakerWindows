@@ -9,8 +9,8 @@
  * Works with CandidateRank[] from HybridSearchService
  */
 
-import { CandidateRank } from './hybrid_search_service.js'
-import Illustration from '#models/illustration'
+import { type CandidateRank } from './hybrid_search_service.js'
+import type Illustration from '#models/illustration'
 
 export interface RankerConfig {
   weights?: {
