@@ -16,7 +16,7 @@ The demo gives you a free account to explore the features. Import your highlight
 
 - **Smart Search** - Find exactly what you need using keywords, similar meanings, or even fuzzy matches for typos
 - **Organize Your Way** - Group illustrations by tags and authors.
-- **Import from Your Apps** - Bring in highlights from Readwise, KOReader, and Google Play Books
+- **Import from Your Apps** - Bring in highlights from Readwise, KOReader, Google Play Books, and Kindle
 - **Image Support** - Upload and organize images alongside your text notes
 - **Your Data, Your Control** - Host it yourself or use the available public server.
 
@@ -28,7 +28,7 @@ The demo gives you a free account to explore the features. Import your highlight
   - Fuzzy matching for typo tolerance
 - **Author Organization** - Browse and manage by author
 - **Image Uploads** - Attach images or documents to any illustration
-- **Import Tools** - Bring data from Readwise, KOReader, and Google Play Books
+- **Import Tools** - Bring data from Readwise, KOReader, Google Play Books, and Kindle
 
 ## Technology
 
@@ -78,8 +78,8 @@ Speaker Windows is built with modern, reliable technologies:
               └───────────────────────┘                        │
                                                                │
    ┌─────────────────────────────────────────────────────────┐
-   │     Importers (Standalone Go Binaries)                  │
-   │  readwise_importer  |  koreader_importer  | playbooks  │
+   │                sw-importer (Unified Go Binary)            │
+   │    --importer=readwise | koreader | playbooks | kindle  │
    └─────────────────────────────────────────────────────────┘
 ```
 
@@ -156,7 +156,7 @@ curl -X POST https://sw-api.wplr.rocks/illustration \
 
 ## Importers
 
-Bring in your highlights from other apps. All importers are standalone Go binaries.
+Import highlights from your reading apps using the unified `sw-importer` binary.
 
 ### Get Your API Token
 
@@ -164,47 +164,32 @@ Bring in your highlights from other apps. All importers are standalone Go binari
 2. Go to Settings
 3. Look for "API Token"
 
-### Readwise Importer
-
-Import highlights from Readwise CSV exports:
+### Build
 
 ```bash
-# Build (if needed)
-cd readwise_importer
-go build -o readwise-import-script main.go
-
-# Run
-API_TOKEN=your_token ./readwise-import-script data.csv
+cd importer
+go build -o sw-importer .
 ```
 
-### KOReader Importer
-
-Import highlights from KOReader JSON exports:
+### Usage
 
 ```bash
-# Import to API
-API_TOKEN=your_token ./koreader_importer highlights.json
-
-# Preview only (don't post to API)
-./koreader_importer highlights.json --print
+API_TOKEN=your_token ./sw-importer --importer=<type> [--print] <file>
 ```
 
-### Google Play Books Importer
+### Supported Sources
 
-Import highlights from Google Play Books exports (HTML or DOCX):
-
-```bash
-# Import to API
-API_TOKEN=your_token ./playbooks_importer export.html
-
-# Preview only
-./playbooks_importer export.html --print
-```
+| `--importer` | Source | File Format | Example |
+|---|---|---|---|
+| `readwise` | Readwise | CSV | `API_TOKEN=x ./sw-importer --importer=readwise data.csv` |
+| `koreader` | KOReader | JSON (`one.json` or `all.json`) | `API_TOKEN=x ./sw-importer --importer=koreader file.json` |
+| `playbooks` | Google Play Books | HTML or DOCX | `API_TOKEN=x ./sw-importer --importer=playbooks export.html` |
+| `kindle` | Kindle for Mac/PC | PDF (annotations export) | `API_TOKEN=x ./sw-importer --importer=kindle notes.pdf` |
 
 ### Common Options
 
-- **Duplicate Handling** - Importers automatically skip duplicates (based on content + source)
-- **Preview Mode** - Use `--print` to see what would be imported without posting to the API
+- **Preview Mode** - Add `--print` to see what would be imported without posting to the API
+- **Duplicate Handling** - Automatically skips duplicates (based on content + source)
 
 ## Development
 

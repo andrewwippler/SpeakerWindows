@@ -155,15 +155,23 @@ frontend/
 
 ## Importers (Go)
 
-Standalone Go binaries for importing data. Build with `go build -o <output> main.go`.
+Unified Go binary for importing data from various sources. Build with:
 
-| Directory | Source | Command |
-|-----------|--------|---------|
-| readwise_importer/ | Readwise CSV | `API_TOKEN=<token> ./readwise-import-script data.csv` |
-| koreader_importer/ | KOReader JSON | `API_TOKEN=<token> ./koreader_importer file.json` |
-| playbooks_importer/ | Play Books (HTML/DOCX) | `API_TOKEN=<token> ./playbooks_importer file.html` |
+```bash
+cd importer
+go build -o sw-importer .
+```
 
-All importers support `--print` flag to preview JSON without posting.
+Usage: `API_TOKEN=<token> ./sw-importer --importer=<type> [--print] <file>`
+
+| `--importer` | Source | File Format |
+|--------------|--------|-------------|
+| `readwise` | Readwise | CSV |
+| `koreader` | KOReader | JSON (`one.json` or `all.json`) |
+| `playbooks` | Play Books | HTML or DOCX |
+| `kindle` | Kindle PDF Notes | PDF |
+
+All importer types support `--print` flag to preview JSON without posting.
 
 ## Lint Config
 
