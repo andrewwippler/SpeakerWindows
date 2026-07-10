@@ -28,7 +28,7 @@
     "react": "^19.2.5",
     "react-dom": "^19.2.5",
     "react-redux": "^9.1.0",
-    "react-use": "^17.6.0",
+    "react-use": "^17.6.1",
     "redux": "^5.0.0",
     "swr": "^2.3.8",
     "typescript": "5.9.3"
