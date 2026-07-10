@@ -1,3 +1,4 @@
 .vscode
 mariadb_dump.sql
 buildapi.sh
+build.sh

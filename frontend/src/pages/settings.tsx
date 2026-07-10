@@ -89,7 +89,7 @@ export default function Settings() {
 
   useEffect(() => {
     if (session?.accessToken) {
-      if (session.team?.members?.[0]?.email) {
+      if (session.team?.id) {
         setTeam(session.team);
         setTeamName(session.team.name);
       } else {

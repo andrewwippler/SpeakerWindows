@@ -7,14 +7,33 @@ import TeamInvitation from '#models/team_invitation'
 import TeamBlock from '#models/team_block'
 import Tag from '#models/tag'
 import type { TeamRole } from '#models/team'
+import { randomUUID } from 'node:crypto'
+
+function generateInviteCode(): string {
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
+  let code = ''
+  for (let i = 0; i < 8; i++) {
+    code += chars.charAt(Math.floor(Math.random() * chars.length))
+  }
+  return code
+}
 
 export default class TeamsController {
   public async getTeam({ auth }: HttpContext) {
     const user = auth.user!
 
-    const team = await Team.query().where('user_id', user.id).first()
+    let team = await Team.query().where('user_id', user.id).first()
     if (!team) {
-      return { message: 'Team not found' }
+      team = await Team.create({
+        inviteCode: generateInviteCode(),
+        name: 'My Team',
+        userId: user.id,
+      })
+      await TeamMember.create({
+        teamId: team.id,
+        userId: user.id,
+        role: 'owner',
+      })
     }
 
     const members = await TeamMember.query()

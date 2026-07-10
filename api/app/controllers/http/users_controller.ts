@@ -51,20 +51,43 @@ export default class UsersController {
 
       const sharedToken = token.value!.release()
 
-      const team = await Team.query().where('user_id', user.id).preload('members').first() // always will find a team
-      let teamData = null
-      if (team) {
-        teamData = {
-          id: team.id,
-          name: team.name,
-          inviteCode: team.inviteCode,
+      let team = await Team.query()
+        .where('user_id', user.id)
+        .preload('members', (query) => {
+          query.preload('user', (uq) => {
+            uq.select('id', 'email')
+          })
+        })
+        .first()
+
+      if (!team) {
+        team = await Team.create({
+          inviteCode: generateInviteCode(),
+          name: 'My Team',
+          userId: user.id,
+        })
+        await TeamMember.create({
+          teamId: team.id,
+          userId: user.id,
           role: 'owner',
-          members: team.members.map((m) => ({
-            userId: m.userId,
-            email: m.user?.email ?? null,
-            role: m.role,
-          })),
-        }
+        })
+        await team.load('members', (query) => {
+          query.preload('user', (uq) => {
+            uq.select('id', 'email')
+          })
+        })
+      }
+
+      const teamData = {
+        id: team.id,
+        name: team.name,
+        inviteCode: team.inviteCode,
+        role: 'owner',
+        members: team.members.map((m) => ({
+          userId: m.userId,
+          email: m.user?.email ?? null,
+          role: m.role,
+        })),
       }
 
       const memberships = await TeamMember.query().where('user_id', user.id).preload('team')
