@@ -16,6 +16,7 @@ import Tag from '#models/tag'
 import Place from '#models/place'
 import _ from 'lodash'
 import { HybridSearchValidator } from '#validators/hybrid_search_validator'
+import LocalEmbeddingProvider from '#services/local_embedding_provider'
 
 export default class HybridSearchController {
   private hybridSearch = HybridSearchService
@@ -53,10 +54,8 @@ export default class HybridSearchController {
 
     try {
       // Step 1: Retrieve candidates independently from all methods
-      const candidates = await this.hybridSearch.retrieve(
-        query,
-        userEmbedding || this.getDefaultEmbedding()
-      )
+      const queryEmbedding = userEmbedding || (await LocalEmbeddingProvider.embed(query))
+      const candidates = await this.hybridSearch.retrieve(query, queryEmbedding)
 
       if (candidates.length === 0) {
         return response.send({
@@ -137,11 +136,5 @@ export default class HybridSearchController {
     }
   }
 
-  /**
-   * Helper: Get default embedding for searches without semantic component
-   * Returns zero vector (384 dimensions)
-   */
-  private getDefaultEmbedding(): number[] {
-    return Array(384).fill(0)
-  }
+  // Replaced by LocalEmbeddingProvider.embed() for real embeddings
 }

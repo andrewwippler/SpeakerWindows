@@ -34,6 +34,7 @@ const HybridSearchController = () => import('#controllers/http/hybrid_search_con
 const UploadsController = () => import('#controllers/http/uploads_controller')
 const ContactsController = () => import('#controllers/http/contacts_controller')
 const TeamsController = () => import('#controllers/http/teams_controller')
+const ImportsController = () => import('#controllers/http/imports_controller')
 
 const PATH_TRAVERSAL_REGEX = /(?:^|[\\/])\.\.(?:[\\/]|$)/
 
@@ -84,6 +85,9 @@ router
 
     //search
     router.post('/search', [HybridSearchController, 'search'])
+
+    // Import highlights
+    router.post('/import', [ImportsController, 'store'])
 
     // Images
     router.post('/upload', [UploadsController, 'store'])

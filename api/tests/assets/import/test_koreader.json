@@ -1,0 +1,25 @@
+{
+  "title": "Test Book",
+  "author": "Test Author",
+  "file": "/test/test.epub",
+  "entries": [
+    {
+      "text": "Test highlight one.",
+      "page": 42,
+      "color": "yellow",
+      "drawer": "",
+      "time": 1700000000,
+      "sort": "",
+      "chapter": ""
+    },
+    {
+      "text": "Short text",
+      "page": 100,
+      "color": "blue",
+      "drawer": "",
+      "time": 1700000001,
+      "sort": "",
+      "chapter": ""
+    }
+  ]
+}

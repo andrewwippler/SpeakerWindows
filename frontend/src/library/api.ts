@@ -125,7 +125,7 @@ class Api {
           return json;
         }
         return json.then(err => {
-          return err;
+          throw err;
         });
       })
       .then(json => {

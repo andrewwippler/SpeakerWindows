@@ -10,6 +10,7 @@ export const controllers = {
     Contacts: () => import('#controllers/http/contacts_controller'),
     HybridSearch: () => import('#controllers/http/hybrid_search_controller'),
     Illustrations: () => import('#controllers/http/illustrations_controller'),
+    Imports: () => import('#controllers/http/imports_controller'),
     Places: () => import('#controllers/http/places_controller'),
     Settings: () => import('#controllers/http/settings_controller'),
     Tags: () => import('#controllers/http/tags_controller'),

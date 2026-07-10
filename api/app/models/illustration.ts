@@ -59,7 +59,9 @@ export default class Illustration extends BaseModel {
   })
   declare tags: ManyToMany<typeof Tag>
 
-  @belongsTo(() => User)
+  @belongsTo(() => User, {
+    foreignKey: 'user_id',
+  })
   declare user: BelongsTo<typeof User>
 
   @belongsTo(() => Team)
