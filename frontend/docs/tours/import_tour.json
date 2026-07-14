@@ -1,0 +1,42 @@
+{
+  "component_id": "highlight_importer_wizard",
+  "version": "1.0.0",
+  "page": "/settings",
+  "steps": [
+    {
+      "step": 1,
+      "target_selector": "#importer",
+      "title": "Select Your Reading App",
+      "content": "Choose where your highlights are coming from. We currently support Readwise (CSV), KOReader (JSON), Play Books (HTML/DOCX), and Kindle (PDF). The file type filter below updates automatically based on your selection.",
+      "placement": "bottom"
+    },
+    {
+      "step": 2,
+      "target_selector": "#import-file",
+      "title": "Upload Your Export File",
+      "content": "Select the exported file from your computer. Accepted file types depend on the source you chose: .csv for Readwise, .json for KOReader, .html or .docx for Play Books, and .pdf for Kindle. Maximum file size is 50MB.",
+      "placement": "top"
+    },
+    {
+      "step": 3,
+      "target_selector": "button:has-text('Import Highlights')",
+      "title": "Start the Import",
+      "content": "Click to upload and process your file. Each highlight is parsed into an illustration, deduplicated against your existing library, and automatically indexed for hybrid search — including semantic vector search.",
+      "placement": "top"
+    },
+    {
+      "step": 4,
+      "target_selector": ".text-sm.text-gray-600",
+      "title": "Review Import Results",
+      "content": "After processing completes, you will see a summary like \"Imported 42 of 50 highlights\". The message also shows how many were skipped as duplicates and how many encountered errors.",
+      "placement": "bottom"
+    },
+    {
+      "step": 5,
+      "target_selector": "#place",
+      "title": "Set Your Default Place",
+      "content": "While you are on the Settings page, consider setting a default Place and Location. These values pre-fill the Place form when you copy an illustration's content, saving you time when logging where you used a quote.",
+      "placement": "top"
+    }
+  ]
+}

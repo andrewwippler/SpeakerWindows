@@ -22,6 +22,7 @@ import {
   EnvelopeIcon,
   NoSymbolIcon,
 } from "@heroicons/react/24/solid";
+import HelpIcon from "@/components/HelpIcon";
 import { setRedirect } from "@/features/ui/reducer";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
@@ -657,7 +658,10 @@ export default function Settings() {
             {/* Import Highlights Section */}
             <div className="mt-10 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6 border-t pt-10">
               <div className="sm:col-span-6">
-                <h2 className="text-lg font-bold text-sky-900 mb-4">Import Highlights</h2>
+                <h2 className="text-lg font-bold text-sky-900 mb-4 flex items-center gap-2">
+                  Import Highlights
+                  <HelpIcon topic="import" />
+                </h2>
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                   <div>
                     <label htmlFor="importer" className="block text-sm font-medium leading-6 text-gray-900">

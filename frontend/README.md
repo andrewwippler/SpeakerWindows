@@ -36,3 +36,28 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+
+## Help Documentation
+
+Help content is defined in `src/data/helpContent.ts` as the **single source of truth**. This file is consumed by:
+
+- **In-app help pages** (`/help/*`) render the content directly via `renderMarkdown()`.
+- **Contextual help panels** (`<HelpIcon>` components on Settings, Search, and New Illustration pages) show a slide-in panel with the topic's compact content.
+- **Markdown docs** (`docs/`) are generated automatically on every build.
+
+### Generating Markdown Docs
+
+The `docs/` directory contains generated `.md` and `.json` files. These are **derived artifacts** — do not edit them directly. Instead, edit `src/data/helpContent.ts` and rebuild.
+
+```bash
+# Regenerate docs manually
+npm run generate:help
+
+# Docs are also regenerated automatically before `npm run build`
+npm run build
+```
+
+The generation script (`scripts/generate-help-docs.ts`) reads `helpContent.ts` and writes:
+- `docs/pages/*.md` — Page guides with YAML frontmatter
+- `docs/features/*.md` — Feature guides (same content, different grouping)
+- `docs/tours/*_tour.json` — Interactive tour step definitions

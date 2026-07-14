@@ -14,6 +14,7 @@ import {
   MagnifyingGlassIcon,
   BellIcon,
 } from "@heroicons/react/24/solid";
+import { QuestionMarkCircleIcon } from "@heroicons/react/24/outline";
 import { useSession } from "next-auth/react";
 import LoginBtn from "./LoginBtn";
 import { useAppDispatch, useAppSelector } from "@/hooks";
@@ -172,6 +173,9 @@ export default function Header() {
                 <NavLink href="/search" icon={MagnifyingGlassIcon}>
                   Search
                 </NavLink>
+                <NavLink href="/help" icon={QuestionMarkCircleIcon}>
+                  Help
+                </NavLink>
               </>
             )}
           </div>
@@ -228,6 +232,9 @@ export default function Header() {
                         </MobileNavLink>
                       <MobileNavLink href="/search" icon={MagnifyingGlassIcon}>
                         Search
+                      </MobileNavLink>
+                      <MobileNavLink href="/help" icon={QuestionMarkCircleIcon}>
+                        Help
                       </MobileNavLink>
                     </>
                   )}

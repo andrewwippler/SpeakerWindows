@@ -19,6 +19,7 @@ import { setModal, setThingToDelete } from "@/features/modal/reducer";
 import ConfirmDialog from "./ConfirmDialog";
 import Image from "next/image";
 import { useSession } from "next-auth/react";
+import HelpIcon from "./HelpIcon";
 
 export default function IllustrationForm({
   illustration,
@@ -184,6 +185,7 @@ export default function IllustrationForm({
           <PlusIcon className="h-6 w-6 mr-2" />
         )}
         {edit ? "Edit" : "New"} Illustration
+        {!edit && <span className="ml-2"><HelpIcon topic="create" /></span>}
       </div>
 
       <form className="mt-8 space-y-6" onSubmit={onSubmit}>

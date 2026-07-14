@@ -12,6 +12,7 @@ import { setRedirect } from "@/features/ui/reducer";
 import { useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
+import HelpIcon from "@/components/HelpIcon";
 
 type dataReturn = {
   illustrations: any;
@@ -59,6 +60,7 @@ export default function Search() {
       <div className="text-xl font-bold pb-4 text-sky-900 flex items-center">
         <MagnifyingGlassIcon className="h-6 w-6 mr-2" />
         <span className="mr-4">Search</span>
+        <HelpIcon topic="search" />
       </div>
       <form className="space-y-6" onSubmit={onSubmit}>
         <div className="flex col-span-6">

@@ -1,0 +1,28 @@
+{
+  "component_id": "hybrid_search_wizard",
+  "version": "1.0.0",
+  "page": "/search",
+  "steps": [
+    {
+      "step": 1,
+      "target_selector": "#search",
+      "title": "Enter Your Search Query",
+      "content": "Type a word, phrase, or concept. Search looks across illustration titles, content, tags, and place names. The hybrid engine also understands meaning — try searching for \"courage\" to find notes about \"bravery\" even if that exact word was never used.",
+      "placement": "bottom"
+    },
+    {
+      "step": 2,
+      "target_selector": "button[type='submit']",
+      "title": "Run the Search",
+      "content": "Click the Search button or press Enter. Your query is processed through four retrieval methods: full-text keyword matching on titles, full-text matching on content, fuzzy typo-tolerant matching, and semantic vector search. Results are ranked and deduplicated automatically.",
+      "placement": "left"
+    },
+    {
+      "step": 3,
+      "target_selector": "ul[role='list']",
+      "title": "Browse Grouped Results",
+      "content": "Results appear in three sections: Places (where you used an illustration), Tags (matching tag names), and Illustrations (matching titles and content). Click any result to open it. Hover over illustration results to preview the first 256 characters of content with your search terms highlighted in bold.",
+      "placement": "right"
+    }
+  ]
+}
