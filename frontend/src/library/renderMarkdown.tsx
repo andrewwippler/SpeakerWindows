@@ -148,6 +148,20 @@ export function renderMarkdown(md: string): React.ReactNode {
     }
 
     // Headings
+    const h4Match = line.match(/^#{4,} (.+)/)
+    if (h4Match) {
+      elements.push(
+        <h4
+          key={key++}
+          className="text-base font-semibold text-sky-900 mt-4 mb-2"
+        >
+          {processInline(h4Match[1])}
+        </h4>,
+      )
+      i++
+      continue
+    }
+
     const h3Match = line.match(/^### (.+)/)
     if (h3Match) {
       elements.push(
@@ -249,7 +263,7 @@ export function renderMarkdown(md: string): React.ReactNode {
     while (
       i < lines.length &&
       lines[i].trim() !== '' &&
-      !lines[i].startsWith('#') &&
+      !/^#{1,6} /.test(lines[i]) &&
       !lines[i].startsWith('> ') &&
       !lines[i].startsWith('- ') &&
       !/^\d+\.\s/.test(lines[i]) &&
