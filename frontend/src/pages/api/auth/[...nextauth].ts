@@ -1,6 +1,7 @@
 // pages/api/auth/[...nextauth].ts
 import NextAuth, { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
+import { hostUrl } from "@/library/config";
 
 export interface TeamMembership {
   teamId: number;
@@ -31,7 +32,7 @@ export const authOptions: NextAuthOptions = {
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_HOST_URL}/login`, {
+        const response = await fetch(`${hostUrl}/login`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({

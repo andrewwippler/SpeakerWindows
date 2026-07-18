@@ -11,4 +11,8 @@ vine.messagesProvider = new SimpleMessagesProvider({
   'name.database.unique': 'Cannot update tag with the same name of an existing tag',
   'reason.required': 'The reason field is required',
   'message.required': 'The message field is required',
+  'title.required': 'The title field is required',
+  'title.maxLength': 'The title must not exceed 255 characters',
+  'content.required': 'The content field is required',
+  'content.maxLength': 'The content must not exceed 10000 characters',
 })

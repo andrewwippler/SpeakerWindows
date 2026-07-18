@@ -7,6 +7,7 @@ import {
   PencilSquareIcon,
 } from "@heroicons/react/24/solid";
 import api from "@/library/api";
+import { hostUrl } from "@/library/config";
 import { useAppSelector, useAppDispatch } from "@/hooks";
 import { setFlashMessage } from "@/features/flash/reducer";
 import { useRouter } from "next/router";
@@ -307,12 +308,12 @@ export default function IllustrationForm({
                         <Link
                           key={index}
                           className="inline-block mr-2 text-sky-500"
-                          href={`${process.env.NEXT_PUBLIC_HOST_URL}/uploads/${upload.name}`}
+                          href={`${hostUrl}/uploads/${upload.name}`}
                         >
                           {upload.type == "image" ? (
                             <>
                               <Image
-                                src={`${process.env.NEXT_PUBLIC_HOST_URL}/uploads/${upload.name}`}
+                                src={`${hostUrl}/uploads/${upload.name}`}
                                 width={100}
                                 height={100}
                                 alt="Picture of the author"

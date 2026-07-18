@@ -88,8 +88,8 @@ export const http = defineConfig({
     path: '/',
     maxAge: '2h',
     httpOnly: true,
-    secure: false,
-    sameSite: false,
+    secure: env.get('NODE_ENV') === 'production',
+    sameSite: env.get('NODE_ENV') === 'production' ? 'lax' : 'none',
   },
 
   /*

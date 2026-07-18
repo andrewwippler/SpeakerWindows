@@ -22,6 +22,7 @@ import { middleware } from '#start/kernel'
 import { sep, normalize, join } from 'node:path'
 import app from '@adonisjs/core/services/app'
 import env from '#start/env'
+import { authThrottle, contactThrottle, importThrottle, uploadThrottle } from '#start/limiter'
 
 const HealthChecksController = () => import('#controllers/health_checks_controller')
 const UsersController = () => import('#controllers/http/users_controller')
@@ -38,11 +39,15 @@ const ImportsController = () => import('#controllers/http/imports_controller')
 
 const PATH_TRAVERSAL_REGEX = /(?:^|[\\/])\.\.(?:[\\/]|$)/
 
-router.post('contact', [ContactsController, 'store'])
+router
+  .post('contact', [ContactsController, 'store'])
+  .use(contactThrottle)
 
 //auth
-router.post('register', [UsersController, 'store'])
-router.post('login', [UsersController, 'login'])
+router
+  .post('register', [UsersController, 'store'])
+  .use(authThrottle)
+router.post('login', [UsersController, 'login']).use(authThrottle)
 router.get('/healthz', [HealthChecksController])
 router.get('users/:uid', [UsersController, 'show']).use([
   middleware.auth({
@@ -87,10 +92,14 @@ router
     router.post('/search', [HybridSearchController, 'search'])
 
     // Import highlights
-    router.post('/import', [ImportsController, 'store'])
+    router
+      .post('/import', [ImportsController, 'store'])
+      .use(importThrottle)
 
     // Images
-    router.post('/upload', [UploadsController, 'store'])
+    router
+      .post('/upload', [UploadsController, 'store'])
+      .use(uploadThrottle)
     router.delete('/upload/:id', [UploadsController, 'destroy'])
 
     // Teams

@@ -1,16 +1,19 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import User from '#models/user'
 import { CreateUserValidator } from '#validators/create_user_validator'
+import { LoginValidator } from '#validators/login_validator'
 import Setting from '#models/setting'
 import Team from '#models/team'
 import TeamMember from '#models/team_member'
 import limiter from '@adonisjs/limiter/services/main'
+import crypto from 'node:crypto'
 
 function generateInviteCode(): string {
   const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
+  const bytes = crypto.randomBytes(8)
   let code = ''
   for (let i = 0; i < 8; i++) {
-    code += chars.charAt(Math.floor(Math.random() * chars.length))
+    code += chars.charAt(bytes[i] % chars.length)
   }
   return code
 }
@@ -18,6 +21,12 @@ function generateInviteCode(): string {
 export default class UsersController {
   public async login({ auth, request, response }: HttpContext) {
     const { email, password } = request.all()
+
+    try {
+      await LoginValidator.validate({ email, password })
+    } catch (error) {
+      return response.status(400).send(error.messages)
+    }
 
     const throttleKey = `login_${email}_${request.ip()}`
 

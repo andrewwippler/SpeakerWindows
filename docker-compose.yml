@@ -3,7 +3,7 @@ services:
   redis:
     image: redis:alpine
     ports:
-      - 6379:6379
+      - "127.0.0.1:6379:6379"
 
   db:
     image: pgvector/pgvector:pg17
@@ -14,7 +14,7 @@ services:
       POSTGRES_PASSWORD: adonis
       POSTGRES_DB: speaker_illus
     ports:
-      - 5432:5432
+      - "127.0.0.1:5432:5432"
   # typesense:
   #   image: typesense/typesense:28.0
   #   ports:

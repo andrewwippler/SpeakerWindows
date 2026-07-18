@@ -1,4 +1,5 @@
 import store from '@/store';
+import { hostUrl } from '@/library/config';
 
 const defaultHeaders = {
   'Accept': 'application/json',
@@ -87,8 +88,7 @@ class Api {
         options.body.append(key, params[key]);
       }
     }
-    const url = `${process.env.NEXT_PUBLIC_HOST_URL}${route}`;
-    // console.log("api options.body", options.body)
+    const url = `${hostUrl}${route}`;
 
     return fetch(url, options)
       .then(resp => {
@@ -113,10 +113,10 @@ class Api {
     let query, url;
     if (verb === 'GET') {
       query = this.getQuery(params);
-      (!query) ? url = `${process.env.NEXT_PUBLIC_HOST_URL}${route}` : url = `${process.env.NEXT_PUBLIC_HOST_URL}${route}?${query}`;
+      (!query) ? url = `${hostUrl}${route}` : url = `${hostUrl}${route}?${query}`;
     } else {
       options.body = JSON.stringify(params);
-      url = `${process.env.NEXT_PUBLIC_HOST_URL}${route}`;
+      url = `${hostUrl}${route}`;
     }
     return fetch(url, options)
       .then(resp => {

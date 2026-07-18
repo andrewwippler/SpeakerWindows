@@ -27,7 +27,10 @@ router.use([
   () => import('@adonisjs/auth/initialize_auth_middleware'),
 ])
 
-server.use([() => import('@adonisjs/cors/cors_middleware')])
+server.use([
+  () => import('@adonisjs/cors/cors_middleware'),
+  () => import('@adonisjs/shield/shield_middleware'),
+])
 
 /**
  * Named middleware collection must be explicitly assigned to
@@ -35,5 +38,4 @@ server.use([() => import('@adonisjs/cors/cors_middleware')])
  */
 export const middleware = router.named({
   auth: () => import('#middleware/auth_middleware'),
-  throttle: () => import('@adonisjs/limiter/build/throttle'),
 })

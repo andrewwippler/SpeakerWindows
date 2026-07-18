@@ -61,6 +61,7 @@
     "@adonisjs/limiter": "^3.0.1",
     "@adonisjs/lucid": "^22.4.2",
     "@adonisjs/redis": "^10.0.0",
+    "@adonisjs/shield": "^9.0.0",
     "@vinejs/vine": "^4.4.0",
     "@xenova/transformers": "^2.17.2",
     "argon2": "^0.44.0",

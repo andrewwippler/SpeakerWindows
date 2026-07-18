@@ -47,8 +47,8 @@ export class SearchIndexingService {
 
     // Upsert document_search record
     await this.upsertSearchIndex(illustrationId, {
-      title_tsv: this.buildTSVectorSQL('english', illustration.title),
-      body_tsv: this.buildTSVectorSQL('english', illustration.content),
+      title_text: illustration.title,
+      body_text: illustration.content,
       title_trigram: illustration.title,
       embedding,
       created_at: illustration.createdAt,
@@ -84,21 +84,16 @@ export class SearchIndexingService {
   private async upsertSearchIndex(
     documentId: number,
     data: {
-      title_tsv: string
-      body_tsv: string
+      title_text: string
+      body_text: string
       title_trigram: string
       embedding: number[]
       created_at: any
       updated_at: Date
     }
   ): Promise<void> {
-    // Build SQL expressions for tsvector and embedding so Postgres
-    // receives proper typed values (to_tsvector(...) and vector literal)
-    const titleTsvExpr = data.title_tsv
-    const bodyTsvExpr = data.body_tsv
-    const embeddingExpr = this.buildEmbeddingLiteral(data.embedding)
+    const embeddingLiteral = this.buildEmbeddingLiteral(data.embedding)
 
-    // PostgreSQL UPSERT with ON CONFLICT
     const sql = `
       INSERT INTO document_search (
         document_id,
@@ -108,7 +103,15 @@ export class SearchIndexingService {
         embedding,
         created_at,
         updated_at
-      ) VALUES (?, ${titleTsvExpr}, ${bodyTsvExpr}, ?, ${embeddingExpr}, ?, ?)
+      ) VALUES (
+        ?,
+        to_tsvector('english', ?),
+        to_tsvector('english', ?),
+        ?,
+        ${embeddingLiteral}::vector,
+        ?,
+        ?
+      )
       ON CONFLICT (document_id)
       DO UPDATE SET
         title_tsv = EXCLUDED.title_tsv,
@@ -118,7 +121,14 @@ export class SearchIndexingService {
         updated_at = EXCLUDED.updated_at
     `
 
-    await db.rawQuery(sql, [documentId, data.title_trigram, data.created_at, data.updated_at])
+    await db.rawQuery(sql, [
+      documentId,
+      data.title_text,
+      data.body_text,
+      data.title_trigram,
+      data.created_at,
+      data.updated_at,
+    ])
   }
 
   /**
@@ -147,16 +157,6 @@ export class SearchIndexingService {
    */
   private prepareFTSText(illustration: Illustration): string {
     return `${illustration.title} ${illustration.content} ${illustration.author || ''}`
-  }
-
-  /**
-   * Build PostgreSQL tsvector from text
-   * Uses to_tsvector function for proper tokenization
-   */
-  private buildTSVectorSQL(language: string, text: string): string {
-    // Escape single quotes
-    const escaped = text.replace(/'/g, "''")
-    return `to_tsvector('${language}', '${escaped}')`
   }
 
   /**

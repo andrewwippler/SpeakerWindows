@@ -1,6 +1,7 @@
 import { useRouter } from "next/router";
 import * as _ from "lodash";
 import api from "@/library/api";
+import { hostUrl } from "@/library/config";
 import { useState, useEffect, FormEvent, use } from "react";
 import Link from "next/link";
 import Layout from "@/components/Layout";
@@ -278,12 +279,12 @@ export default function IllustrationWrapper() {
                     <Link
                       key={index}
                       className="inline-block mr-2 text-sky-500"
-                      href={`${process.env.NEXT_PUBLIC_HOST_URL}/uploads/${upload.name}`}
+                      href={`${hostUrl}/uploads/${upload.name}`}
                     >
                       {upload.type == "image" ? (
                         <>
                           <Image
-                            src={`${process.env.NEXT_PUBLIC_HOST_URL}/uploads/${upload.name}`}
+                            src={`${hostUrl}/uploads/${upload.name}`}
                             width={100}
                             height={100}
                             alt="Attachment"

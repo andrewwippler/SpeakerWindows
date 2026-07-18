@@ -185,4 +185,57 @@ test.group('Users', (group) => {
     login.assertStatus(429)
     assert.equal(login.body().message, 'Too many requests. Please wait 30 minutes and try again.')
   })
+
+  test('Invite codes are cryptographically random and unique', async ({ client, assert }) => {
+    const user1 = await UserFactory.make()
+    const user2 = await UserFactory.make()
+
+    await client.post('/register').json({
+      email: user1.email,
+      password: user1.password + '1A!a',
+      password_confirmation: user1.password + '1A!a',
+    })
+
+    await client.post('/register').json({
+      email: user2.email,
+      password: user2.password + '1A!a',
+      password_confirmation: user2.password + '1A!a',
+    })
+
+    const login1 = await client
+      .post('/login')
+      .json({ email: user1.email, password: user1.password + '1A!a' })
+
+    const login2 = await client
+      .post('/login')
+      .json({ email: user2.email, password: user2.password + '1A!a' })
+
+    const team1 = login1.body().team
+    const team2 = login2.body().team
+
+    assert.isString(team1.inviteCode)
+    assert.isString(team2.inviteCode)
+    assert.equal(team1.inviteCode.length, 8)
+    assert.equal(team2.inviteCode.length, 8)
+    assert.notEqual(team1.inviteCode, team2.inviteCode)
+  })
+
+  test('Login endpoint rejects invalid email format', async ({ client, assert }) => {
+    const response = await client.post('/login').json({
+      email: 'not-an-email',
+      password: 'password',
+    })
+
+    response.assertStatus(400)
+    assert.isArray(response.body())
+  })
+
+  test('Login endpoint rejects missing password', async ({ client, assert }) => {
+    const response = await client.post('/login').json({
+      email: 'test@test.com',
+    })
+
+    response.assertStatus(400)
+    assert.isArray(response.body())
+  })
 })

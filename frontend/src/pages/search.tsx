@@ -14,6 +14,25 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 import HelpIcon from "@/components/HelpIcon";
 
+export function HighlightedText({ text, query }: { text: string; query: string }) {
+  if (!query) return <>{text}</>;
+  const escapedQuery = query.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const parts = text.split(new RegExp(`(${escapedQuery})`, "gi"));
+  return (
+    <>
+      {parts.map((part, i) =>
+        part.toLowerCase() === query.toLowerCase() ? (
+          <span key={i} className="font-bold">
+            {part}
+          </span>
+        ) : (
+          <span key={i}>{part}</span>
+        )
+      )}
+    </>
+  );
+}
+
 type dataReturn = {
   illustrations: any;
   tags: any;
@@ -133,25 +152,15 @@ export default function Search() {
                 <Link
                   className="block pb-1 group-hover/item:underline"
                   href={`/illustration/${d.id}`}
-                  dangerouslySetInnerHTML={{
-                    __html: d.title.replace(
-                      new RegExp(`${searched}`, "gi"),
-                      `<span class='font-bold'>${searched}</span>`
-                    ),
-                  }}
-                ></Link>
-                <div
-                  className="invisible h-0 group-hover/item:h-auto group-hover/item:visible"
-                  dangerouslySetInnerHTML={{
-                    __html:
-                      d.content
-                        .slice(0, 256)
-                        .replace(
-                          new RegExp(`${searched}`, "gi"),
-                          `<span class='font-bold'>${searched}</span>`
-                        ) + "...",
-                  }}
-                ></div>
+                >
+                  <HighlightedText text={d.title} query={searched} />
+                </Link>
+                <div className="invisible h-0 group-hover/item:h-auto group-hover/item:visible">
+                  <HighlightedText
+                    text={d.content.slice(0, 256) + "..."}
+                    query={searched}
+                  />
+                </div>
               </li>
             ))
           : searched && <div>No illustrations found</div>}

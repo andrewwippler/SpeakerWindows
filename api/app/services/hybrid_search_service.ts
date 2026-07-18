@@ -32,21 +32,26 @@ export class HybridSearchService {
     query: string
   ): Promise<{ illustrationId: number; rank: number }[]> {
     const queryVector = this.toTsQuery(query)
+    if (!queryVector) return []
 
-    const results = await db.rawQuery(
-      `
-      SELECT
-        document_id as "illustrationId",
-        ROW_NUMBER() OVER (ORDER BY ts_rank(title_tsv, to_tsquery('english', ?)) DESC) as rank
-      FROM document_search
-      WHERE title_tsv @@ to_tsquery('english', ?)
-      ORDER BY ts_rank(title_tsv, to_tsquery('english', ?)) DESC
-      LIMIT ?
-    `,
-      [queryVector, queryVector, queryVector, this.TOP_K]
-    )
+    try {
+      const results = await db.rawQuery(
+        `
+        SELECT
+          document_id as "illustrationId",
+          ROW_NUMBER() OVER (ORDER BY ts_rank(title_tsv, to_tsquery('english', ?)) DESC) as rank
+        FROM document_search
+        WHERE title_tsv @@ to_tsquery('english', ?)
+        ORDER BY ts_rank(title_tsv, to_tsquery('english', ?)) DESC
+        LIMIT ?
+      `,
+        [queryVector, queryVector, queryVector, this.TOP_K]
+      )
 
-    return results.rows as { illustrationId: number; rank: number }[]
+      return results.rows as { illustrationId: number; rank: number }[]
+    } catch {
+      return []
+    }
   }
 
   /**
@@ -56,21 +61,26 @@ export class HybridSearchService {
     query: string
   ): Promise<{ illustrationId: number; rank: number }[]> {
     const queryVector = this.toTsQuery(query)
+    if (!queryVector) return []
 
-    const results = await db.rawQuery(
-      `
-      SELECT
-        document_id as "illustrationId",
-        ROW_NUMBER() OVER (ORDER BY ts_rank(body_tsv, to_tsquery('english', ?)) DESC) as rank
-      FROM document_search
-      WHERE body_tsv @@ to_tsquery('english', ?)
-      ORDER BY ts_rank(body_tsv, to_tsquery('english', ?)) DESC
-      LIMIT ?
-    `,
-      [queryVector, queryVector, queryVector, this.TOP_K]
-    )
+    try {
+      const results = await db.rawQuery(
+        `
+        SELECT
+          document_id as "illustrationId",
+          ROW_NUMBER() OVER (ORDER BY ts_rank(body_tsv, to_tsquery('english', ?)) DESC) as rank
+        FROM document_search
+        WHERE body_tsv @@ to_tsquery('english', ?)
+        ORDER BY ts_rank(body_tsv, to_tsquery('english', ?)) DESC
+        LIMIT ?
+      `,
+        [queryVector, queryVector, queryVector, this.TOP_K]
+      )
 
-    return results.rows as { illustrationId: number; rank: number }[]
+      return results.rows as { illustrationId: number; rank: number }[]
+    } catch {
+      return []
+    }
   }
 
   /**
@@ -171,6 +181,7 @@ export class HybridSearchService {
 
   private toTsQuery(query: string): string {
     return query
+      .replace(/[^a-zA-Z0-9\s]/g, ' ')
       .trim()
       .split(/\s+/)
       .filter((term) => term.length > 0)
