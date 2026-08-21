@@ -12,6 +12,9 @@ FROM base AS dependencies
 COPY --chown=node:node ./package*.json ./
 RUN npm ci
 
+FROM base AS model-cache
+COPY --chown=node:node ./model-cache ./model-cache
+
 FROM dependencies AS build
 COPY --chown=node:node ./adonisrc.ts ./tsconfig.json ./ace.js ./
 COPY --chown=node:node ./bin ./bin
@@ -34,6 +37,7 @@ ENV HASH_DRIVER=bcrypt
 COPY --chown=node:node ./package*.json ./
 RUN npm ci --omit=dev
 COPY --chown=node:node --from=build /home/node/app/build ./
+COPY --chown=node:node --from=model-cache /home/node/app/model-cache ./model-cache
 EXPOSE 3333
 CMD [ "dumb-init", "node", "bin/server.js" ]
 

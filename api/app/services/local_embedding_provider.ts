@@ -8,9 +8,15 @@
 
 import { pipeline, env, type FeatureExtractionPipeline } from '@xenova/transformers'
 import type { EmbeddingProvider } from './search_indexing_service.js'
+import { resolve, dirname } from 'node:path'
+import { fileURLToPath } from 'node:url'
 
-env.allowLocalModels = false
+const __dirname = dirname(fileURLToPath(import.meta.url))
+
+env.allowLocalModels = true
+env.allowRemoteModels = false
 env.useBrowserCache = false
+env.cacheDir = process.env.MODEL_CACHE_DIR || resolve(__dirname, '../../model-cache')
 
 let pipelineInstance: FeatureExtractionPipeline | null = null
 

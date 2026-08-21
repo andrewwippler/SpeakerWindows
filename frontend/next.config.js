@@ -4,9 +4,6 @@ const apiHostname = hostUrl ? new URL(hostUrl).hostname : 'sw-api.wplr.rocks'
 
 const nextConfig = {
   reactStrictMode: true,
-  publicRuntimeConfig: {
-    hostUrl,
-  },
   images: {
     remotePatterns: [
       {
