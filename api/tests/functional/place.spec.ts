@@ -46,30 +46,30 @@ test.group('Place', (group) => {
 
   test('Can get list of places on my specific illustration', async ({ client }) => {
     const loggedInUser = await client
-      .post('/login')
+      .post('/api/login')
       .json({ email: goodUser.email, password: 'oasssadfasdf' })
 
     const illustration = await Illustration.findBy('title', 'Places Test')
     const response = await client
-      .get(`/places/${illustration.id}`)
+      .get(`/api/places/${illustration.id}`)
       .bearerToken(loggedInUser.body().token)
     response.assertStatus(200)
   })
 
   test('Cannot get list of places on your specific illustration', async ({ client }) => {
     const loggedInUser = await client
-      .post('/login')
+      .post('/api/login')
       .json({ email: badUser.email, password: 'oasssadfasdf' })
     const illustration = await Illustration.findBy('title', 'Places Test')
     const response = await client
-      .get(`/places/${illustration.id}`)
+      .get(`/api/places/${illustration.id}`)
       .bearerToken(loggedInUser.body().token)
     response.assertStatus(403)
   })
 
   test('Can add new place to my illustration', async ({ client, assert }) => {
     const loggedInUser = await client
-      .post('/login')
+      .post('/api/login')
       .json({ email: goodUser.email, password: 'oasssadfasdf' })
 
     const illustration = await Illustration.findByOrFail('title', 'Places Test')
@@ -82,7 +82,7 @@ test.group('Place', (group) => {
     }
 
     const response = await client
-      .post(`/places/${illustration.id}`)
+      .post(`/api/places/${illustration.id}`)
       .bearerToken(loggedInUser.body().token)
       .json(place)
     response.assertStatus(200)
@@ -96,13 +96,13 @@ test.group('Place', (group) => {
 
   test('Cannot add new place to your illustration or unknown', async ({ client, assert }) => {
     const loggedInUser = await client
-      .post('/login')
+      .post('/api/login')
       .json({ email: badUser.email, password: 'oasssadfasdf' })
     const illustration = await Illustration.findByOrFail('title', 'Places Test')
     const place = await PlaceFactory.make()
 
     const response = await client
-      .post(`/places/${illustration.id}`)
+      .post(`/api/places/${illustration.id}`)
       .bearerToken(loggedInUser.body().token)
       .json(place.toJSON())
     response.assertStatus(403)
@@ -118,7 +118,7 @@ test.group('Place', (group) => {
 
   test('Can update my place', async ({ client, assert }) => {
     const loggedInUser = await client
-      .post('/login')
+      .post('/api/login')
       .json({ email: goodUser.email, password: 'oasssadfasdf' })
     const illustration = await Illustration.findByOrFail('title', 'Places Test')
     const allPlaces = await illustration.related('places').query()
@@ -131,7 +131,7 @@ test.group('Place', (group) => {
       illustration_id: illustration.id,
     }
     const response = await client
-      .put(`/places/${testPlace.id}`)
+      .put(`/api/places/${testPlace.id}`)
       .bearerToken(loggedInUser.body().token)
       .json(updatedPlace)
     response.assertStatus(200)
@@ -140,7 +140,7 @@ test.group('Place', (group) => {
 
   test('Cannot update your place', async ({ client, assert }) => {
     const loggedInUser = await client
-      .post('/login')
+      .post('/api/login')
       .json({ email: badUser.email, password: 'oasssadfasdf' })
     const illustration = await Illustration.findByOrFail('title', 'Places Test')
     const allPlaces = await illustration.related('places').query()
@@ -152,7 +152,7 @@ test.group('Place', (group) => {
       illustration_id: illustration.id,
     }
     const response = await client
-      .put(`/places/${testPlace.id}`)
+      .put(`/api/places/${testPlace.id}`)
       .bearerToken(loggedInUser.body().token)
       .json(updatedPlace)
     response.assertStatus(403)
@@ -161,7 +161,7 @@ test.group('Place', (group) => {
 
   test('Fails on wrong illustration_id', async ({ client, assert }) => {
     const loggedInUser = await client
-      .post('/login')
+      .post('/api/login')
       .json({ email: goodUser.email, password: 'oasssadfasdf' })
     const illustration = await Illustration.findByOrFail('title', 'Places Test')
     const allPlaces = await illustration.related('places').query()
@@ -172,7 +172,7 @@ test.group('Place', (group) => {
     }
 
     const response = await client
-      .put(`/places/${testPlace.id}`)
+      .put(`/api/places/${testPlace.id}`)
       .bearerToken(loggedInUser.body().token)
       .json(updatedPlace)
     response.assertStatus(403)
@@ -181,7 +181,7 @@ test.group('Place', (group) => {
 
   test('Can delete place on my illustration', async ({ client, assert }) => {
     const loggedInUser = await client
-      .post('/login')
+      .post('/api/login')
       .json({ email: goodUser.email, password: 'oasssadfasdf' })
     const illustration = await IllustrationFactory.merge({ title: 'Testing Place Delete' }).create()
 
@@ -191,7 +191,7 @@ test.group('Place', (group) => {
     }).create()
 
     const response = await client
-      .delete(`/places/${place.id}`)
+      .delete(`/api/places/${place.id}`)
       .bearerToken(loggedInUser.body().token)
     response.assertStatus(200)
     response.assertBodyContains({ message: `Deleted place id: ${place.id}` })
@@ -203,7 +203,7 @@ test.group('Place', (group) => {
 
   test('Cannot delete place on your illustration', async ({ client, assert }) => {
     const loggedInUser = await client
-      .post('/login')
+      .post('/api/login')
       .json({ email: badUser.email, password: 'oasssadfasdf' })
     const illustration = await IllustrationFactory.merge({ title: 'Testing Place Delete' }).create()
     const place = await PlaceFactory.merge({
@@ -212,7 +212,7 @@ test.group('Place', (group) => {
     }).create()
 
     const response = await client
-      .delete(`/places/${place.id}`)
+      .delete(`/api/places/${place.id}`)
       .bearerToken(loggedInUser.body().token)
     response.assertStatus(403)
     response.assertBodyContains({ message: 'You do not have permission to access this resource' })
@@ -220,7 +220,7 @@ test.group('Place', (group) => {
 
   test('Fail on creating to nonexistent illustration', async ({ client, assert }) => {
     const loggedInUser = await client
-      .post('/login')
+      .post('/api/login')
       .json({ email: goodUser.email, password: 'oasssadfasdf' })
     const place = await PlaceFactory.merge({ user_id: goodUser.id }).make()
 

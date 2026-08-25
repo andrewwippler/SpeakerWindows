@@ -41,11 +41,11 @@ test.group('UploadsController', (group) => {
 
   test('should upload a file successfully', async ({ client, assert }) => {
     const loggedInUser = await client
-      .post('/login')
+      .post('/api/login')
       .json({ email: goodUser.email, password: 'oasssadfasdf' })
     const filePath = join(dirname, '..', 'assets', '1kb.png')
     const response = await client
-      .post('/upload')
+      .post('/api/upload')
       .file('illustration_image', filePath)
       .fields({
         illustration_id: testIllustration.id,
@@ -57,7 +57,7 @@ test.group('UploadsController', (group) => {
     response.assertBodyContains({ message: 'File uploaded successfully' })
 
     const verify = await client
-      .get(`/illustration/${testIllustration.id}`)
+      .get(`/api/illustration/${testIllustration.id}`)
       .bearerToken(loggedInUser.body().token)
 
     const uploadsPath = app.makePath('uploads', 'test', verify.body().uploads[0].name)
@@ -70,11 +70,11 @@ test.group('UploadsController', (group) => {
 
   test('should fail when no file is uploaded', async ({ client }) => {
     const loggedInUser = await client
-      .post('/login')
+      .post('/api/login')
       .json({ email: goodUser.email, password: 'oasssadfasdf' })
 
     const response = await client
-      .post('/upload')
+      .post('/api/upload')
       .fields({
         illustration_id: testIllustration.id,
       })
@@ -87,12 +87,12 @@ test.group('UploadsController', (group) => {
 
   test('should fail when an invalid file is uploaded', async ({ client }) => {
     const loggedInUser = await client
-      .post('/login')
+      .post('/api/login')
       .json({ email: goodUser.email, password: 'oasssadfasdf' })
 
     const filePath = join(dirname, '..', 'assets', 'sample.txt')
     const response = await client
-      .post('/upload')
+      .post('/api/upload')
       .file('illustration_image', filePath)
       .fields({
         illustration_id: testIllustration.id,
@@ -111,11 +111,11 @@ test.group('UploadsController', (group) => {
     assert,
   }) => {
     const loggedInUser = await client
-      .post('/login')
+      .post('/api/login')
       .json({ email: badUser.email, password: 'oasssadfasdf' })
     const filePath = join(dirname, '..', 'assets', '1kb.png')
     const response = await client
-      .post('/upload')
+      .post('/api/upload')
       .file('illustration_image', filePath)
       .fields({
         illustration_id: testIllustration.id,
@@ -131,14 +131,14 @@ test.group('UploadsController', (group) => {
 
   test('should not allow badUser delete attachment from goodUser', async ({ client, assert }) => {
     const goodLoggedInUser = await client
-      .post('/login')
+      .post('/api/login')
       .json({ email: goodUser.email, password: 'oasssadfasdf' })
     const badLoggedInUser = await client
-      .post('/login')
+      .post('/api/login')
       .json({ email: badUser.email, password: 'oasssadfasdf' })
     const filePath = join(dirname, '..', 'assets', '1kb.png')
     await client
-      .post('/upload')
+      .post('/api/upload')
       .file('illustration_image', filePath)
       .fields({
         illustration_id: testIllustration.id,
@@ -149,7 +149,7 @@ test.group('UploadsController', (group) => {
     const uploadRecord = await Upload.findBy('illustration_id', testIllustration.id)
 
     const response = await client
-      .delete(`/upload/${uploadRecord!.id}`)
+      .delete(`/api/upload/${uploadRecord!.id}`)
       .bearerToken(badLoggedInUser.body().token)
       .send()
     response.assertStatus(403)
@@ -158,11 +158,11 @@ test.group('UploadsController', (group) => {
 
   test('should be able to delete own attachment', async ({ client, assert }) => {
     const goodLoggedInUser = await client
-      .post('/login')
+      .post('/api/login')
       .json({ email: goodUser.email, password: 'oasssadfasdf' })
     const filePath = join(dirname, '..', 'assets', '1kb.png')
     await client
-      .post('/upload')
+      .post('/api/upload')
       .file('illustration_image', filePath)
       .fields({
         illustration_id: testIllustration.id,
@@ -173,7 +173,7 @@ test.group('UploadsController', (group) => {
     const uploadRecord = await Upload.findBy('illustration_id', testIllustration.id)
 
     const response = await client
-      .delete(`/upload/${uploadRecord!.id}`)
+      .delete(`/api/upload/${uploadRecord!.id}`)
       .bearerToken(goodLoggedInUser.body().token)
       .send()
     response.assertStatus(200)

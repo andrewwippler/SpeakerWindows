@@ -57,6 +57,8 @@ export default defineConfig({
     () => import('@adonisjs/core/providers/hash_provider'),
     { file: () => import('@adonisjs/core/providers/repl_provider'), environment: ['repl', 'test'] },
     () => import('@adonisjs/auth/auth_provider'),
+    () => import('@adonisjs/session/session_provider'),
+    () => import('@adonisjs/core/providers/edge_provider'),
     () => import('@adonisjs/redis/redis_provider'),
     () => import('@adonisjs/bouncer/bouncer_provider'),
     () => import('@adonisjs/limiter/limiter_provider'),

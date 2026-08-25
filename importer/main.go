@@ -75,7 +75,7 @@ func main() {
 
 	for _, ill := range deduped {
 		jsonData, _ := json.Marshal(ill)
-		req, err := http.NewRequest("POST", "https://sw-api.wplr.rocks/illustration", strings.NewReader(string(jsonData)))
+		req, err := http.NewRequest("POST", "https://sw-api.wplr.rocks/api/illustration", strings.NewReader(string(jsonData)))
 		if err != nil {
 			fmt.Println("Error creating request:", err)
 			continue

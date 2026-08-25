@@ -15,29 +15,21 @@ services:
       POSTGRES_DB: speaker_illus
     ports:
       - "127.0.0.1:5432:5432"
-  # typesense:
-  #   image: typesense/typesense:28.0
-  #   ports:
-  #     - 8108:8108
-  #   environment:
-  #     TYPESENSE_API_KEY: 0c4d2e1a-3b8f-4b5f-8a6c-7d9e0f1a2b3c
-  #     TYPESENSE_DATA_DIR: /data
-  #   volumes:
-  #     - ./tmp/typesense:/data
 
-  # adonis_app:
-  #   container_name: adonis_app
-  #   restart: always
-  #   build:
-  #     context: api/.
-  #     target: dependencies
-  #   ports:
-  #     - 3333:3333
-  #     - 9229:9229
-  #   env_file:
-  #     - api/.env
-  #   volumes:
-  #     - ./api/:/home/node/app
-  #     # Uncomment the below line if you developing on MacOS
-  #     #- /home/node/app/node_modules
-  #   command: dumb-init node ace serve --watch --node-args="--inspect=0.0.0.0"
+  monolith:
+    container_name: speakerwindows
+    restart: always
+    build:
+      context: api/.
+      target: production
+    ports:
+      - "3333:3333"
+    env_file:
+      - api/.env
+    depends_on:
+      - db
+      - redis
+    environment:
+      - NODE_ENV=production
+      - DB_HOST=db
+      - REDIS_HOST=redis

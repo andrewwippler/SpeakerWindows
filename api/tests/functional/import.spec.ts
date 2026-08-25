@@ -14,7 +14,7 @@ const dirname = fileURLToPath(import.meta.url)
 const assetsDir = join(dirname, 'assets', 'import')
 
 async function login(client: any, email: string, password: string) {
-  const response = await client.post('/login').json({ email, password })
+  const response = await client.post('/api/login').json({ email, password })
   return response.body().token
 }
 
@@ -60,7 +60,7 @@ test.group('Import', (group) => {
   })
 
   test('unauthenticated user receives 401', async ({ client }) => {
-    const response = await client.post('/import').send()
+    const response = await client.post('/api/import').send()
 
     response.assertStatus(401)
   })
@@ -71,7 +71,7 @@ test.group('Import', (group) => {
 
     const csvPath = join(assetsDir, 'test_readwise.csv')
     const response = await client
-      .post('/import')
+      .post('/api/import')
       .file('file', csvPath)
       .fields({ importer: 'invalid_type' })
       .bearerToken(token)
@@ -88,7 +88,7 @@ test.group('Import', (group) => {
     const token = await login(client, user.email, 'oasssadfasdf')
 
     const response = await client
-      .post('/import')
+      .post('/api/import')
       .fields({ importer: 'readwise' })
       .bearerToken(token)
       .send()
@@ -103,7 +103,7 @@ test.group('Import', (group) => {
 
     const txtPath = join(dirname, 'assets', 'sample.txt')
     const response = await client
-      .post('/import')
+      .post('/api/import')
       .file('file', txtPath)
       .fields({ importer: 'readwise' })
       .bearerToken(token)
@@ -120,7 +120,7 @@ test.group('Import', (group) => {
     await fs.mkdir(join(dirname, 'tmp'), { recursive: true })
     await fs.writeFile(tmpFile, 'not,a,valid,csv,header')
     const response = await client
-      .post('/import')
+      .post('/api/import')
       .file('file', tmpFile)
       .fields({ importer: 'readwise' })
       .bearerToken(token)
@@ -138,7 +138,7 @@ test.group('Import', (group) => {
 
     const csvPath = join(assetsDir, 'test_readwise.csv')
     const response = await client
-      .post('/import')
+      .post('/api/import')
       .file('file', csvPath)
       .fields({ importer: 'readwise' })
       .bearerToken(token)
@@ -159,7 +159,7 @@ test.group('Import', (group) => {
 
     const jsonPath = join(assetsDir, 'test_koreader.json')
     const response = await client
-      .post('/import')
+      .post('/api/import')
       .file('file', jsonPath)
       .fields({ importer: 'koreader' })
       .bearerToken(token)
@@ -179,7 +179,7 @@ test.group('Import', (group) => {
 
     const htmlPath = join(assetsDir, 'test_playbooks.html')
     const response = await client
-      .post('/import')
+      .post('/api/import')
       .file('file', htmlPath)
       .fields({ importer: 'playbooks' })
       .bearerToken(token)
@@ -246,7 +246,7 @@ test.group('Import', (group) => {
     await fs.writeFile(docxPath, docxBuffer)
 
     const response = await client
-      .post('/import')
+      .post('/api/import')
       .file('file', docxPath)
       .fields({ importer: 'playbooks' })
       .bearerToken(token)
@@ -278,7 +278,7 @@ test.group('Import', (group) => {
     await fs.writeFile(pdfPath, pdfContent)
 
     const response = await client
-      .post('/import')
+      .post('/api/import')
       .file('file', pdfPath)
       .fields({ importer: 'kindle' })
       .bearerToken(token)
@@ -296,7 +296,7 @@ test.group('Import', (group) => {
 
     const csvPath = join(assetsDir, 'test_readwise.csv')
     const firstResponse = await client
-      .post('/import')
+      .post('/api/import')
       .file('file', csvPath)
       .fields({ importer: 'readwise' })
       .bearerToken(token)
@@ -305,7 +305,7 @@ test.group('Import', (group) => {
     assert.equal(firstResponse.body().imported, 2)
 
     const secondResponse = await client
-      .post('/import')
+      .post('/api/import')
       .file('file', csvPath)
       .fields({ importer: 'readwise' })
       .bearerToken(token)

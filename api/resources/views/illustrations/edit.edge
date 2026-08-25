@@ -1,0 +1,109 @@
+@layout()
+
+<div class="mb-6">
+  <a href="/illustrations/{{ illustration.id }}" class="text-sm font-semibold text-sky-600 hover:text-sky-500">
+    &larr; Back to Illustration
+  </a>
+</div>
+
+<h1 class="text-2xl font-bold mb-6">Edit Illustration</h1>
+
+@if(flashMessages.has('error'))
+  <div role="alert" data-variant="error" class="mb-4">
+    {{ flashMessages.get('error') }}
+  </div>
+@endif
+
+@if(flashMessages.has('success'))
+  <div role="alert" data-variant="success" class="mb-4">
+    {{ flashMessages.get('success') }}
+  </div>
+@endif
+
+<form
+  hx-put="/illustrations/{{ illustration.id }}"
+  hx-swap="none"
+  hx-on::after-request="if(event.detail.successful) window.location='/illustrations/{{ illustration.id }}'"
+  class="space-y-6"
+>
+  <div>
+    <label for="title" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+      Title
+    </label>
+    <input
+      type="text"
+      id="title"
+      name="title"
+      value="{{ illustration.title || '' }}"
+      required
+      class="w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2 text-sm shadow-sm focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500"
+    />
+  </div>
+
+  <div>
+    <label for="author" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+      Author
+    </label>
+    <input
+      type="text"
+      id="author"
+      name="author"
+      value="{{ illustration.author || '' }}"
+      class="w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2 text-sm shadow-sm focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500"
+    />
+  </div>
+
+  <div>
+    <label for="source" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+      Source
+    </label>
+    <input
+      type="text"
+      id="source"
+      name="source"
+      value="{{ illustration.source || '' }}"
+      class="w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2 text-sm shadow-sm focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500"
+    />
+  </div>
+
+  <div>
+    <label for="content" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+      Content
+    </label>
+    <textarea
+      id="content"
+      name="content"
+      rows="12"
+      class="w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2 text-sm shadow-sm focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500 font-mono"
+    >{{ illustration.content || '' }}</textarea>
+  </div>
+
+  <div>
+    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+      Tags
+    </label>
+    <ot-taginput value="{{ illustration.tags ? illustration.tags.map(t => t.name).join(', ') : '' }}">
+      <input name="tags" list="tag-list" placeholder="Add tags..." />
+      <datalist id="tag-list">
+        @each(tag in tags)
+          <option value="{{ tag.name }}">
+        @end
+      </datalist>
+    </ot-taginput>
+  </div>
+
+  <div class="flex gap-3">
+    <button
+      type="submit"
+      class="rounded-md bg-sky-600 px-4 py-2 text-sm font-semibold text-white hover:bg-sky-500"
+    >
+      Save
+    </button>
+    <a
+      href="/illustrations/{{ illustration.id }}"
+      class="rounded-md border border-gray-300 dark:border-gray-600 px-4 py-2 text-sm font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
+    >
+      Cancel
+    </a>
+  </div>
+</form>

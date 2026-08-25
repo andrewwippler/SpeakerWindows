@@ -50,7 +50,7 @@ test.group('Illustrations', (group) => {
       source: 'test',
       content: 'this shall pass as new',
     }
-    const response = await client.post('/illustration').json(testIll)
+    const response = await client.post('/api/illustration').json(testIll)
     response.assertStatus(401)
 
     // console.log(response.body())
@@ -59,7 +59,7 @@ test.group('Illustrations', (group) => {
 
   test('Create illustrations with user', async ({ client, assert }) => {
     const loggedInUser = await client
-      .post('/login')
+      .post('/api/login')
       .json({ email: goodUser.email, password: 'oasssadfasdf' })
 
     const testIll = {
@@ -69,7 +69,7 @@ test.group('Illustrations', (group) => {
       content: 'this shall pass as new',
     }
     const response = await client
-      .post('/illustration')
+      .post('/api/illustration')
       .bearerToken(loggedInUser.body().token)
       .json(testIll)
 
@@ -78,14 +78,14 @@ test.group('Illustrations', (group) => {
     assert.isNumber(response.body().id)
 
     const verify = await client
-      .get(`/illustration/${response.body().id}`)
+      .get(`/api/illustration/${response.body().id}`)
       .bearerToken(loggedInUser.body().token)
     verify.assertBodyContains(testIll)
   })
 
   test('Duplicate illustration cannot be imported', async ({ client, assert }) => {
     const loggedInUser = await client
-      .post('/login')
+      .post('/api/login')
       .json({ email: goodUser.email, password: 'oasssadfasdf' })
 
     const testIll = {
@@ -96,13 +96,13 @@ test.group('Illustrations', (group) => {
     }
 
     const first = await client
-      .post('/illustration')
+      .post('/api/illustration')
       .bearerToken(loggedInUser.body().token)
       .json(testIll)
     first.assertStatus(200)
 
     const second = await client
-      .post('/illustration')
+      .post('/api/illustration')
       .bearerToken(loggedInUser.body().token)
       .json(testIll)
     second.assertStatus(409)
@@ -111,7 +111,7 @@ test.group('Illustrations', (group) => {
 
   test('Create illustrations with legacy_id', async ({ client, assert }) => {
     const loggedInUser = await client
-      .post('/login')
+      .post('/api/login')
       .json({ email: goodUser.email, password: 'oasssadfasdf' })
 
     const testIll = {
@@ -122,7 +122,7 @@ test.group('Illustrations', (group) => {
       content: 'this shall pass as new',
     }
     const response = await client
-      .post('/illustration')
+      .post('/api/illustration')
       .bearerToken(loggedInUser.body().token)
       .json(testIll)
 
@@ -130,13 +130,13 @@ test.group('Illustrations', (group) => {
     assert.equal(response.body().message, 'Created successfully')
     assert.isNumber(response.body().id)
 
-    const verify = await client.get(`/illustrations/123`).bearerToken(loggedInUser.body().token)
+    const verify = await client.get(`/api/illustrations/123`).bearerToken(loggedInUser.body().token)
     assert.equal(verify.body().legacyId, 123)
   })
 
   test('Cannot access unowned illustration', async ({ client, assert }) => {
     const loggedInUser = await client
-      .post('/login')
+      .post('/api/login')
       .json({ email: badUser.email, password: 'oasssadfasdf' })
     const testIll = await IllustrationFactory.merge({
       title: 'Illustrations Test2',
@@ -144,13 +144,13 @@ test.group('Illustrations', (group) => {
       user_id: goodUser.id,
     }).create()
     const response = await client
-      .get(`/illustration/${testIll.id}`)
+      .get(`/api/illustration/${testIll.id}`)
       .bearerToken(loggedInUser.body().token)
     response.assertStatus(403)
     assert.equal(response.body().message, 'You do not have permission to access this resource')
 
     const legacy = await client
-      .get(`/illustrations/${testIll.legacy_id}`)
+      .get(`/api/illustrations/${testIll.legacy_id}`)
       .bearerToken(loggedInUser.body().token)
     legacy.assertStatus(403)
     assert.equal(legacy.body().message, 'You do not have permission to access this resource')
@@ -177,10 +177,10 @@ test.group('Illustrations', (group) => {
       ],
     }
     const loggedInUser = await client
-      .post('/login')
+      .post('/api/login')
       .json({ email: goodUser.email, password: 'oasssadfasdf' })
     const response = await client
-      .post('/illustration')
+      .post('/api/illustration')
       .bearerToken(loggedInUser.body().token)
       .json(illus)
 
@@ -189,7 +189,7 @@ test.group('Illustrations', (group) => {
     assert.isNumber(response.body().id)
 
     const verify = await client
-      .get(`/illustration/${response.body().id}`)
+      .get(`/api/illustration/${response.body().id}`)
       .bearerToken(loggedInUser.body().token)
     verify.assertStatus(200)
     // console.log(verify.body())
@@ -201,7 +201,7 @@ test.group('Illustrations', (group) => {
 
   test('Create illustrations with lots of tags', async ({ client, assert }) => {
     const loggedInUser = await client
-      .post('/login')
+      .post('/api/login')
       .json({ email: goodUser.email, password: 'oasssadfasdf' })
 
     const tags = [...Array(1000).keys()].map(String)
@@ -213,7 +213,7 @@ test.group('Illustrations', (group) => {
       tags,
     }
     const response = await client
-      .post('/illustration')
+      .post('/api/illustration')
       .bearerToken(loggedInUser.body().token)
       .json(illus)
 
@@ -222,7 +222,7 @@ test.group('Illustrations', (group) => {
     assert.isNumber(response.body().id)
 
     const verify = await client
-      .get(`/illustration/${response.body().id}`)
+      .get(`/api/illustration/${response.body().id}`)
       .bearerToken(loggedInUser.body().token)
     verify.assertStatus(200)
 
@@ -236,13 +236,13 @@ test.group('Illustrations', (group) => {
 
   test('Illustration is not present in unrelated tag', async ({ client, assert }) => {
     const loggedInUser = await client
-      .post('/login')
+      .post('/api/login')
       .json({ email: goodUser.email, password: 'oasssadfasdf' })
 
     const illustration = await Illustration.findByOrFail('title', 'Illustrations Test')
     const tag = await Tag.find(testTagIdTwo)
     const response = await client
-      .get(`/illustration/${illustration.id}`)
+      .get(`/api/illustration/${illustration.id}`)
       .bearerToken(loggedInUser.body().token)
 
     assert.equal(response.body().tags.length, 1)
@@ -251,7 +251,7 @@ test.group('Illustrations', (group) => {
 
   test('Can update illustration with auth', async ({ client, assert }) => {
     const loggedInUser = await client
-      .post('/login')
+      .post('/api/login')
       .json({ email: goodUser.email, password: 'oasssadfasdf' })
     const illustration = await Illustration.findBy('title', 'Illustrations Test')
     const tagTwo = await Tag.find(testTagIdTwo)
@@ -266,7 +266,7 @@ test.group('Illustrations', (group) => {
     }
 
     const response = await client
-      .put(`/illustration/${illustration.id}`)
+      .put(`/api/illustration/${illustration.id}`)
       .bearerToken(loggedInUser.body().token)
       .json(illus)
     response.assertStatus(200)
@@ -280,7 +280,7 @@ test.group('Illustrations', (group) => {
 
   test('Cannot update illustration wrong auth', async ({ client, assert }) => {
     const loggedInUser = await client
-      .post('/login')
+      .post('/api/login')
       .json({ email: badUser.email, password: 'oasssadfasdf' })
     const illustration = await IllustrationFactory.merge({
       title: 'Tester',
@@ -295,7 +295,7 @@ test.group('Illustrations', (group) => {
     }
 
     const response = await client
-      .put(`/illustration/${illustration.id}`)
+      .put(`/api/illustration/${illustration.id}`)
       .bearerToken(loggedInUser.body().token)
       .json(illus)
     response.assertStatus(403)
@@ -307,7 +307,7 @@ test.group('Illustrations', (group) => {
 
   test('Can delete illustration with auth', async ({ client, assert }) => {
     const loggedInUser = await client
-      .post('/login')
+      .post('/api/login')
       .json({ email: goodUser.email, password: 'oasssadfasdf' })
 
     const illustration = await IllustrationFactory.merge({
@@ -321,13 +321,13 @@ test.group('Illustrations', (group) => {
     await illustration.related('places').save(place)
 
     const response = await client
-      .delete(`/illustration/${illustration.id}`)
+      .delete(`/api/illustration/${illustration.id}`)
       .bearerToken(loggedInUser.body().token)
     response.assertStatus(200)
     response.assertBodyContains({ message: `Deleted illustration id: ${illustration.id}` })
 
     const responseFourOhThree = await client
-      .get(`/illustration/${illustration.id}`)
+      .get(`/api/illustration/${illustration.id}`)
       .bearerToken(loggedInUser.body().token)
     responseFourOhThree.assertStatus(404)
 
@@ -338,10 +338,10 @@ test.group('Illustrations', (group) => {
 
   test('Cannot delete illustration wrong auth', async ({ client, assert }) => {
     const loggedInUser = await client
-      .post('/login')
+      .post('/api/login')
       .json({ email: badUser.email, password: 'oasssadfasdf' })
     const goodloggedInUser = await client
-      .post('/login')
+      .post('/api/login')
       .json({ email: goodUser.email, password: 'oasssadfasdf' })
     const illustration = await IllustrationFactory.merge({
       title: 'Testing Delete',
@@ -354,24 +354,24 @@ test.group('Illustrations', (group) => {
     await illustration.related('places').save(place)
 
     const response = await client
-      .delete(`/illustration/${illustration.id}`)
+      .delete(`/api/illustration/${illustration.id}`)
       .bearerToken(loggedInUser.body().token)
     response.assertStatus(403)
     response.assertBody({ message: `You do not have permission to delete this resource` })
 
     const responseFourOhThree = await client
-      .get(`/illustration/${illustration.id}`)
+      .get(`/api/illustration/${illustration.id}`)
       .bearerToken(goodloggedInUser.body().token)
     responseFourOhThree.assertStatus(200)
   })
 
   test('403 on unknown illustration', async ({ client }) => {
     const loggedInUser = await client
-      .post('/login')
+      .post('/api/login')
       .json({ email: goodUser.email, password: 'oasssadfasdf' })
 
     const response = await client
-      .get('/illustration/99999999999')
+      .get('/api/illustration/99999999999')
       .bearerToken(loggedInUser.body().token)
     response.assertStatus(500)
 

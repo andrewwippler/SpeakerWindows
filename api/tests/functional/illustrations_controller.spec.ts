@@ -81,14 +81,14 @@ test.group('IllustrationsController.bulk', (group) => {
       private: false,
     }).create()
 
-    const loginResponse = await client.post('/login').json({
+    const loginResponse = await client.post('/api/login').json({
       email: owner.email,
       password: 'testpassword123',
     })
     const token = loginResponse.body().token
 
     const response = await client
-      .put('/illustrations/bulk')
+      .put('/api/illustrations/bulk')
       .bearerToken(token)
       .json({
         illustrations: [illustration.id],
@@ -111,14 +111,14 @@ test.group('IllustrationsController.bulk', (group) => {
       private: false,
     }).create()
 
-    const loginResponse = await client.post('/login').json({
+    const loginResponse = await client.post('/api/login').json({
       email: owner.email,
       password: 'testpassword123',
     })
     const token = loginResponse.body().token
 
     const response = await client
-      .put('/illustrations/bulk')
+      .put('/api/illustrations/bulk')
       .bearerToken(token)
       .json({
         illustrations: [illustration.id],
@@ -133,14 +133,14 @@ test.group('IllustrationsController.bulk', (group) => {
   test('Non-existent illustration returns 400', async ({ client, assert }) => {
     const user = await UserFactory.merge({ password: 'testpassword123' }).create()
 
-    const loginResponse = await client.post('/login').json({
+    const loginResponse = await client.post('/api/login').json({
       email: user.email,
       password: 'testpassword123',
     })
     const token = loginResponse.body().token
 
     const response = await client
-      .put('/illustrations/bulk')
+      .put('/api/illustrations/bulk')
       .bearerToken(token)
       .json({
         illustrations: [99999],
@@ -163,14 +163,14 @@ test.group('IllustrationsController.bulk', (group) => {
     const tag2 = await TagFactory.create()
     await illustration.related('tags').attach([tag.id, tag2.id])
 
-    const loginResponse = await client.post('/login').json({
+    const loginResponse = await client.post('/api/login').json({
       email: teamOwner.email,
       password: 'testpassword123',
     })
     const token = loginResponse.body().token
 
     const response = await client
-      .put('/illustrations/bulk')
+      .put('/api/illustrations/bulk')
       .bearerToken(token)
       .json({
         illustrations: [illustration.id],
@@ -196,14 +196,14 @@ test.group('IllustrationsController.bulk', (group) => {
     const tag2 = await TagFactory.create()
     await illustration.related('tags').attach([tag.id, tag2.id])
 
-    const loginResponse = await client.post('/login').json({
+    const loginResponse = await client.post('/api/login').json({
       email: creator.email,
       password: 'testpassword123',
     })
     const token = loginResponse.body().token
 
     const response = await client
-      .put('/illustrations/bulk')
+      .put('/api/illustrations/bulk')
       .bearerToken(token)
       .json({
         illustrations: [illustration.id],
@@ -228,14 +228,14 @@ test.group('IllustrationsController.bulk', (group) => {
     const tag2 = await TagFactory.create()
     await illustration.related('tags').attach([tag.id, tag2.id])
 
-    const loginResponse = await client.post('/login').json({
+    const loginResponse = await client.post('/api/login').json({
       email: editor.email,
       password: 'testpassword123',
     })
     const token = loginResponse.body().token
 
     const response = await client
-      .put('/illustrations/bulk')
+      .put('/api/illustrations/bulk')
       .bearerToken(token)
       .json({
         illustrations: [illustration.id],
@@ -263,14 +263,14 @@ test.group('IllustrationsController.bulk', (group) => {
     const tag = await TagFactory.create()
     await illustration.related('tags').attach([tag.id])
 
-    const loginResponse = await client.post('/login').json({
+    const loginResponse = await client.post('/api/login').json({
       email: readonly.email,
       password: 'testpassword123',
     })
     const token = loginResponse.body().token
 
     const response = await client
-      .put('/illustrations/bulk')
+      .put('/api/illustrations/bulk')
       .bearerToken(token)
       .json({
         illustrations: [illustration.id],
@@ -295,14 +295,14 @@ test.group('IllustrationsController.bulk', (group) => {
     const tag = await TagFactory.create()
     await illustration.related('tags').attach([tag.id])
 
-    const loginResponse = await client.post('/login').json({
+    const loginResponse = await client.post('/api/login').json({
       email: teamOwner1.email,
       password: 'testpassword123',
     })
     const token = loginResponse.body().token
 
     const response = await client
-      .put('/illustrations/bulk')
+      .put('/api/illustrations/bulk')
       .bearerToken(token)
       .json({
         illustrations: [illustration.id],
@@ -321,14 +321,14 @@ test.group('IllustrationsController.bulk', (group) => {
     const tag = await TagFactory.create()
     await illustration.related('tags').attach([tag.id])
 
-    const loginResponse = await client.post('/login').json({
+    const loginResponse = await client.post('/api/login').json({
       email: user.email,
       password: 'testpassword123',
     })
     const token = loginResponse.body().token
 
     const response = await client
-      .put('/illustrations/bulk')
+      .put('/api/illustrations/bulk')
       .bearerToken(token)
       .json({
         illustrations: [illustration.id],
@@ -348,14 +348,14 @@ test.group('IllustrationsController.bulk', (group) => {
     const tag = await TagFactory.create()
     await illustration.related('tags').attach([tag.id])
 
-    const loginResponse = await client.post('/login').json({
+    const loginResponse = await client.post('/api/login').json({
       email: user.email,
       password: 'testpassword123',
     })
     const token = loginResponse.body().token
 
     const response = await client
-      .put('/illustrations/bulk')
+      .put('/api/illustrations/bulk')
       .bearerToken(token)
       .json({
         illustrations: [illustration.id],
@@ -370,13 +370,13 @@ test.group('IllustrationsController.bulk', (group) => {
   test('Missing illustrations array returns 400', async ({ client, assert }) => {
     const user = await UserFactory.merge({ password: 'testpassword123' }).create()
 
-    const loginResponse = await client.post('/login').json({
+    const loginResponse = await client.post('/api/login').json({
       email: user.email,
       password: 'testpassword123',
     })
     const token = loginResponse.body().token
 
-    const response = await client.put('/illustrations/bulk').bearerToken(token).json({
+    const response = await client.put('/api/illustrations/bulk').bearerToken(token).json({
       action: 'toggle_privacy',
       data: true,
     })
@@ -388,14 +388,14 @@ test.group('IllustrationsController.bulk', (group) => {
   test('Invalid action returns 400', async ({ client, assert }) => {
     const user = await UserFactory.merge({ password: 'testpassword123' }).create()
 
-    const loginResponse = await client.post('/login').json({
+    const loginResponse = await client.post('/api/login').json({
       email: user.email,
       password: 'testpassword123',
     })
     const token = loginResponse.body().token
 
     const response = await client
-      .put('/illustrations/bulk')
+      .put('/api/illustrations/bulk')
       .bearerToken(token)
       .json({
         illustrations: [1],

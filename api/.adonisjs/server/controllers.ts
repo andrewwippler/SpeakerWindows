@@ -18,4 +18,18 @@ export const controllers = {
     Uploads: () => import('#controllers/http/uploads_controller'),
     Users: () => import('#controllers/http/users_controller'),
   },
+  view: {
+    Articles: () => import('#controllers/view/articles_controller'),
+    Auth: () => import('#controllers/view/auth_controller'),
+    Author: () => import('#controllers/view/author_controller'),
+    Contact: () => import('#controllers/view/contact_controller'),
+    Dashboard: () => import('#controllers/view/dashboard_controller'),
+    Help: () => import('#controllers/view/help_controller'),
+    Illustration: () => import('#controllers/view/illustration_controller'),
+    Invitation: () => import('#controllers/view/invitation_controller'),
+    Legal: () => import('#controllers/view/legal_controller'),
+    Search: () => import('#controllers/view/search_controller'),
+    Settings: () => import('#controllers/view/settings_controller'),
+    Tag: () => import('#controllers/view/tag_controller'),
+  },
 }

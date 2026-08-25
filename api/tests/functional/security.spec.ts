@@ -10,7 +10,7 @@ test.group('Security', (group) => {
 
   test('CORS rejects requests from disallowed origins', async ({ client, assert }) => {
     const response = await client
-      .post('/login')
+      .post('/api/login')
       .header('Origin', 'https://evil.com')
       .json({ email: 'test@test.com', password: 'password' })
 
@@ -20,7 +20,7 @@ test.group('Security', (group) => {
 
   test('CORS allows requests from allowed origins', async ({ client, assert }) => {
     const response = await client
-      .post('/login')
+      .post('/api/login')
       .header('Origin', 'https://sw.wplr.rocks')
       .json({ email: 'test@test.com', password: 'password' })
 
@@ -29,7 +29,7 @@ test.group('Security', (group) => {
 
   test('CSP header is present on responses', async ({ client, assert }) => {
     const response = await client
-      .post('/login')
+      .post('/api/login')
       .json({ email: 'test@test.com', password: 'password' })
 
     const csp = response.headers()['content-security-policy']
@@ -44,21 +44,21 @@ test.group('Security', (group) => {
 
   test('Login endpoint validates email format', async ({ client, assert }) => {
     const response = await client
-      .post('/login')
+      .post('/api/login')
       .json({ email: 'not-an-email', password: 'password' })
 
     response.assertStatus(400)
   })
 
   test('Login endpoint validates password is required', async ({ client, assert }) => {
-    const response = await client.post('/login').json({ email: 'test@test.com' })
+    const response = await client.post('/api/login').json({ email: 'test@test.com' })
 
     response.assertStatus(400)
   })
 
   test('Register endpoint validates email format', async ({ client, assert }) => {
     const response = await client
-      .post('/register')
+      .post('/api/register')
       .json({ email: 'bad-email', password: 'Test1234!', password_confirmation: 'Test1234!' })
 
     response.assertStatus(400)
@@ -66,7 +66,7 @@ test.group('Security', (group) => {
 
   test('Register endpoint validates password strength', async ({ client, assert }) => {
     const response = await client
-      .post('/register')
+      .post('/api/register')
       .json({ email: 'new@test.com', password: 'weak', password_confirmation: 'weak' })
 
     response.assertStatus(400)
@@ -74,7 +74,7 @@ test.group('Security', (group) => {
 
   test('Contact endpoint requires valid email', async ({ client, assert }) => {
     const response = await client
-      .post('/contact')
+      .post('/api/contact')
       .json({ email: 'not-valid', reason: 'general', message: 'test' })
 
     response.assertStatus(422)
@@ -82,7 +82,7 @@ test.group('Security', (group) => {
 
   test('SQL injection in login email is handled safely', async ({ client, assert }) => {
     const response = await client
-      .post('/login')
+      .post('/api/login')
       .json({ email: "' OR 1=1 --", password: 'password' })
 
     response.assertStatus(400)
@@ -92,11 +92,11 @@ test.group('Security', (group) => {
     const user = await UserFactory.merge({ password: 'TestPass123!' }).create()
 
     const loggedInUser = await client
-      .post('/login')
+      .post('/api/login')
       .json({ email: user.email, password: 'TestPass123!' })
 
     const response = await client
-      .post('/search')
+      .post('/api/search')
       .json({ query: "'; DROP TABLE illustrations; --" })
       .bearerToken(loggedInUser.body().token)
 

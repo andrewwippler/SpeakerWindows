@@ -27,10 +27,10 @@ test.group('Authors', (group) => {
 
   test('Author routes', async ({ client, assert }) => {
     const loggedInUser = await client
-      .post('/login')
+      .post('/api/login')
       .json({ email: goodUser.email, password: 'oasssadfasdf' })
     const secondLoggedInUser = await client
-      .post('/login')
+      .post('/api/login')
       .json({ email: badUser.email, password: 'oasssadfasdf' })
 
     testIllustration = {
@@ -39,7 +39,7 @@ test.group('Authors', (group) => {
       source: 'test',
       content: 'this shall pass as new',
     }
-    await client.post('/illustration').bearerToken(loggedInUser.body().token).json(testIllustration)
+    await client.post('/api/illustration').bearerToken(loggedInUser.body().token).json(testIllustration)
 
     const second = {
       author: 'test2',
@@ -47,12 +47,12 @@ test.group('Authors', (group) => {
       source: 'test',
       content: 'this shall pass as new',
     }
-    await client.post('/illustration').bearerToken(loggedInUser.body().token).json(second)
-    await client.post('/illustration').bearerToken(secondLoggedInUser.body().token).json(second)
+    await client.post('/api/illustration').bearerToken(loggedInUser.body().token).json(second)
+    await client.post('/api/illustration').bearerToken(secondLoggedInUser.body().token).json(second)
 
-    const both = await client.get('/illustration/authors').bearerToken(loggedInUser.body().token)
+    const both = await client.get('/api/illustration/authors').bearerToken(loggedInUser.body().token)
     const one = await client
-      .get('/illustration/authors')
+      .get('/api/illustration/authors')
       .bearerToken(secondLoggedInUser.body().token)
 
     both.assertStatus(200)
@@ -64,17 +64,17 @@ test.group('Authors', (group) => {
     assert.equal(one.body().length, 1)
 
     const response = await client
-      .get('/author/' + testIllustration.author)
+      .get('/api/author/' + testIllustration.author)
       .bearerToken(loggedInUser.body().token)
     response.assertStatus(200)
     assert.equal(response.body().length, 1)
-    const last = await client.get('/author/boogers').bearerToken(loggedInUser.body().token)
+    const last = await client.get('/api/author/boogers').bearerToken(loggedInUser.body().token)
     last.assertStatus(204)
   })
 
   test('Update author', async ({ client, assert }) => {
     const loggedInUser = await client
-      .post('/login')
+      .post('/api/login')
       .json({ email: goodUser.email, password: 'oasssadfasdf' })
 
     testIllustration = {
@@ -83,35 +83,35 @@ test.group('Authors', (group) => {
       source: 'test',
       content: 'this shall pass as new',
     }
-    await client.post('/illustration').bearerToken(loggedInUser.body().token).json(testIllustration)
+    await client.post('/api/illustration').bearerToken(loggedInUser.body().token).json(testIllustration)
 
     const response = await client
-      .put('/author/' + testIllustration.author)
+      .put('/api/author/' + testIllustration.author)
       .bearerToken(loggedInUser.body().token)
       .json({ author: 'new author' })
     response.assertStatus(200)
     assert.equal(response.body().message, 'Author updated from testy mctest to new author')
-    const updated = await client.get('/author/new author').bearerToken(loggedInUser.body().token)
+    const updated = await client.get('/api/author/new author').bearerToken(loggedInUser.body().token)
     updated.assertStatus(200)
     assert.equal(updated.body().length, 1)
-    const last = await client.get('/author/boogers').bearerToken(loggedInUser.body().token)
+    const last = await client.get('/api/author/boogers').bearerToken(loggedInUser.body().token)
     last.assertStatus(204)
   })
 
   test('No authors returns 204', async ({ client }) => {
     const loggedInUser = await client
-      .post('/login')
+      .post('/api/login')
       .json({ email: goodUser.email, password: 'oasssadfasdf' })
 
     const response = await client
-      .get('/illustration/authors')
+      .get('/api/illustration/authors')
       .bearerToken(loggedInUser.body().token)
     response.assertStatus(204)
   })
 
   test('Update author with no changes returns 400', async ({ client }) => {
     const loggedInUser = await client
-      .post('/login')
+      .post('/api/login')
       .json({ email: goodUser.email, password: 'oasssadfasdf' })
 
     const illustration = {
@@ -120,10 +120,10 @@ test.group('Authors', (group) => {
       source: 'test',
       content: 'this shall pass as new',
     }
-    await client.post('/illustration').bearerToken(loggedInUser.body().token).json(illustration)
+    await client.post('/api/illustration').bearerToken(loggedInUser.body().token).json(illustration)
 
     const response = await client
-      .put('/author/' + illustration.author)
+      .put('/api/author/' + illustration.author)
       .bearerToken(loggedInUser.body().token)
       .json({ author: illustration.author })
     response.assertStatus(400)
@@ -131,11 +131,11 @@ test.group('Authors', (group) => {
 
   test('Update author with non-existent author returns 200 with no results', async ({ client }) => {
     const loggedInUser = await client
-      .post('/login')
+      .post('/api/login')
       .json({ email: goodUser.email, password: 'oasssadfasdf' })
 
     const response = await client
-      .put('/author/nonExistentAuthor')
+      .put('/api/author/nonExistentAuthor')
       .bearerToken(loggedInUser.body().token)
       .json({ author: 'new author' })
     response.assertStatus(200)

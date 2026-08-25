@@ -88,7 +88,7 @@ class Api {
         options.body.append(key, params[key]);
       }
     }
-    const url = `${hostUrl}${route}`;
+    const url = `${hostUrl}/api${route}`;
 
     return fetch(url, options)
       .then(resp => {
@@ -113,10 +113,10 @@ class Api {
     let query, url;
     if (verb === 'GET') {
       query = this.getQuery(params);
-      (!query) ? url = `${hostUrl}${route}` : url = `${hostUrl}${route}?${query}`;
+      (!query) ? url = `${hostUrl}/api${route}` : url = `${hostUrl}/api${route}?${query}`;
     } else {
       options.body = JSON.stringify(params);
-      url = `${hostUrl}${route}`;
+      url = `${hostUrl}/api${route}`;
     }
     return fetch(url, options)
       .then(resp => {

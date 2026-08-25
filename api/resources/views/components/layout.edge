@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="csrf-token" value="{{ csrfToken || '' }}" />
+  <title>{{ title || 'SpeakerWindows' }}</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'media',
+    }
+  </script>
+  <link rel="stylesheet" href="/oat.min.css" />
+  <script src="https://unpkg.com/htmx.org@2.0.4"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  <script src="/oat.min.js" defer></script>
+</head>
+
+<body class="min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 flex flex-col">
+
+  <header class="bg-sky-300 shadow-sm">
+    <nav class="mx-auto flex max-w-7xl items-center justify-between p-4 lg:px-8" aria-label="Global">
+      <div class="flex lg:flex-1">
+        <a href="/" class="-m-1.5 p-1.5">
+          <span class="text-xl font-bold italic text-sky-900">SpeakerWindows</span>
+        </a>
+      </div>
+
+      <div class="hidden lg:flex lg:gap-x-8">
+        <a href="/" class="text-sm font-semibold leading-6 text-sky-800 hover:text-sky-950">
+          Dashboard
+        </a>
+        <a href="/search" class="text-sm font-semibold leading-6 text-sky-800 hover:text-sky-950">
+          Search
+        </a>
+        <a href="/settings" class="text-sm font-semibold leading-6 text-sky-800 hover:text-sky-950">
+          Settings
+        </a>
+      </div>
+
+      <div class="hidden lg:flex lg:flex-1 lg:justify-end">
+        <ot-dropdown>
+          <button popovertarget="user-menu" class="ghost">
+            {{ auth?.user?.fullName || 'Account' }}
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+          </button>
+          <menu popover id="user-menu">
+            <a href="/settings" role="menuitem" class="ghost">Settings</a>
+            <a href="/logout" role="menuitem" class="ghost">Sign Out</a>
+          </menu>
+        </ot-dropdown>
+      </div>
+
+      <div class="flex lg:hidden" x-data="{ mobileOpen: false }">
+        <button
+          type="button"
+          class="-m-2.5 inline-flex items-center justify-center rounded-md p-2.5 text-sky-800"
+          @click="mobileOpen = !mobileOpen"
+        >
+          <span class="sr-only">Open main menu</span>
+          <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+          </svg>
+        </button>
+        <div
+          x-show="mobileOpen"
+          @click.outside="mobileOpen = false"
+          x-transition
+          class="absolute inset-x-0 top-0 z-50 origin-top-right rounded-md bg-white dark:bg-gray-800 p-6 shadow-lg ring-1 ring-black ring-opacity-5"
+        >
+          <div class="flex items-center justify-between">
+            <a href="/" class="-m-1.5 p-1.5">
+              <span class="text-xl font-bold italic text-sky-900">SpeakerWindows</span>
+            </a>
+            <button type="button" class="-m-2.5 rounded-md p-2.5 text-sky-800" @click="mobileOpen = false">
+              <span class="sr-only">Close menu</span>
+              <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+          <div class="mt-6 flow-root">
+            <div class="-my-6 divide-y divide-gray-500/10">
+              <div class="space-y-2 py-6">
+                <a href="/" class="-mx-3 block rounded-lg px-3 py-2 text-base font-semibold leading-7 text-sky-800 hover:bg-sky-100">
+                  Dashboard
+                </a>
+                <a href="/search" class="-mx-3 block rounded-lg px-3 py-2 text-base font-semibold leading-7 text-sky-800 hover:bg-sky-100">
+                  Search
+                </a>
+                <a href="/illustrations" class="-mx-3 block rounded-lg px-3 py-2 text-base font-semibold leading-7 text-sky-800 hover:bg-sky-100">
+                  Illustrations
+                </a>
+                <a href="/settings" class="-mx-3 block rounded-lg px-3 py-2 text-base font-semibold leading-7 text-sky-800 hover:bg-sky-100">
+                  Settings
+                </a>
+                <a href="/invitations" class="-mx-3 block rounded-lg px-3 py-2 text-base font-semibold leading-7 text-sky-800 hover:bg-sky-100">
+                  Invitations
+                </a>
+              </div>
+              <div class="py-6">
+                <a href="/logout" class="-mx-3 block rounded-lg px-3 py-2.5 text-base font-semibold leading-7 text-sky-800 hover:bg-sky-100">
+                  Logout
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </nav>
+  </header>
+
+  <div class="mx-auto flex w-full max-w-7xl flex-1 lg:px-8">
+
+    <aside class="hidden lg:block lg:w-56 lg:flex-shrink-0 border-r border-gray-200 dark:border-gray-700 py-6 pr-4">
+      <nav class="space-y-1">
+        <a href="/" class="flex items-center gap-x-3 rounded-md px-3 py-2 text-sm font-medium text-sky-700 dark:text-sky-300 hover:bg-sky-50 dark:hover:bg-gray-800">
+          <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12l8.954-8.955a1.126 1.126 0 011.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
+          </svg>
+          Dashboard
+        </a>
+        <a href="/search" class="flex items-center gap-x-3 rounded-md px-3 py-2 text-sm font-medium text-sky-700 dark:text-sky-300 hover:bg-sky-50 dark:hover:bg-gray-800">
+          <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+          </svg>
+          Search
+        </a>
+        <a href="/illustrations" class="flex items-center gap-x-3 rounded-md px-3 py-2 text-sm font-medium text-sky-700 dark:text-sky-300 hover:bg-sky-50 dark:hover:bg-gray-800">
+          <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M3.75 21h16.5A2.25 2.25 0 0022.5 18.75V5.25A2.25 2.25 0 0020.25 3H3.75A2.25 2.25 0 001.5 5.25v13.5A2.25 2.25 0 003.75 21z" />
+          </svg>
+          Illustrations
+        </a>
+        <a href="/settings" class="flex items-center gap-x-3 rounded-md px-3 py-2 text-sm font-medium text-sky-700 dark:text-sky-300 hover:bg-sky-50 dark:hover:bg-gray-800">
+          <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.324.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 011.37.49l1.296 2.247a1.125 1.125 0 01-.26 1.431l-1.003.827c-.293.24-.438.613-.431.992a6.759 6.759 0 010 .255c-.007.378.138.75.43.99l1.005.828c.424.35.534.954.26 1.43l-1.298 2.247a1.125 1.125 0 01-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.57 6.57 0 01-.22.128c-.331.183-.581.495-.644.869l-.213 1.28c-.09.543-.56.941-1.11.941h-2.594c-.55 0-1.02-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 01-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 01-1.369-.49l-1.297-2.247a1.125 1.125 0 01.26-1.431l1.004-.827c.292-.24.437-.613.43-.992a6.932 6.932 0 010-.255c.007-.378-.138-.75-.43-.99l-1.004-.828a1.125 1.125 0 01-.26-1.43l1.297-2.247a1.125 1.125 0 011.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.087.22-.128.332-.183.582-.495.644-.869l.214-1.281z" />
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+          </svg>
+          Settings
+        </a>
+        <a href="/invitations" class="flex items-center gap-x-3 rounded-md px-3 py-2 text-sm font-medium text-sky-700 dark:text-sky-300 hover:bg-sky-50 dark:hover:bg-gray-800">
+          <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
+          </svg>
+          Invitations
+        </a>
+      </nav>
+    </aside>
+
+    <main class="flex-1 py-6 px-4 sm:px-6 lg:px-8">
+      {{{ $slots.main() }}}
+    </main>
+
+  </div>
+
+  <footer class="border-t border-gray-200 dark:border-gray-700 py-6 text-center text-sm text-gray-500 dark:text-gray-400">
+    SpeakerWindows &copy; Copyright 2017-{{ new Date().getFullYear() }} Andrew Wippler
+  </footer>
+
+</body>
+</html>

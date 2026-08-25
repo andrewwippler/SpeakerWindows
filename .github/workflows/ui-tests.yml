@@ -1,0 +1,57 @@
+# UI Tests (Playwright)
+
+name: UI Tests
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test_ui:
+    runs-on: ubuntu-latest
+
+    services:
+      pg:
+        image: pgvector/pgvector:pg17
+        ports:
+          - 5432:5432
+        env:
+          POSTGRES_DB: testing
+          POSTGRES_PASSWORD: adonis
+      redis:
+        image: redis:5-alpine
+        ports:
+          - 6379:6379
+
+    strategy:
+      matrix:
+        node-version: [24.x]
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'npm'
+        cache-dependency-path: api/package-lock.json
+    - run: npm ci
+      working-directory: ./api
+    - run: cp ./api/.env.test ./api/.env
+    - run: npx playwright install --with-deps chromium
+      working-directory: ./api
+    - run: sleep 10
+    - run: npm run test:ui
+      working-directory: ./api
+      env:
+        CI: true
+    - uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: Playwright-Report
+        path: api/playwright-report/
+        retention-days: 14

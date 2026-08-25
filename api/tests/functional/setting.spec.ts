@@ -18,7 +18,7 @@ test.group('Contact', (group) => {
 
   test('My user has settings when I log in', async ({ client }) => {
     const loggedInUser = await client
-      .post('/login')
+      .post('/api/login')
       .json({ email: goodUser.email, password: 'oasssadfasdf' })
     loggedInUser.assertStatus(200)
 
@@ -27,12 +27,12 @@ test.group('Contact', (group) => {
 
   test('I can update my settings', async ({ client }) => {
     const response = await client
-      .post('/login')
+      .post('/api/login')
       .json({ email: goodUser.email, password: 'oasssadfasdf' })
     const token = response.body().token
 
     // post here
-    const verify = await client.post(`/settings`).bearerToken(token).json({ place: 'nowhere' })
+    const verify = await client.post('/api/settings').bearerToken(token).json({ place: 'nowhere' })
     verify.assertStatus(200)
     verify.assertBodyContains({ message: 'Settings saved!' })
     verify.assertBodyContains({ settings: { place: 'nowhere' } })
@@ -40,12 +40,12 @@ test.group('Contact', (group) => {
 
   test('I can get my settings from /settings', async ({ client }) => {
     const response = await client
-      .post('/login')
+      .post('/api/login')
       .json({ email: goodUser.email, password: 'oasssadfasdf' })
     const token = response.body().token
 
     // get here
-    const verify = await client.get(`/settings`).bearerToken(token)
+    const verify = await client.get('/api/settings').bearerToken(token)
     verify.assertStatus(200)
     verify.assertBodyContains({ location: 'Home' })
   })

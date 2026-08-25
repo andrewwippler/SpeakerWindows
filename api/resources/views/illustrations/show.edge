@@ -1,0 +1,107 @@
+@layout()
+
+<div class="mb-6">
+  <a href="/illustrations" class="text-sm font-semibold text-sky-600 hover:text-sky-500">
+    &larr; Back to Illustrations
+  </a>
+</div>
+
+@if(flashMessages.has('error'))
+  <div role="alert" data-variant="error" class="mb-4">
+    {{ flashMessages.get('error') }}
+  </div>
+@endif
+
+@if(flashMessages.has('success'))
+  <div role="alert" data-variant="success" class="mb-4">
+    {{ flashMessages.get('success') }}
+  </div>
+@endif
+
+<article class="rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-6 shadow-sm">
+  <div class="flex items-start justify-between gap-4">
+    <div class="flex-1">
+      <h1 class="text-2xl font-bold text-gray-900 dark:text-gray-100">
+        {{ illustration.title }}
+      </h1>
+
+      @if(illustration.author)
+        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+          by {{ illustration.author }}
+        </p>
+      @endif
+
+      @if(illustration.source)
+        <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">
+          Source: {{ illustration.source }}
+        </p>
+      @endif
+    </div>
+
+    <div class="flex gap-2 shrink-0">
+      <a
+        href="/illustrations/{{ illustration.id }}/edit"
+        class="rounded-md bg-sky-600 px-4 py-2 text-sm font-semibold text-white hover:bg-sky-500"
+      >
+        Edit
+      </a>
+      <button
+        commandfor="delete-illustration"
+        command="show-modal"
+        class="rounded-md bg-red-600 px-4 py-2 text-sm font-semibold text-white hover:bg-red-500"
+      >
+        Delete
+      </button>
+    </div>
+  </div>
+
+  @if(illustration.tags && illustration.tags.length)
+    <div class="mt-4 flex flex-wrap gap-1">
+      @each(tag in illustration.tags)
+        <ot-tag>{{ tag.name }}</ot-tag>
+      @end
+    </div>
+  @endif
+
+  @if(illustration.places && illustration.places.length)
+    <div class="mt-4">
+      <h2 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Places</h2>
+      <ul class="list-disc list-inside text-sm text-gray-600 dark:text-gray-400 space-y-1">
+        @each(place in illustration.places)
+          <li>
+            {{ place.place }}
+            @if(place.location)
+              <span class="text-gray-400 dark:text-gray-500">— {{ place.location }}</span>
+            @endif
+            @if(place.used)
+              <span class="text-gray-400 dark:text-gray-500">({{ place.used.toFormat('yyyy-MM-dd') }})</span>
+            @endif
+          </li>
+        @end
+      </ul>
+    </div>
+  @endif
+
+  @if(illustration.content)
+    <div class="mt-6 prose prose-sm dark:prose-invert max-w-none">
+      {{{ illustration.content }}}
+    </div>
+  @endif
+</article>
+
+<dialog id="delete-illustration" closedby="any">
+  <form method="dialog">
+    <header><h3>Confirm Delete</h3></header>
+    <div>
+      <p>Are you sure you want to delete "{{ illustration.title }}"? This action cannot be undone.</p>
+    </div>
+    <footer>
+      <button type="button" commandfor="delete-illustration" command="close" class="outline">Cancel</button>
+      <form action="/illustrations/{{ illustration.id }}" method="POST" style="display:inline">
+        <input type="hidden" name="_csrf" value="{{ csrfToken || '' }}" />
+        <input type="hidden" name="_method" value="DELETE" />
+        <button type="submit" value="confirm" data-variant="danger">Delete</button>
+      </form>
+    </footer>
+  </form>
+</dialog>

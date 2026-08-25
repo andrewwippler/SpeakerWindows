@@ -17,20 +17,20 @@ test.group('Users', (group) => {
       password_confirmation: user.password + '1A!a',
     }
 
-    const response = await client.post('/register').json(fixedUser)
+    const response = await client.post('/api/register').json(fixedUser)
     response.assertBodyContains({ message: 'Created successfully' })
     response.assertBodyContains({ uid: response.body().uid })
     response.assertStatus(200)
 
     const loggedInUser = await client
-      .post('/login')
+      .post('/api/login')
       .json({ email: user.email, password: user.password + '1A!a' })
 
     const verify = await client
-      .get(`/users/${response.body().uid}`)
+      .get(`/api/users/${response.body().uid}`)
       .bearerToken(loggedInUser.body().token)
     verify.assertStatus(200)
-    const verify401 = await client.get(`/users/${response.body().uid}`)
+    const verify401 = await client.get(`/api/users/${response.body().uid}`)
     verify401.assertStatus(401)
   })
 
@@ -48,11 +48,11 @@ test.group('Users', (group) => {
       password_confirmation: userTwo.password + '1A!a',
     }
 
-    const userOne = await client.post('/register').json(fixedUser)
-    const registeredTwo = await client.post('/register').json(fixedUser2)
+    const userOne = await client.post('/api/register').json(fixedUser)
+    const registeredTwo = await client.post('/api/register').json(fixedUser2)
 
     const loggedInUser = await client
-      .post('/login')
+      .post('/api/login')
       .json({ email: user.email, password: user.password + '1A!a' })
 
     const verify = await client
@@ -69,7 +69,7 @@ test.group('Users', (group) => {
       email: user.email,
     }
 
-    const response = await client.post('/register').json(fixedUser)
+    const response = await client.post('/api/register').json(fixedUser)
 
     response.assertStatus(400)
     assert.equal(response.body()[0].message, 'The password field is required')
@@ -78,7 +78,7 @@ test.group('Users', (group) => {
     fixedUser.password_confirmation = '12345'
     fixedUser.password = '12345'
 
-    const weak = await client.post('/register').json(fixedUser)
+    const weak = await client.post('/api/register').json(fixedUser)
 
     weak.assertStatus(400)
     assert.equal(
@@ -89,7 +89,7 @@ test.group('Users', (group) => {
     // don't match
     fixedUser.password = 'Aa12345678'
     fixedUser.password_confirmation = 'Aaa12345678'
-    const match = await client.post('/register').json(fixedUser)
+    const match = await client.post('/api/register').json(fixedUser)
 
     match.assertStatus(400)
     assert.equal(
@@ -99,7 +99,7 @@ test.group('Users', (group) => {
   })
 
   test('Bad emails', async ({ client, assert }) => {
-    await client.post('/register').json({
+    await client.post('/api/register').json({
       email: 'test@test.com',
       password: 'testING123!!',
       password_confirmation: 'testING123!!',
@@ -115,7 +115,7 @@ test.group('Users', (group) => {
     // not valid
     fixedUser.email = 'test@test'
 
-    const weak = await client.post('/register').json(fixedUser)
+    const weak = await client.post('/api/register').json(fixedUser)
 
     weak.assertStatus(400)
     assert.equal(weak.body()[0].message, 'Enter a valid email address')
@@ -123,7 +123,7 @@ test.group('Users', (group) => {
     // no email
     fixedUser.email = ''
 
-    const none = await client.post('/register').json(fixedUser)
+    const none = await client.post('/api/register').json(fixedUser)
 
     none.assertStatus(400)
     assert.equal(none.body()[0].message, 'The email field is required')
@@ -131,7 +131,7 @@ test.group('Users', (group) => {
     // unique
 
     fixedUser.email = 'test@test.com'
-    const duplicate = await client.post('/register').json(fixedUser)
+    const duplicate = await client.post('/api/register').json(fixedUser)
 
     duplicate.assertStatus(400)
     assert.equal(duplicate.body()[0].message, 'Email already exists')
@@ -146,7 +146,7 @@ test.group('Users', (group) => {
     }
     await User.create(userLogin)
 
-    const response = await client.post('/login').json(userLogin)
+    const response = await client.post('/api/login').json(userLogin)
 
     response.assertStatus(200)
   })
@@ -164,7 +164,7 @@ test.group('Users', (group) => {
     }
     await User.create(goodUser)
 
-    const login = await client.post('/login').json(baduser)
+    const login = await client.post('/api/login').json(baduser)
     login.assertStatus(401)
     assert.equal(login.body().message, 'Email or password is incorrect')
   })
@@ -172,15 +172,15 @@ test.group('Users', (group) => {
   test('User is locked out after 5 invalid attemps', async ({ client, assert }) => {
     const user = { email: 'test@test.com', password: 'badpassword' }
 
-    await client.post('/login').json(user)
-    await client.post('/login').json(user)
-    await client.post('/login').json(user)
-    await client.post('/login').json(user)
-    await client.post('/login').json(user)
-    await client.post('/login').json(user)
-    await client.post('/login').json(user)
-    await client.post('/login').json(user)
-    const login = await client.post('/login').json(user)
+    await client.post('/api/login').json(user)
+    await client.post('/api/login').json(user)
+    await client.post('/api/login').json(user)
+    await client.post('/api/login').json(user)
+    await client.post('/api/login').json(user)
+    await client.post('/api/login').json(user)
+    await client.post('/api/login').json(user)
+    await client.post('/api/login').json(user)
+    const login = await client.post('/api/login').json(user)
     // console.log(login.body())
     login.assertStatus(429)
     assert.equal(login.body().message, 'Too many requests. Please wait 30 minutes and try again.')
@@ -190,24 +190,24 @@ test.group('Users', (group) => {
     const user1 = await UserFactory.make()
     const user2 = await UserFactory.make()
 
-    await client.post('/register').json({
+    await client.post('/api/register').json({
       email: user1.email,
       password: user1.password + '1A!a',
       password_confirmation: user1.password + '1A!a',
     })
 
-    await client.post('/register').json({
+    await client.post('/api/register').json({
       email: user2.email,
       password: user2.password + '1A!a',
       password_confirmation: user2.password + '1A!a',
     })
 
     const login1 = await client
-      .post('/login')
+      .post('/api/login')
       .json({ email: user1.email, password: user1.password + '1A!a' })
 
     const login2 = await client
-      .post('/login')
+      .post('/api/login')
       .json({ email: user2.email, password: user2.password + '1A!a' })
 
     const team1 = login1.body().team
@@ -221,7 +221,7 @@ test.group('Users', (group) => {
   })
 
   test('Login endpoint rejects invalid email format', async ({ client, assert }) => {
-    const response = await client.post('/login').json({
+    const response = await client.post('/api/login').json({
       email: 'not-an-email',
       password: 'password',
     })
@@ -231,7 +231,7 @@ test.group('Users', (group) => {
   })
 
   test('Login endpoint rejects missing password', async ({ client, assert }) => {
-    const response = await client.post('/login').json({
+    const response = await client.post('/api/login').json({
       email: 'test@test.com',
     })
 

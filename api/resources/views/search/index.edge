@@ -1,0 +1,42 @@
+@layout()
+  <div class="mb-8">
+    <h1 class="text-2xl font-bold text-sky-800 dark:text-sky-200">Search</h1>
+  </div>
+
+  <form
+    hx-post="/api/search"
+    hx-trigger="submit"
+    hx-target="#results"
+    hx-indicator="#search-spinner"
+    class="mb-8"
+  >
+    <div class="flex gap-2">
+      <input
+        type="text"
+        name="query"
+        placeholder="Search illustrations..."
+        required
+        class="flex-1 rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-2 text-sm text-gray-900 dark:text-gray-100 shadow-sm focus:border-sky-500 focus:ring-sky-500"
+      />
+      <button
+        type="submit"
+        class="rounded-md bg-sky-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-sky-500"
+      >
+        Search
+      </button>
+    </div>
+  </form>
+
+  <div id="search-spinner" class="htmx-indicator mb-4 text-sm text-gray-500 dark:text-gray-400">
+    Searching...
+  </div>
+
+  <div id="results">
+    <div class="text-center py-12">
+      <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+      </svg>
+      <p class="mt-4 text-gray-500 dark:text-gray-400">Enter a search term to find illustrations.</p>
+    </div>
+  </div>
+@end

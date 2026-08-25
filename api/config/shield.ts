@@ -1,12 +1,21 @@
 import { defineConfig } from '@adonisjs/shield'
 
 const shieldConfig = defineConfig({
-  csrf: false,
+  csrf: {
+    enabled: true,
+    // EXPLICITLY ALLOW GET & HEAD TO BYPASS VALIDATION
+    methods: ['POST', 'PUT', 'PATCH', 'DELETE'],
+    exceptRoutes: (ctx) => {
+      const pathname = (ctx.request.parsedUrl.pathname || '').replace(/^\//, '')
+      return pathname.startsWith('api') || pathname.startsWith('uploads')
+    },
+  },
 
   csp: {
+    enabled: true,
     directives: {
       defaultSrc: ["'self'"],
-      scriptSrc: ["'self'"],
+      scriptSrc: ["'self'", "'unsafe-inline'", 'https://unpkg.com'],
       styleSrc: ["'self'", "'unsafe-inline'"],
       imgSrc: ["'self'", 'data:', 'https://avatars.githubusercontent.com'],
       connectSrc: ["'self'"],
@@ -17,11 +26,7 @@ const shieldConfig = defineConfig({
     },
   },
 
-  xssFilter: {
-    enabled: true,
-  },
-
-  contentTypeSniff: {
+  contentTypeSniffing: {
     enabled: true,
   },
 })

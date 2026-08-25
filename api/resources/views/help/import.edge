@@ -1,0 +1,47 @@
+@layout()
+  <div class="mb-6">
+    <a href="/help" class="text-sm font-semibold text-sky-600 hover:text-sky-500">
+      &larr; Back to Help
+    </a>
+  </div>
+
+  <article class="rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-6">
+    <h1 class="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-4">Import</h1>
+
+    <div class="prose prose-sm dark:prose-invert max-w-none space-y-4 text-gray-700 dark:text-gray-300">
+      <p>
+        SpeakerWindows supports importing highlights from several popular reading apps. Use the <code>sw-importer</code> CLI tool to convert and upload your data.
+      </p>
+
+      <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Readwise</h2>
+      <p>
+        Export your highlights from Readwise as a CSV file, then run:
+      </p>
+      <pre class="rounded-md bg-gray-100 dark:bg-gray-700 p-3 text-sm"><code>API_TOKEN=&lt;token&gt; ./sw-importer --importer=readwise highlights.csv</code></pre>
+
+      <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100">KOReader</h2>
+      <p>
+        Export your highlights from KOReader as JSON (<code>one.json</code> or <code>all.json</code>), then run:
+      </p>
+      <pre class="rounded-md bg-gray-100 dark:bg-gray-700 p-3 text-sm"><code>API_TOKEN=&lt;token&gt; ./sw-importer --importer=koreader highlights.json</code></pre>
+
+      <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Google Play Books</h2>
+      <p>
+        Export your notes as HTML or DOCX, then run:
+      </p>
+      <pre class="rounded-md bg-gray-100 dark:bg-gray-700 p-3 text-sm"><code>API_TOKEN=&lt;token&gt; ./sw-importer --importer=playbooks notes.html</code></pre>
+
+      <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Kindle</h2>
+      <p>
+        Export your Kindle PDF notes, then run:
+      </p>
+      <pre class="rounded-md bg-gray-100 dark:bg-gray-700 p-3 text-sm"><code>API_TOKEN=&lt;token&gt; ./sw-importer --importer=kindle notes.pdf</code></pre>
+
+      <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Preview Before Importing</h2>
+      <p>
+        Add the <code>--print</code> flag to any command to preview the JSON output without posting to the server:
+      </p>
+      <pre class="rounded-md bg-gray-100 dark:bg-gray-700 p-3 text-sm"><code>API_TOKEN=&lt;token&gt; ./sw-importer --importer=readwise --print highlights.csv</code></pre>
+    </div>
+  </article>
+@end

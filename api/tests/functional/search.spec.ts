@@ -38,10 +38,10 @@ test.group('Search API', (group) => {
 
   test('Can search for all', async ({ client }) => {
     const loggedInUser = await client
-      .post('/login')
+      .post('/api/login')
       .json({ email: goodUser.email, password: 'oasssadfasdf' })
     const response = await client
-      .post(`/search`)
+      .post(`/api/search`)
       .json({ query: 'Search' })
       .bearerToken(loggedInUser.body().token)
 
@@ -57,19 +57,19 @@ test.group('Search API', (group) => {
 
   test('No search string returns 422', async ({ client }) => {
     const loggedInUser = await client
-      .post('/login')
+      .post('/api/login')
       .json({ email: goodUser.email, password: 'oasssadfasdf' })
-    const response = await client.post(`/search`).json({}).bearerToken(loggedInUser.body().token)
+    const response = await client.post(`/api/search`).json({}).bearerToken(loggedInUser.body().token)
 
     response.assertStatus(422)
   })
 
   test('Empty search string returns 422', async ({ client }) => {
     const loggedInUser = await client
-      .post('/login')
+      .post('/api/login')
       .json({ email: goodUser.email, password: 'oasssadfasdf' })
     const response = await client
-      .post(`/search`)
+      .post(`/api/search`)
       .json({ query: '' })
       .bearerToken(loggedInUser.body().token)
 
@@ -82,7 +82,7 @@ test.group('Search API', (group) => {
   }) => {
     const user = await UserFactory.create()
     const loggedInUser = await client
-      .post('/login')
+      .post('/api/login')
       .json({ email: goodUser.email, password: 'oasssadfasdf' })
 
     const ill1 = await IllustrationFactory.merge({
@@ -109,7 +109,7 @@ test.group('Search API', (group) => {
     await indexing.indexIllustration(ill4.id)
 
     const response = await client
-      .post(`/search`)
+      .post(`/api/search`)
       .json({ query: 'Python' })
       .bearerToken(loggedInUser.body().token)
 

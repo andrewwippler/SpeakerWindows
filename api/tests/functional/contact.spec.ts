@@ -9,7 +9,7 @@ test.group('Contact', (group) => {
   })
 
   test('Can submit a contact form request', async ({ client }) => {
-    const response = await client.post('/contact').json({
+    const response = await client.post('/api/contact').json({
       email: 'test@test.com',
       reason: 'general',
       message: 'stuff here',
@@ -19,7 +19,7 @@ test.group('Contact', (group) => {
   })
 
   test('Errors submit a contact form request', async ({ client }) => {
-    const response = await client.post('/contact').json({})
+    const response = await client.post('/api/contact').json({})
     response.assertStatus(422)
   })
 })
