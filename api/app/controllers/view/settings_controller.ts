@@ -25,10 +25,17 @@ export default class SettingsController {
       const count2 = tagQuery2.length ? tagQuery2.length : 0
       settingsData = { ...settingsData, emptyTags: count2 }
 
-      return view.render('settings/index', { settings: settingsData })
+      const illustrationsCount = await Illustration.query()
+        .where('user_id', `${auth.user?.id}`)
+        .count('* as total')
+
+      return view.render('settings/index', {
+        settings: settingsData,
+        illustrationsCount: Number(illustrationsCount[0].$extras.total),
+      })
     } catch (error) {
       console.error('Settings error:', error)
-      return view.render('settings/index', { settings: {} })
+      return view.render('settings/index', { settings: {}, illustrationsCount: 0 })
     }
   }
 

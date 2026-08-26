@@ -1,17 +1,12 @@
 @layout()
-  <div class="mb-8">
-    <h1 class="text-2xl font-bold text-sky-800 dark:text-sky-200">Tags</h1>
+<h2>Tags</h2>
+@if(tags && tags.length)
+  <div style="display: flex; flex-wrap: wrap; gap: var(--space-2);">
+    @each(tag in tags)
+      <a href="/tags/{{ tag.name }}"><ot-tag>{{ tag.name }}</ot-tag></a>
+    @end
   </div>
-
-  @if(tags && tags.length)
-    <div class="flex flex-wrap gap-2">
-      @each(tag in tags)
-        <a href="/tags/{{ tag.name }}">
-          <ot-tag>{{ tag.name }}</ot-tag>
-        </a>
-      @end
-    </div>
-  @else
-    <p class="text-gray-500 dark:text-gray-400 text-sm">No tags found.</p>
-  @endif
+@else
+  <p>No tags found.</p>
+@end
 @end

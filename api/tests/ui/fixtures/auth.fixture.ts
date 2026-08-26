@@ -5,7 +5,11 @@ export const TEST_USER = {
   password: 'SecurePass123!',
 }
 
-export async function registerUser(page: Page, email = TEST_USER.email, password = TEST_USER.password) {
+export async function registerUser(
+  page: Page,
+  email = TEST_USER.email,
+  password = TEST_USER.password
+) {
   await page.goto('/register')
   await page.fill('input[name="email"]', email)
   await page.fill('input[name="password"]', password)

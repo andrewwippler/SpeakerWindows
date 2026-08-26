@@ -1,36 +1,34 @@
 @layout()
-  <div class="mb-6">
-    <a href="/help" class="text-sm font-semibold text-sky-600 hover:text-sky-500">
-      &larr; Back to Help
-    </a>
-  </div>
+<div style="margin-bottom: var(--space-4);">
+  <a href="/help">&larr; Back to Help</a>
+</div>
 
-  <article class="rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-6">
-    <h1 class="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-4">Search</h1>
+<article class="card">
+  <header>
+    <h3>Search</h3>
+  </header>
 
-    <div class="prose prose-sm dark:prose-invert max-w-none space-y-4 text-gray-700 dark:text-gray-300">
-      <p>
-        SpeakerWindows provides a powerful hybrid search that combines text search with vector-based semantic search.
-      </p>
+  <p>
+    SpeakerWindows provides a powerful hybrid search that combines text search with vector-based semantic search.
+  </p>
 
-      <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100">How to Search</h2>
-      <ol class="list-decimal list-inside space-y-2">
-        <li>Navigate to the <strong>Search</strong> page from the sidebar or top navigation.</li>
-        <li>Type your query into the search box.</li>
-        <li>Press <strong>Search</strong> or hit Enter to see results.</li>
-      </ol>
+  <h4>How to Search</h4>
+  <ol>
+    <li>Navigate to the <strong>Search</strong> page from the sidebar or top navigation.</li>
+    <li>Type your query into the search box.</li>
+    <li>Press <strong>Search</strong> or hit Enter to see results.</li>
+  </ol>
 
-      <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Search Tips</h2>
-      <ul class="list-disc list-inside space-y-2">
-        <li>Use natural language queries for semantic search (e.g., "quotes about courage").</li>
-        <li>Use specific keywords for text-based matching (e.g., author names, titles).</li>
-        <li>Combine both approaches for the best results.</li>
-      </ul>
+  <h4>Search Tips</h4>
+  <ul>
+    <li>Use natural language queries for semantic search (e.g., "quotes about courage").</li>
+    <li>Use specific keywords for text-based matching (e.g., author names, titles).</li>
+    <li>Combine both approaches for the best results.</li>
+  </ul>
 
-      <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Filtering Results</h2>
-      <p>
-        You can click on tags or authors in the search results to narrow down to a specific subset of illustrations.
-      </p>
-    </div>
-  </article>
+  <h4>Filtering Results</h4>
+  <p>
+    You can click on tags or authors in the search results to narrow down to a specific subset of illustrations.
+  </p>
+</article>
 @end

@@ -1,89 +1,49 @@
 @layout()
-  <div class="mb-6">
-    <a href="/illustrations" class="text-sm font-semibold text-sky-600 hover:text-sky-500">
-      &larr; Back to Illustrations
-    </a>
+<div style="margin-bottom: var(--space-4);">
+  <a href="/illustrations">&larr; Back to Illustrations</a>
+</div>
+
+@flashMessage('error')
+  <div role="alert" data-variant="error">
+    {{ $message }}
   </div>
+@end
 
-  @if(flashMessages.has('error'))
-    <div role="alert" data-variant="error" class="mb-6">
-      {{ flashMessages.get('error') }}
-    </div>
-  @endif
+<article class="card">
+  <header>
+    <h3>New Illustration</h3>
+  </header>
 
-  <div class="rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-6">
-    <h1 class="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-4">New Illustration</h1>
-
-    <form action="/illustrations" method="POST">
-      <input type="hidden" name="_csrf" value="{{ csrfToken || '' }}" />
-      <div class="space-y-4">
-        <div>
-          <label for="title" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-            Title
-          </label>
-          <input
-            id="title"
-            type="text"
-            name="title"
-            required
-            class="w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-2 text-sm text-gray-900 dark:text-gray-100 shadow-sm focus:border-sky-500 focus:ring-sky-500"
-          />
-        </div>
-        <div>
-          <label for="author" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-            Author
-          </label>
-          <input
-            id="author"
-            type="text"
-            name="author"
-            class="w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-2 text-sm text-gray-900 dark:text-gray-100 shadow-sm focus:border-sky-500 focus:ring-sky-500"
-          />
-        </div>
-        <div>
-          <label for="source" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-            Source
-          </label>
-          <input
-            id="source"
-            type="text"
-            name="source"
-            class="w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-2 text-sm text-gray-900 dark:text-gray-100 shadow-sm focus:border-sky-500 focus:ring-sky-500"
-          />
-        </div>
-        <div>
-          <label for="content" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-            Content
-          </label>
-          <textarea
-            id="content"
-            name="content"
-            rows="8"
-            class="w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-2 text-sm text-gray-900 dark:text-gray-100 shadow-sm focus:border-sky-500 focus:ring-sky-500"
-          ></textarea>
-        </div>
-        <div>
-          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-            Tags
-          </label>
-          <ot-taginput>
-            <input name="tags" list="tag-list" placeholder="Add tags..." />
-            <datalist id="tag-list">
-              @each(tag in tags)
-                <option value="{{ tag.name }}">
-              @end
-            </datalist>
-          </ot-taginput>
-        </div>
-        <div class="pt-2">
-          <button
-            type="submit"
-            class="rounded-md bg-sky-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-sky-500"
-          >
-            Create
-          </button>
-        </div>
-      </div>
-    </form>
-  </div>
+  <form action="/illustrations" method="POST">
+    <input type="hidden" name="_csrf" value="{{ csrfToken || '' }}" />
+    <label data-field>
+      Title
+      <input type="text" name="title" required />
+    </label>
+    <label data-field>
+      Author
+      <input type="text" name="author" />
+    </label>
+    <label data-field>
+      Source
+      <input type="text" name="source" />
+    </label>
+    <label data-field>
+      Content
+      <textarea name="content" rows="8"></textarea>
+    </label>
+    <label data-field>
+      Tags
+      <ot-taginput>
+        <input name="tags" list="tag-list" placeholder="Add tags..." />
+        <datalist id="tag-list">
+          @each(tag in tags)
+            <option value="{{ tag.name }}">
+          @end
+        </datalist>
+      </ot-taginput>
+    </label>
+    <button type="submit">Create</button>
+  </form>
+</article>
 @end

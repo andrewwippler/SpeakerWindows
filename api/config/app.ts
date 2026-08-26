@@ -89,8 +89,6 @@ export const http = defineConfig({
     maxAge: '2h',
     httpOnly: true,
     secure: env.get('NODE_ENV') === 'production',
-    sameSite: env.get('NODE_ENV') === 'production' ? 'lax' : 'none',
+    sameSite: 'lax',
   },
-
-
 })

@@ -1,28 +1,13 @@
 @layout()
-  <div class="mb-8">
-    <h1 class="text-2xl font-bold text-sky-800 dark:text-sky-200">Help</h1>
-  </div>
+<h2>Help</h2>
 
-  <div class="rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-6">
-    <nav class="space-y-4">
-      <a href="/help/search" class="flex items-center gap-x-3 rounded-md px-4 py-3 text-sm font-medium text-gray-900 dark:text-gray-100 hover:bg-sky-50 dark:hover:bg-gray-700 transition-colors">
-        <svg class="h-5 w-5 text-sky-600" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
-        </svg>
-        Search
-      </a>
-      <a href="/help/create" class="flex items-center gap-x-3 rounded-md px-4 py-3 text-sm font-medium text-gray-900 dark:text-gray-100 hover:bg-sky-50 dark:hover:bg-gray-700 transition-colors">
-        <svg class="h-5 w-5 text-sky-600" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-        </svg>
-        Create Illustrations
-      </a>
-      <a href="/help/import" class="flex items-center gap-x-3 rounded-md px-4 py-3 text-sm font-medium text-gray-900 dark:text-gray-100 hover:bg-sky-50 dark:hover:bg-gray-700 transition-colors">
-        <svg class="h-5 w-5 text-sky-600" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
-        </svg>
-        Import
-      </a>
-    </nav>
-  </div>
+<article class="card">
+  <nav>
+    <menu>
+      <li><a href="/help/search" class="ghost">Search</a></li>
+      <li><a href="/help/create" class="ghost">Create Illustrations</a></li>
+      <li><a href="/help/import" class="ghost">Import</a></li>
+    </menu>
+  </nav>
+</article>
 @end

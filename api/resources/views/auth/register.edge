@@ -1,42 +1,40 @@
 @layout()
-<div class="min-h-screen flex items-center justify-center">
-  <div class="w-full max-w-md">
-    <article class="card">
-      <header>
-        <h1 class="text-xl font-bold">Create Account</h1>
-      </header>
-      @if(flashMessages.has('error'))
-        <div role="alert" data-variant="error" class="mb-4">
-          {{ flashMessages.get('error') }}
-        </div>
-      @endif
-      @if(flashMessages.has('success'))
-        <div role="alert" data-variant="success" class="mb-4">
-          {{ flashMessages.get('success') }}
-        </div>
-      @endif
+<div style="display: flex; justify-content: center; padding: var(--space-8) 0;">
+  <article class="card" style="width: 100%; max-width: 28rem;">
+    <header>
+      <h3>Create Account</h3>
+    </header>
+    @flashMessage('error')
+      <div role="alert" data-variant="error">
+        {{ $message }}
+      </div>
+    @end
+    @flashMessage('success')
+      <div role="alert" data-variant="success">
+        {{ $message }}
+      </div>
+    @end
 
-      <form method="POST" action="/register">
-        {{ csrfField() }}
-        <label data-field>
-          Email
-          <input type="email" name="email" required autofocus />
-        </label>
-        <label data-field>
-          Password
-          <input type="password" name="password" required />
-        </label>
-        <label data-field>
-          Confirm Password
-          <input type="password" name="password_confirmation" required />
-        </label>
-        <button type="submit">Create Account</button>
-      </form>
+    <form method="POST" action="/register">
+      {{ csrfField() }}
+      <label data-field>
+        Email
+        <input type="email" name="email" required autofocus />
+      </label>
+      <label data-field>
+        Password
+        <input type="password" name="password" required />
+      </label>
+      <label data-field>
+        Confirm Password
+        <input type="password" name="password_confirmation" required />
+      </label>
+      <button type="submit">Create Account</button>
+    </form>
 
-      <footer class="text-center text-sm mt-4">
-        <p>Already have an account? <a href="/login">Sign In</a></p>
-      </footer>
-    </article>
-  </div>
+    <footer>
+      <p>Already have an account? <a href="/login">Sign In</a></p>
+    </footer>
+  </article>
 </div>
 @end

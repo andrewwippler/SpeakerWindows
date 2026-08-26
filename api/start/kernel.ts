@@ -30,6 +30,7 @@ router.use([
 ])
 
 server.use([
+  () => import('@adonisjs/static/static_middleware'),
   () => import('@adonisjs/cors/cors_middleware'),
 ])
 

@@ -109,7 +109,7 @@ test.group('Place', (group) => {
     assert.equal(response.body().message, 'You do not have permission to access this resource')
 
     const unknown = await client
-      .post(`/places/9999999999`)
+      .post(`/api/places/9999999999`)
       .bearerToken(loggedInUser.body().token)
       .json(place.toJSON())
     unknown.assertStatus(404)
@@ -225,7 +225,7 @@ test.group('Place', (group) => {
     const place = await PlaceFactory.merge({ user_id: goodUser.id }).make()
 
     const response = await client
-      .post(`/places/999999999999999999999999999999999`)
+      .post(`/api/places/999999999999999999999999999999999`)
       .bearerToken(loggedInUser.body().token)
       .json(place.toJSON())
     response.assertStatus(404)

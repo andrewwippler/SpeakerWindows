@@ -7,7 +7,7 @@ export default class HttpExceptionHandler extends ExceptionHandler {
   protected debug = !app.inProduction
 
   async handle(error: unknown, ctx: HttpContext) {
-if (error instanceof authErrors.E_UNAUTHORIZED_ACCESS) {
+    if (error instanceof authErrors.E_UNAUTHORIZED_ACCESS) {
       const pathname = ctx.request.parsedUrl.pathname
 
       // Avoid looping if request is already targeting auth pages or API

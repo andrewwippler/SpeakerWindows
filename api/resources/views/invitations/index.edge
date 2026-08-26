@@ -1,81 +1,49 @@
 @layout()
-  <div class="mb-8">
-    <h1 class="text-2xl font-bold text-sky-800 dark:text-sky-200">Invitations</h1>
+<h2>Invitations</h2>
+
+@flashMessage('success')
+  <div role="alert" data-variant="success">
+    {{ $message }}
   </div>
+@end
 
-  @if(flashMessages.has('success'))
-    <div class="mb-6 rounded-md bg-green-50 dark:bg-green-900/30 p-4">
-      <div class="flex">
-        <svg class="h-5 w-5 text-green-400" viewBox="0 0 20 20" fill="currentColor">
-          <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z" clip-rule="evenodd" />
-        </svg>
-        <p class="ml-3 text-sm font-medium text-green-800 dark:text-green-200">
-          {{ flashMessages.get('success') }}
-        </p>
-      </div>
-    </div>
-  @endif
+@flashMessage('error')
+  <div role="alert" data-variant="error">
+    {{ $message }}
+  </div>
+@end
 
-  @if(flashMessages.has('error'))
-    <div class="mb-6 rounded-md bg-red-50 dark:bg-red-900/30 p-4">
-      <div class="flex">
-        <svg class="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
-          <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.28 7.22a.75.75 0 00-1.06 1.06L8.94 10l-1.72 1.72a.75.75 0 101.06 1.06L10 11.06l1.72 1.72a.75.75 0 101.06-1.06L11.06 10l1.72-1.72a.75.75 0 00-1.06-1.06L10 8.94 8.28 7.22z" clip-rule="evenodd" />
-        </svg>
-        <p class="ml-3 text-sm font-medium text-red-800 dark:text-red-200">
-          {{ flashMessages.get('error') }}
-        </p>
-      </div>
-    </div>
-  @endif
-
-  @if(invitations.length)
-    <div class="space-y-4">
-      @each(invitation in invitations)
-        <div
-          id="invitation-{{ invitation.id }}"
-          class="rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-4"
-        >
-          <div class="flex items-center justify-between">
-            <div>
-              <p class="font-medium text-gray-900 dark:text-gray-100">
-                {{ invitation.teamName || invitation.team?.name || 'Team' }}
-              </p>
-              <p class="text-sm text-gray-500 dark:text-gray-400">
-                Invited by {{ invitation.invitedBy?.fullName || 'someone' }}
-              </p>
-              <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">
-                {{ invitation.email }}
-              </p>
-            </div>
-            <div class="flex gap-2">
-              <button
-                hx-patch="/api/invitations/{{ invitation.id }}/accept"
-                hx-target="#invitation-{{ invitation.id }}"
-                hx-swap="outerHTML"
-                class="rounded-md bg-green-600 px-3 py-1.5 text-sm font-semibold text-white shadow-sm hover:bg-green-500"
-              >
-                Accept
-              </button>
-              <button
-                hx-delete="/api/invitations/{{ invitation.id }}/decline"
-                hx-target="#invitation-{{ invitation.id }}"
-                hx-swap="outerHTML"
-                class="rounded-md bg-red-600 px-3 py-1.5 text-sm font-semibold text-white shadow-sm hover:bg-red-500"
-              >
-                Decline
-              </button>
-            </div>
-          </div>
-        </div>
-      @endeach
-    </div>
-  @else
-    <div class="text-center py-12">
-      <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
-      </svg>
-      <p class="mt-4 text-gray-500 dark:text-gray-400">No pending invitations.</p>
-    </div>
-  @endif
+@if(invitations.length)
+  <div style="display: flex; flex-direction: column; gap: var(--space-4);">
+    @each(invitation in invitations)
+      <article class="card" id="invitation-{{ invitation.id }}">
+        <header>
+          <h4>{{ invitation.teamName || invitation.team?.name || 'Team' }}</h4>
+          <p>Invited by {{ invitation.invitedBy?.fullName || 'someone' }}</p>
+          <p>{{ invitation.email }}</p>
+        </header>
+        <footer>
+          <button
+            hx-patch="/api/invitations/{{ invitation.id }}/accept"
+            hx-target="#invitation-{{ invitation.id }}"
+            hx-swap="outerHTML"
+            data-variant="secondary"
+          >
+            Accept
+          </button>
+          <button
+            hx-delete="/api/invitations/{{ invitation.id }}/decline"
+            hx-target="#invitation-{{ invitation.id }}"
+            hx-swap="outerHTML"
+            data-variant="danger"
+          >
+            Decline
+          </button>
+        </footer>
+      </article>
+    @endeach
+  </div>
+@else
+  <p>No pending invitations.</p>
+@end
 @end

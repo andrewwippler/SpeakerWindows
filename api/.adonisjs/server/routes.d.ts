@@ -19,6 +19,8 @@ export type ScannedRoutes = {
     'illustrations.create': { paramsTuple?: []; params?: {} }
     'illustrations.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'illustrations.edit': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'illustrations.update': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'illustrations.destroy': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'tags.index': { paramsTuple?: []; params?: {} }
     'tags.show': { paramsTuple: [ParamValue]; params: {'name': ParamValue} }
     'authors.index': { paramsTuple?: []; params?: {} }
@@ -197,6 +199,7 @@ export type ScannedRoutes = {
     'api.user.blocks.create': { paramsTuple?: []; params?: {} }
   }
   PUT: {
+    'illustrations.update': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'api.illustrations.update': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'api.illustrations.bulk': { paramsTuple?: []; params?: {} }
     'api.authors.update': { paramsTuple: [ParamValue]; params: {'name': ParamValue} }
@@ -206,6 +209,7 @@ export type ScannedRoutes = {
     'api.team.members.update': { paramsTuple: [ParamValue]; params: {'userId': ParamValue} }
   }
   DELETE: {
+    'illustrations.destroy': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'api.illustrations.destroy': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'api.tags.destroy': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'api.tags.removeIllustrations': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }

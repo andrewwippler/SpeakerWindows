@@ -19,7 +19,10 @@ test.group('Contact', (group) => {
   })
 
   test('Errors submit a contact form request', async ({ client }) => {
-    const response = await client.post('/api/contact').json({})
+    const response = await client
+      .post('/api/contact')
+      .accept('json') // Tells AdonisJS to return JSON instead of redirecting
+      .json({})
     response.assertStatus(422)
   })
 })

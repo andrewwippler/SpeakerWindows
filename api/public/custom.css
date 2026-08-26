@@ -1,0 +1,16 @@
+:root {
+  --primary: #0369a1;
+  --primary-foreground: #fff;
+  --secondary: #e0f2fe;
+  --secondary-foreground: #0c4a6e;
+  --accent: #bae6fd;
+  --danger: #dc2626;
+  --success: #16a34a;
+  --warning: #d97706;
+  --background: #f8fafc;
+  --foreground: #0f172a;
+  --muted: #f1f5f9;
+  --muted-foreground: #64748b;
+  --border: #e2e8f0;
+  --ring: #0369a1;
+}

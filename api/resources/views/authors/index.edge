@@ -1,36 +1,24 @@
 @layout()
-  <div class="mb-8">
-    <h1 class="text-2xl font-bold text-sky-800 dark:text-sky-200">Authors</h1>
-  </div>
-
-  @if(authors && authors.length)
-    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+<h2>Authors</h2>
+@if(authors && authors.length)
+  <div class="container">
+    <div class="row">
       @each(author in authors)
-        <a
-          href="/authors/{{ author.name }}"
-          class="block rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-4 shadow-sm hover:shadow-md transition-shadow"
-        >
-          <div class="flex items-center gap-x-3">
-            <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-sky-100 dark:bg-sky-900">
-              <span class="text-sm font-semibold text-sky-600 dark:text-sky-300">
-                {{ author.name.charAt(0).toUpperCase() }}
-              </span>
-            </div>
-            <div class="min-w-0 flex-1">
-              <h2 class="text-sm font-semibold text-gray-900 dark:text-gray-100 truncate">
-                {{ author.name }}
-              </h2>
-              @if(author.illustrationsCount)
-                <p class="text-xs text-gray-500 dark:text-gray-400">
-                  {{ author.illustrationsCount }} illustration{{ author.illustrationsCount !== 1 ? 's' : '' }}
-                </p>
-              @endif
-            </div>
-          </div>
-        </a>
+        <div class="col-4">
+          <a href="/authors/{{ author.name }}" class="card">
+            <figure data-variant="avatar" class="small" aria-label="{{ author.name }}">
+              <abbr>{{ titleCase(author.name) }}</abbr>
+            </figure>
+            <h4>{{ author.name }}</h4>
+            @if(author.illustrationsCount)
+              <p>{{ author.illustrationsCount }} illustration{{ author.illustrationsCount !== 1 ? 's' : '' }}</p>
+            @end
+          </a>
+        </div>
       @end
     </div>
-  @else
-    <p class="text-gray-500 dark:text-gray-400 text-sm">No authors found.</p>
-  @endif
+  </div>
+@else
+  <p>No authors found.</p>
+@end
 @end

@@ -27,8 +27,7 @@ export default class AuthController {
 
     try {
       await LoginValidator.validate({ email, password })
-    } catch (error) {
-      session.flash('errors', error.messages)
+    } catch {
       session.flash('error', 'Invalid credentials format')
       return view.render('auth/login')
     }
@@ -54,7 +53,7 @@ export default class AuthController {
 
       session.flash('success', 'Logged in successfully')
       return response.redirect('/')
-    } catch (error) {
+    } catch {
       await locallimit.increment(throttleKey)
       session.flash('error', 'Email or password is incorrect')
       return view.render('auth/login')
@@ -75,7 +74,8 @@ export default class AuthController {
         password_confirmation: passwordConfirmation,
       })
     } catch (error) {
-      session.flash('errors', error.messages)
+      const messages = (error as { messages?: unknown }).messages
+      session.flash('errors', messages ?? 'Registration validation failed')
       session.flash('error', 'Registration validation failed')
       return view.render('auth/register')
     }

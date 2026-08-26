@@ -1,18 +1,9 @@
 import { test } from '@japa/runner'
 import db from '@adonisjs/lucid/services/db'
-import IllustrationFactory from '#database/factories/illustration_factory'
 import UserFactory from '#database/factories/user_factory'
-import PlaceFactory from '#database/factories/place_factory'
-import Illustration from '#models/illustration'
-import TagFactory from '#database/factories/tag_factory'
-import Tag from '#models/tag'
-import Place from '#models/place'
 import type User from '#models/user'
-import { type ModelObject } from '@adonisjs/lucid/types/model'
 let goodUser: User
 let badUser: User
-let testTagIdOne: string | number | ModelObject
-let testTagIdTwo: number
 let testIllustration: any
 
 test.group('Authors', (group) => {
@@ -39,7 +30,10 @@ test.group('Authors', (group) => {
       source: 'test',
       content: 'this shall pass as new',
     }
-    await client.post('/api/illustration').bearerToken(loggedInUser.body().token).json(testIllustration)
+    await client
+      .post('/api/illustration')
+      .bearerToken(loggedInUser.body().token)
+      .json(testIllustration)
 
     const second = {
       author: 'test2',
@@ -50,7 +44,9 @@ test.group('Authors', (group) => {
     await client.post('/api/illustration').bearerToken(loggedInUser.body().token).json(second)
     await client.post('/api/illustration').bearerToken(secondLoggedInUser.body().token).json(second)
 
-    const both = await client.get('/api/illustration/authors').bearerToken(loggedInUser.body().token)
+    const both = await client
+      .get('/api/illustration/authors')
+      .bearerToken(loggedInUser.body().token)
     const one = await client
       .get('/api/illustration/authors')
       .bearerToken(secondLoggedInUser.body().token)
@@ -83,7 +79,10 @@ test.group('Authors', (group) => {
       source: 'test',
       content: 'this shall pass as new',
     }
-    await client.post('/api/illustration').bearerToken(loggedInUser.body().token).json(testIllustration)
+    await client
+      .post('/api/illustration')
+      .bearerToken(loggedInUser.body().token)
+      .json(testIllustration)
 
     const response = await client
       .put('/api/author/' + testIllustration.author)
@@ -91,7 +90,9 @@ test.group('Authors', (group) => {
       .json({ author: 'new author' })
     response.assertStatus(200)
     assert.equal(response.body().message, 'Author updated from testy mctest to new author')
-    const updated = await client.get('/api/author/new author').bearerToken(loggedInUser.body().token)
+    const updated = await client
+      .get('/api/author/new author')
+      .bearerToken(loggedInUser.body().token)
     updated.assertStatus(200)
     assert.equal(updated.body().length, 1)
     const last = await client.get('/api/author/boogers').bearerToken(loggedInUser.body().token)

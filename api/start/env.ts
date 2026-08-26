@@ -57,7 +57,7 @@ export default await Env.create(new URL('../', import.meta.url), {
   |----------------------------------------------------------
   */
   SESSION_SECRET: Env.schema.string.optional(),
-  SESSION_DRIVER: Env.schema.enum.optional(['cookie', 'redis'] as const),
+  SESSION_DRIVER: Env.schema.enum.optional(['cookie', 'memory'] as const),
   SESSION_COOKIE_DOMAIN: Env.schema.string.optional(),
 
   /*

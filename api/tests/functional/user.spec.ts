@@ -56,7 +56,7 @@ test.group('Users', (group) => {
       .json({ email: user.email, password: user.password + '1A!a' })
 
     const verify = await client
-      .get(`/users/${registeredTwo.body().uid}`)
+      .get(`/api/users/${registeredTwo.body().uid}`)
       .bearerToken(loggedInUser.body().token)
     verify.assertStatus(401)
     assert.equal(verify.body().message, "You cannot see someone else's profile")

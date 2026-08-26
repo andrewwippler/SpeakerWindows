@@ -1,38 +1,36 @@
 @layout()
-<div class="min-h-screen flex items-center justify-center">
-  <div class="w-full max-w-md">
-    <article class="card">
-      <header>
-        <h1 class="text-xl font-bold">Sign in to SpeakerWindows</h1>
-      </header>
-      @if(flashMessages.has('error'))
-        <div role="alert" data-variant="error" class="mb-4">
-          {{ flashMessages.get('error') }}
-        </div>
-      @endif
-      @if(flashMessages.has('success'))
-        <div role="alert" data-variant="success" class="mb-4">
-          {{ flashMessages.get('success') }}
-        </div>
-      @endif
+<div style="display: flex; justify-content: center; padding: var(--space-8) 0;">
+  <article class="card" style="width: 100%; max-width: 28rem;">
+    <header>
+      <h3>Sign in to SpeakerWindows</h3>
+    </header>
+    @flashMessage('error')
+      <div role="alert" data-variant="error">
+        {{ $message }}
+      </div>
+    @end
+    @flashMessage('success')
+      <div role="alert" data-variant="success">
+        {{ $message }}
+      </div>
+    @end
 
-      <form method="POST" action="/login">
-        {{ csrfField() }}
-        <label data-field>
-          Email
-          <input type="email" name="email" required autofocus />
-        </label>
-        <label data-field>
-          Password
-          <input type="password" name="password" required />
-        </label>
-        <button type="submit">Sign In</button>
-      </form>
+    <form method="POST" action="/login">
+      {{ csrfField() }}
+      <label data-field>
+        Email
+        <input type="email" name="email" required autofocus />
+      </label>
+      <label data-field>
+        Password
+        <input type="password" name="password" required />
+      </label>
+      <button type="submit">Sign In</button>
+    </form>
 
-      <footer class="text-center text-sm mt-4">
-        <p>Don't have an account? <a href="/register">Register</a></p>
-      </footer>
-    </article>
-  </div>
+    <footer>
+      <p>Don't have an account? <a href="/register">Register</a></p>
+    </footer>
+  </article>
 </div>
 @end

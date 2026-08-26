@@ -39,9 +39,11 @@ test.group('Search API', (group) => {
   test('Can search for all', async ({ client }) => {
     const loggedInUser = await client
       .post('/api/login')
+      .accept('json') // Tells AdonisJS to return JSON instead of redirecting
       .json({ email: goodUser.email, password: 'oasssadfasdf' })
     const response = await client
       .post(`/api/search`)
+      .accept('json')
       .json({ query: 'Search' })
       .bearerToken(loggedInUser.body().token)
 
@@ -59,7 +61,11 @@ test.group('Search API', (group) => {
     const loggedInUser = await client
       .post('/api/login')
       .json({ email: goodUser.email, password: 'oasssadfasdf' })
-    const response = await client.post(`/api/search`).json({}).bearerToken(loggedInUser.body().token)
+    const response = await client
+      .post(`/api/search`)
+      .accept('json') // Tells AdonisJS to return JSON instead of redirecting
+      .json({})
+      .bearerToken(loggedInUser.body().token)
 
     response.assertStatus(422)
   })
@@ -70,6 +76,7 @@ test.group('Search API', (group) => {
       .json({ email: goodUser.email, password: 'oasssadfasdf' })
     const response = await client
       .post(`/api/search`)
+      .accept('json') // Tells AdonisJS to return JSON instead of redirecting
       .json({ query: '' })
       .bearerToken(loggedInUser.body().token)
 
@@ -111,6 +118,7 @@ test.group('Search API', (group) => {
     const response = await client
       .post(`/api/search`)
       .json({ query: 'Python' })
+      .accept('json') // Tells AdonisJS to return JSON instead of redirecting
       .bearerToken(loggedInUser.body().token)
 
     response.assertStatus(200)

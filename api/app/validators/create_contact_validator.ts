@@ -1,6 +1,6 @@
 import vine from '@vinejs/vine'
 
-export const CreateContactValidator = vine.compile(
+export const CreateContactValidator = vine.create(
   vine.object({
     email: vine.string().trim().email(),
     reason: vine.string().trim(),

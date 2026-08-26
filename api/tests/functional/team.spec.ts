@@ -19,7 +19,7 @@ test.group('Teams', (group) => {
       password_confirmation: user.password + '1A!a',
     }
 
-    const response = await client.post('/register').json(fixedUser)
+    const response = await client.post('/api/register').json(fixedUser)
     response.assertBodyContains({ message: 'Created successfully' })
 
     const team = await Team.query().where('user_id', response.body().id).first()
@@ -36,15 +36,15 @@ test.group('Teams', (group) => {
       password_confirmation: user.password + '1A!a',
     }
 
-    await client.post('/register').json(fixedUser)
-    const loginResponse = await client.post('/login').json({
+    await client.post('/api/register').json(fixedUser)
+    const loginResponse = await client.post('/api/login').json({
       email: user.email,
       password: user.password + '1A!a',
     })
 
     const token = loginResponse.body().token
 
-    const teamResponse = await client.get('/team').bearerToken(token)
+    const teamResponse = await client.get('/api/team').bearerToken(token)
     teamResponse.assertStatus(200)
     assert.exists(teamResponse.body().id)
     assert.equal(teamResponse.body().name, 'My Team')
@@ -59,8 +59,8 @@ test.group('Teams', (group) => {
       password_confirmation: user.password + '1A!a',
     }
 
-    await client.post('/register').json(fixedUser)
-    const loginResponse = await client.post('/login').json({
+    await client.post('/api/register').json(fixedUser)
+    const loginResponse = await client.post('/api/login').json({
       email: user.email,
       password: user.password + '1A!a',
     })
@@ -68,7 +68,7 @@ test.group('Teams', (group) => {
     const token = loginResponse.body().token
 
     const updateResponse = await client
-      .put('/team')
+      .put('/api/team')
       .bearerToken(token)
       .json({ name: 'New Team Name' })
     updateResponse.assertStatus(200)
@@ -83,13 +83,13 @@ test.group('Teams', (group) => {
       password_confirmation: owner.password + '1A!a',
     }
 
-    await client.post('/register').json(ownerUser)
-    const ownerLogin = await client.post('/login').json({
+    await client.post('/api/register').json(ownerUser)
+    const ownerLogin = await client.post('/api/login').json({
       email: owner.email,
       password: owner.password + '1A!a',
     })
 
-    const teamResponse = await client.get('/team').bearerToken(ownerLogin.body().token)
+    const teamResponse = await client.get('/api/team').bearerToken(ownerLogin.body().token)
     const inviteCode = teamResponse.body().inviteCode
 
     const member = await UserFactory.make()
@@ -99,14 +99,14 @@ test.group('Teams', (group) => {
       password_confirmation: member.password + '1A!a',
     }
 
-    await client.post('/register').json(memberUser)
-    const memberLogin = await client.post('/login').json({
+    await client.post('/api/register').json(memberUser)
+    const memberLogin = await client.post('/api/login').json({
       email: member.email,
       password: member.password + '1A!a',
     })
 
     const joinResponse = await client
-      .post(`/teams/join/${inviteCode}`)
+      .post(`/api/teams/join/${inviteCode}`)
       .bearerToken(memberLogin.body().token)
     joinResponse.assertStatus(200)
     assert.exists(joinResponse.body().message)
@@ -123,19 +123,19 @@ test.group('Teams', (group) => {
       password_confirmation: owner.password + '1A!a',
     }
 
-    await client.post('/register').json(ownerUser)
-    const ownerLogin = await client.post('/login').json({
+    await client.post('/api/register').json(ownerUser)
+    const ownerLogin = await client.post('/api/login').json({
       email: owner.email,
       password: owner.password + '1A!a',
     })
 
-    const teamResponse = await client.get('/team').bearerToken(ownerLogin.body().token)
+    const teamResponse = await client.get('/api/team').bearerToken(ownerLogin.body().token)
     const teamId = teamResponse.body().id
 
     const newMember = await UserFactory.create()
 
     const addResponse = await client
-      .post('/team/members')
+      .post('/api/team/members')
       .bearerToken(ownerLogin.body().token)
       .json({
         userId: newMember.id,
@@ -152,8 +152,8 @@ test.group('Teams', (group) => {
       password_confirmation: owner.password + '1A!a',
     }
 
-    await client.post('/register').json(ownerUser)
-    const ownerLogin = await client.post('/login').json({
+    await client.post('/api/register').json(ownerUser)
+    const ownerLogin = await client.post('/api/login').json({
       email: owner.email,
       password: owner.password + '1A!a',
     })
@@ -166,7 +166,7 @@ test.group('Teams', (group) => {
     })
 
     const updateResponse = await client
-      .put(`/team/members/${newMember.id}`)
+      .put(`/api/team/members/${newMember.id}`)
       .bearerToken(ownerLogin.body().token)
       .json({
         role: 'creator',
@@ -185,8 +185,8 @@ test.group('Teams', (group) => {
       password_confirmation: owner.password + '1A!a',
     }
 
-    await client.post('/register').json(ownerUser)
-    const ownerLogin = await client.post('/login').json({
+    await client.post('/api/register').json(ownerUser)
+    const ownerLogin = await client.post('/api/login').json({
       email: owner.email,
       password: owner.password + '1A!a',
     })
@@ -201,7 +201,7 @@ test.group('Teams', (group) => {
     })
 
     const removeResponse = await client
-      .delete(`/team/members/${newMember.id}`)
+      .delete(`/api/team/members/${newMember.id}`)
       .bearerToken(ownerLogin.body().token)
     removeResponse.assertStatus(200)
 
@@ -224,14 +224,14 @@ test.group('Team Illustrations', (group) => {
       password_confirmation: owner.password + '1A!a',
     }
 
-    await client.post('/register').json(ownerUser)
-    const ownerLogin = await client.post('/login').json({
+    await client.post('/api/register').json(ownerUser)
+    const ownerLogin = await client.post('/api/login').json({
       email: owner.email,
       password: owner.password + '1A!a',
     })
 
     const createResponse = await client
-      .post('/illustration')
+      .post('/api/illustration')
       .bearerToken(ownerLogin.body().token)
       .json({
         title: 'Team Illustration',
@@ -252,8 +252,8 @@ test.group('Team Illustrations', (group) => {
       password_confirmation: owner.password + '1A!a',
     }
 
-    await client.post('/register').json(ownerUser)
-    const ownerLogin = await client.post('/login').json({
+    await client.post('/api/register').json(ownerUser)
+    const ownerLogin = await client.post('/api/login').json({
       email: owner.email,
       password: owner.password + '1A!a',
     })
@@ -267,8 +267,8 @@ test.group('Team Illustrations', (group) => {
       password_confirmation: editor.password + '1A!a',
     }
 
-    await client.post('/register').json(editorUser)
-    const editorLogin = await client.post('/login').json({
+    await client.post('/api/register').json(editorUser)
+    const editorLogin = await client.post('/api/login').json({
       email: editor.email,
       password: editor.password + '1A!a',
     })
@@ -280,7 +280,7 @@ test.group('Team Illustrations', (group) => {
     })
 
     const createResponse = await client
-      .post('/illustration')
+      .post('/api/illustration')
       .bearerToken(editorLogin.body().token)
       .json({
         title: 'Editor Illustration',
@@ -301,14 +301,14 @@ test.group('Team Illustrations', (group) => {
       password_confirmation: owner.password + '1A!a',
     }
 
-    await client.post('/register').json(ownerUser)
-    const ownerLogin = await client.post('/login').json({
+    await client.post('/api/register').json(ownerUser)
+    const ownerLogin = await client.post('/api/login').json({
       email: owner.email,
       password: owner.password + '1A!a',
     })
 
     const createResponse = await client
-      .post('/illustration')
+      .post('/api/illustration')
       .bearerToken(ownerLogin.body().token)
       .json({
         title: 'Team Illustration',
@@ -325,8 +325,8 @@ test.group('Team Illustrations', (group) => {
       password_confirmation: member.password + '1A!a',
     }
 
-    await client.post('/register').json(memberUser)
-    const memberLogin = await client.post('/login').json({
+    await client.post('/api/register').json(memberUser)
+    const memberLogin = await client.post('/api/login').json({
       email: member.email,
       password: member.password + '1A!a',
     })
@@ -338,7 +338,7 @@ test.group('Team Illustrations', (group) => {
     })
 
     const getResponse = await client
-      .get(`/illustration/${illustrationId}`)
+      .get(`/api/illustration/${illustrationId}`)
       .bearerToken(memberLogin.body().token)
     getResponse.assertStatus(200)
     assert.equal(getResponse.body().title, 'Team Illustration')
@@ -352,14 +352,14 @@ test.group('Team Illustrations', (group) => {
       password_confirmation: owner.password + '1A!a',
     }
 
-    await client.post('/register').json(ownerUser)
-    const ownerLogin = await client.post('/login').json({
+    await client.post('/api/register').json(ownerUser)
+    const ownerLogin = await client.post('/api/login').json({
       email: owner.email,
       password: owner.password + '1A!a',
     })
 
     const createResponse = await client
-      .post('/illustration')
+      .post('/api/illustration')
       .bearerToken(ownerLogin.body().token)
       .json({
         title: 'Team Illustration',
@@ -374,14 +374,14 @@ test.group('Team Illustrations', (group) => {
       password_confirmation: outsider.password + '1A!a',
     }
 
-    await client.post('/register').json(outsiderUser)
-    const outsiderLogin = await client.post('/login').json({
+    await client.post('/api/register').json(outsiderUser)
+    const outsiderLogin = await client.post('/api/login').json({
       email: outsider.email,
       password: outsider.password + '1A!a',
     })
 
     const getResponse = await client
-      .get(`/illustration/${illustrationId}`)
+      .get(`/api/illustration/${illustrationId}`)
       .bearerToken(outsiderLogin.body().token)
     getResponse.assertStatus(403)
   })
@@ -394,8 +394,8 @@ test.group('Team Illustrations', (group) => {
       password_confirmation: owner.password + '1A!a',
     }
 
-    await client.post('/register').json(ownerUser)
-    const ownerLogin = await client.post('/login').json({
+    await client.post('/api/register').json(ownerUser)
+    const ownerLogin = await client.post('/api/login').json({
       email: owner.email,
       password: owner.password + '1A!a',
     })
@@ -403,7 +403,7 @@ test.group('Team Illustrations', (group) => {
     const team = await Team.query().where('user_id', ownerLogin.body().id).first()
 
     const createResponse = await client
-      .post('/illustration')
+      .post('/api/illustration')
       .bearerToken(ownerLogin.body().token)
       .json({
         title: 'Private Illustration',
@@ -419,8 +419,8 @@ test.group('Team Illustrations', (group) => {
       password_confirmation: member.password + '1A!a',
     }
 
-    await client.post('/register').json(memberUser)
-    const memberLogin = await client.post('/login').json({
+    await client.post('/api/register').json(memberUser)
+    const memberLogin = await client.post('/api/login').json({
       email: member.email,
       password: member.password + '1A!a',
     })
@@ -432,12 +432,12 @@ test.group('Team Illustrations', (group) => {
     })
 
     const memberGetResponse = await client
-      .get(`/illustration/${illustrationId}`)
+      .get(`/api/illustration/${illustrationId}`)
       .bearerToken(memberLogin.body().token)
     memberGetResponse.assertStatus(403)
 
     const ownerGetResponse = await client
-      .get(`/illustration/${illustrationId}`)
+      .get(`/api/illustration/${illustrationId}`)
       .bearerToken(ownerLogin.body().token)
     ownerGetResponse.assertStatus(200)
     assert.equal(ownerGetResponse.body().title, 'Private Illustration')
@@ -451,14 +451,14 @@ test.group('Team Illustrations', (group) => {
       password_confirmation: owner.password + '1A!a',
     }
 
-    await client.post('/register').json(ownerUser)
-    const ownerLogin = await client.post('/login').json({
+    await client.post('/api/register').json(ownerUser)
+    const ownerLogin = await client.post('/api/login').json({
       email: owner.email,
       password: owner.password + '1A!a',
     })
 
     const createResponse = await client
-      .post('/illustration')
+      .post('/api/illustration')
       .bearerToken(ownerLogin.body().token)
       .json({
         title: 'Team Illustration',
@@ -475,8 +475,8 @@ test.group('Team Illustrations', (group) => {
       password_confirmation: editor.password + '1A!a',
     }
 
-    await client.post('/register').json(editorUser)
-    const editorLogin = await client.post('/login').json({
+    await client.post('/api/register').json(editorUser)
+    const editorLogin = await client.post('/api/login').json({
       email: editor.email,
       password: editor.password + '1A!a',
     })
@@ -488,7 +488,7 @@ test.group('Team Illustrations', (group) => {
     })
 
     const updateMetadataResponse = await client
-      .put(`/illustration/${illustrationId}`)
+      .put(`/api/illustration/${illustrationId}`)
       .bearerToken(editorLogin.body().token)
       .json({
         title: 'Updated Title',
@@ -506,14 +506,14 @@ test.group('Team Illustrations', (group) => {
       password_confirmation: owner.password + '1A!a',
     }
 
-    await client.post('/register').json(ownerUser)
-    const ownerLogin = await client.post('/login').json({
+    await client.post('/api/register').json(ownerUser)
+    const ownerLogin = await client.post('/api/login').json({
       email: owner.email,
       password: owner.password + '1A!a',
     })
 
     const createResponse = await client
-      .post('/illustration')
+      .post('/api/illustration')
       .bearerToken(ownerLogin.body().token)
       .json({
         title: 'Team Illustration',
@@ -530,8 +530,8 @@ test.group('Team Illustrations', (group) => {
       password_confirmation: readonly.password + '1A!a',
     }
 
-    await client.post('/register').json(readonlyUser)
-    const readonlyLogin = await client.post('/login').json({
+    await client.post('/api/register').json(readonlyUser)
+    const readonlyLogin = await client.post('/api/login').json({
       email: readonly.email,
       password: readonly.password + '1A!a',
     })
@@ -543,7 +543,7 @@ test.group('Team Illustrations', (group) => {
     })
 
     const updateResponse = await client
-      .put(`/illustration/${illustrationId}`)
+      .put(`/api/illustration/${illustrationId}`)
       .bearerToken(readonlyLogin.body().token)
       .json({
         title: 'Updated Title',
@@ -559,14 +559,14 @@ test.group('Team Illustrations', (group) => {
       password_confirmation: owner.password + '1A!a',
     }
 
-    await client.post('/register').json(ownerUser)
-    const ownerLogin = await client.post('/login').json({
+    await client.post('/api/register').json(ownerUser)
+    const ownerLogin = await client.post('/api/login').json({
       email: owner.email,
       password: owner.password + '1A!a',
     })
 
     const createResponse = await client
-      .post('/illustration')
+      .post('/api/illustration')
       .bearerToken(ownerLogin.body().token)
       .json({
         title: 'Team Illustration',
@@ -583,8 +583,8 @@ test.group('Team Illustrations', (group) => {
       password_confirmation: creator.password + '1A!a',
     }
 
-    await client.post('/register').json(creatorUser)
-    const creatorLogin = await client.post('/login').json({
+    await client.post('/api/register').json(creatorUser)
+    const creatorLogin = await client.post('/api/login').json({
       email: creator.email,
       password: creator.password + '1A!a',
     })
@@ -596,7 +596,7 @@ test.group('Team Illustrations', (group) => {
     })
 
     const deleteResponse = await client
-      .delete(`/illustration/${illustrationId}`)
+      .delete(`/api/illustration/${illustrationId}`)
       .bearerToken(creatorLogin.body().token)
     deleteResponse.assertStatus(200)
   })
@@ -609,14 +609,14 @@ test.group('Team Illustrations', (group) => {
       password_confirmation: owner.password + '1A!a',
     }
 
-    await client.post('/register').json(ownerUser)
-    const ownerLogin = await client.post('/login').json({
+    await client.post('/api/register').json(ownerUser)
+    const ownerLogin = await client.post('/api/login').json({
       email: owner.email,
       password: owner.password + '1A!a',
     })
 
     const createResponse = await client
-      .post('/illustration')
+      .post('/api/illustration')
       .bearerToken(ownerLogin.body().token)
       .json({
         title: 'Team Illustration',
@@ -633,8 +633,8 @@ test.group('Team Illustrations', (group) => {
       password_confirmation: editor.password + '1A!a',
     }
 
-    await client.post('/register').json(editorUser)
-    const editorLogin = await client.post('/login').json({
+    await client.post('/api/register').json(editorUser)
+    const editorLogin = await client.post('/api/login').json({
       email: editor.email,
       password: editor.password + '1A!a',
     })
@@ -646,7 +646,7 @@ test.group('Team Illustrations', (group) => {
     })
 
     const deleteResponse = await client
-      .delete(`/illustration/${illustrationId}`)
+      .delete(`/api/illustration/${illustrationId}`)
       .bearerToken(editorLogin.body().token)
     deleteResponse.assertStatus(403)
   })
@@ -659,8 +659,8 @@ test.group('Team Illustrations', (group) => {
       password_confirmation: owner1.password + '1A!a',
     }
 
-    await client.post('/register').json(owner1User)
-    const owner1Login = await client.post('/login').json({
+    await client.post('/api/register').json(owner1User)
+    const owner1Login = await client.post('/api/login').json({
       email: owner1.email,
       password: owner1.password + '1A!a',
     })
@@ -672,16 +672,16 @@ test.group('Team Illustrations', (group) => {
       password_confirmation: owner2.password + '1A!a',
     }
 
-    await client.post('/register').json(owner2User)
-    const owner2Login = await client.post('/login').json({
+    await client.post('/api/register').json(owner2User)
+    const owner2Login = await client.post('/api/login').json({
       email: owner2.email,
       password: owner2.password + '1A!a',
     })
 
-    const team1Response = await client.get('/team').bearerToken(owner1Login.body().token)
+    const team1Response = await client.get('/api/team').bearerToken(owner1Login.body().token)
     const inviteCode1 = team1Response.body().inviteCode
 
-    await client.post(`/teams/join/${inviteCode1}`).bearerToken(owner2Login.body().token)
+    await client.post(`/api/teams/join/${inviteCode1}`).bearerToken(owner2Login.body().token)
 
     const owner3 = await UserFactory.make()
     const owner3User = {
@@ -690,14 +690,14 @@ test.group('Team Illustrations', (group) => {
       password_confirmation: owner3.password + '1A!a',
     }
 
-    await client.post('/register').json(owner3User)
-    const owner3Login = await client.post('/login').json({
+    await client.post('/api/register').json(owner3User)
+    const owner3Login = await client.post('/api/login').json({
       email: owner3.email,
       password: owner3.password + '1A!a',
     })
 
     const joinResponse = await client
-      .post(`/teams/join/${inviteCode1}`)
+      .post(`/api/teams/join/${inviteCode1}`)
       .bearerToken(owner3Login.body().token)
     joinResponse.assertStatus(200)
   })
@@ -710,8 +710,8 @@ test.group('Team Illustrations', (group) => {
       password_confirmation: owner1.password + '1A!a',
     }
 
-    await client.post('/register').json(owner1User)
-    const owner1Login = await client.post('/login').json({
+    await client.post('/api/register').json(owner1User)
+    const owner1Login = await client.post('/api/login').json({
       email: owner1.email,
       password: owner1.password + '1A!a',
     })
@@ -723,8 +723,8 @@ test.group('Team Illustrations', (group) => {
       password_confirmation: owner2.password + '1A!a',
     }
 
-    await client.post('/register').json(owner2User)
-    const owner2Login = await client.post('/login').json({
+    await client.post('/api/register').json(owner2User)
+    const owner2Login = await client.post('/api/login').json({
       email: owner2.email,
       password: owner2.password + '1A!a',
     })
@@ -738,8 +738,8 @@ test.group('Team Illustrations', (group) => {
       password_confirmation: member.password + '1A!a',
     }
 
-    await client.post('/register').json(memberUser)
-    const memberLogin = await client.post('/login').json({
+    await client.post('/api/register').json(memberUser)
+    const memberLogin = await client.post('/api/login').json({
       email: member.email,
       password: member.password + '1A!a',
     })
@@ -750,11 +750,11 @@ test.group('Team Illustrations', (group) => {
       role: 'editor',
     })
 
-    const teamResponse = await client.get('/team').bearerToken(owner1Login.body().token)
+    const teamResponse = await client.get('/api/team').bearerToken(owner1Login.body().token)
     const inviteCode = teamResponse.body().inviteCode
 
     const joinResponse = await client
-      .post(`/teams/join/${inviteCode}`)
+      .post(`/api/teams/join/${inviteCode}`)
       .bearerToken(owner2Login.body().token)
     joinResponse.assertStatus(400)
     joinResponse.assertBodyContains({
@@ -770,8 +770,8 @@ test.group('Team Illustrations', (group) => {
       password_confirmation: owner1.password + '1A!a',
     }
 
-    await client.post('/register').json(owner1User)
-    const owner1Login = await client.post('/login').json({
+    await client.post('/api/register').json(owner1User)
+    const owner1Login = await client.post('/api/login').json({
       email: owner1.email,
       password: owner1.password + '1A!a',
     })
@@ -783,17 +783,17 @@ test.group('Team Illustrations', (group) => {
       password_confirmation: owner2.password + '1A!a',
     }
 
-    await client.post('/register').json(owner2User)
-    const owner2Login = await client.post('/login').json({
+    await client.post('/api/register').json(owner2User)
+    const owner2Login = await client.post('/api/login').json({
       email: owner2.email,
       password: owner2.password + '1A!a',
     })
 
-    const teamResponse = await client.get('/team').bearerToken(owner2Login.body().token)
+    const teamResponse = await client.get('/api/team').bearerToken(owner2Login.body().token)
     const inviteCode = teamResponse.body().inviteCode
 
     const joinResponse = await client
-      .post(`/teams/join/${inviteCode}`)
+      .post(`/api/teams/join/${inviteCode}`)
       .bearerToken(owner1Login.body().token)
     joinResponse.assertStatus(200)
     joinResponse.assertBodyContains({ message: 'Joined team successfully' })
@@ -807,8 +807,8 @@ test.group('Team Illustrations', (group) => {
       password_confirmation: owner.password + '1A!a',
     }
 
-    await client.post('/register').json(ownerUser)
-    const ownerLogin = await client.post('/login').json({
+    await client.post('/api/register').json(ownerUser)
+    const ownerLogin = await client.post('/api/login').json({
       email: owner.email,
       password: owner.password + '1A!a',
     })
@@ -822,8 +822,8 @@ test.group('Team Illustrations', (group) => {
       password_confirmation: member.password + '1A!a',
     }
 
-    await client.post('/register').json(memberUser)
-    const memberLogin = await client.post('/login').json({
+    await client.post('/api/register').json(memberUser)
+    const memberLogin = await client.post('/api/login').json({
       email: member.email,
       password: member.password + '1A!a',
     })
@@ -835,7 +835,7 @@ test.group('Team Illustrations', (group) => {
     })
 
     const leaveResponse = await client
-      .delete(`/team/memberships/${team!.id}`)
+      .delete(`/api/team/memberships/${team!.id}`)
       .bearerToken(memberLogin.body().token)
     leaveResponse.assertStatus(200)
     leaveResponse.assertBodyContains({ message: 'Left team successfully' })
@@ -849,8 +849,8 @@ test.group('Team Illustrations', (group) => {
       password_confirmation: owner.password + '1A!a',
     }
 
-    await client.post('/register').json(ownerUser)
-    const ownerLogin = await client.post('/login').json({
+    await client.post('/api/register').json(ownerUser)
+    const ownerLogin = await client.post('/api/login').json({
       email: owner.email,
       password: owner.password + '1A!a',
     })
@@ -858,7 +858,7 @@ test.group('Team Illustrations', (group) => {
     const team = await Team.query().where('user_id', ownerLogin.body().id).first()
 
     const leaveResponse = await client
-      .delete(`/team/memberships/${team!.id}`)
+      .delete(`/api/team/memberships/${team!.id}`)
       .bearerToken(ownerLogin.body().token)
     leaveResponse.assertStatus(400)
     leaveResponse.assertBodyContains({ message: 'Cannot leave your own team' })
@@ -872,8 +872,8 @@ test.group('Team Illustrations', (group) => {
       password_confirmation: owner1.password + '1A!a',
     }
 
-    await client.post('/register').json(owner1User)
-    const owner1Login = await client.post('/login').json({
+    await client.post('/api/register').json(owner1User)
+    const owner1Login = await client.post('/api/login').json({
       email: owner1.email,
       password: owner1.password + '1A!a',
     })
@@ -885,19 +885,19 @@ test.group('Team Illustrations', (group) => {
       password_confirmation: owner2.password + '1A!a',
     }
 
-    await client.post('/register').json(owner2User)
-    const owner2Login = await client.post('/login').json({
+    await client.post('/api/register').json(owner2User)
+    const owner2Login = await client.post('/api/login').json({
       email: owner2.email,
       password: owner2.password + '1A!a',
     })
 
-    const teamResponse = await client.get('/team').bearerToken(owner1Login.body().token)
+    const teamResponse = await client.get('/api/team').bearerToken(owner1Login.body().token)
     const inviteCode = teamResponse.body().inviteCode
 
-    await client.post(`/teams/join/${inviteCode}`).bearerToken(owner2Login.body().token)
+    await client.post(`/api/teams/join/${inviteCode}`).bearerToken(owner2Login.body().token)
 
     const membershipsResponse = await client
-      .get('/team/memberships')
+      .get('/api/team/memberships')
       .bearerToken(owner2Login.body().token)
     membershipsResponse.assertStatus(200)
     const memberships = membershipsResponse.body()
@@ -914,14 +914,14 @@ test.group('Team Illustrations', (group) => {
       password_confirmation: user.password + '1A!a',
     }
 
-    await client.post('/register').json(fixedUser)
-    const loginResponse = await client.post('/login').json({
+    await client.post('/api/register').json(fixedUser)
+    const loginResponse = await client.post('/api/login').json({
       email: user.email,
       password: user.password + '1A!a',
     })
 
     const membershipsResponse = await client
-      .get('/team/memberships')
+      .get('/api/team/memberships')
       .bearerToken(loginResponse.body().token)
     membershipsResponse.assertStatus(200)
     assert.equal(membershipsResponse.body().length, 0)
@@ -935,8 +935,8 @@ test.group('Team Illustrations', (group) => {
       password_confirmation: owner.password + '1A!a',
     }
 
-    await client.post('/register').json(ownerUser)
-    const ownerLogin = await client.post('/login').json({
+    await client.post('/api/register').json(ownerUser)
+    const ownerLogin = await client.post('/api/login').json({
       email: owner.email,
       password: owner.password + '1A!a',
     })
@@ -950,8 +950,8 @@ test.group('Team Illustrations', (group) => {
       password_confirmation: creator.password + '1A!a',
     }
 
-    await client.post('/register').json(creatorUser)
-    const creatorLogin = await client.post('/login').json({
+    await client.post('/api/register').json(creatorUser)
+    const creatorLogin = await client.post('/api/login').json({
       email: creator.email,
       password: creator.password + '1A!a',
     })
@@ -969,14 +969,14 @@ test.group('Team Illustrations', (group) => {
       password_confirmation: member.password + '1A!a',
     }
 
-    await client.post('/register').json(memberUser)
-    const memberLogin = await client.post('/login').json({
+    await client.post('/api/register').json(memberUser)
+    const memberLogin = await client.post('/api/login').json({
       email: member.email,
       password: member.password + '1A!a',
     })
 
     const addMemberResponse = await client
-      .post('/team/members')
+      .post('/api/team/members')
       .bearerToken(creatorLogin.body().token)
       .json({ userId: memberLogin.body().id, role: 'editor' })
     addMemberResponse.assertStatus(200)
@@ -991,8 +991,8 @@ test.group('Team Illustrations', (group) => {
       password_confirmation: owner.password + '1A!a',
     }
 
-    await client.post('/register').json(ownerUser)
-    const ownerLogin = await client.post('/login').json({
+    await client.post('/api/register').json(ownerUser)
+    const ownerLogin = await client.post('/api/login').json({
       email: owner.email,
       password: owner.password + '1A!a',
     })
@@ -1006,8 +1006,8 @@ test.group('Team Illustrations', (group) => {
       password_confirmation: creator.password + '1A!a',
     }
 
-    await client.post('/register').json(creatorUser)
-    const creatorLogin = await client.post('/login').json({
+    await client.post('/api/register').json(creatorUser)
+    const creatorLogin = await client.post('/api/login').json({
       email: creator.email,
       password: creator.password + '1A!a',
     })
@@ -1019,7 +1019,7 @@ test.group('Team Illustrations', (group) => {
     })
 
     const updateResponse = await client
-      .put(`/team/members/${ownerLogin.body().id}`)
+      .put(`/api/team/members/${ownerLogin.body().id}`)
       .bearerToken(creatorLogin.body().token)
       .json({ role: 'editor' })
     updateResponse.assertStatus(404)
@@ -1034,13 +1034,13 @@ test.group('Team Illustrations', (group) => {
       password_confirmation: user.password + '1A!a',
     }
 
-    await client.post('/register').json(fixedUser)
-    const loginResponse = await client.post('/login').json({
+    await client.post('/api/register').json(fixedUser)
+    const loginResponse = await client.post('/api/login').json({
       email: user.email,
       password: user.password + '1A!a',
     })
 
-    const teamResponse = await client.get('/team').bearerToken(loginResponse.body().token)
+    const teamResponse = await client.get('/api/team').bearerToken(loginResponse.body().token)
     teamResponse.assertStatus(200)
     teamResponse.assertBodyContains({ role: 'owner' })
   })
@@ -1053,8 +1053,8 @@ test.group('Team Illustrations', (group) => {
       password_confirmation: owner.password + '1A!a',
     }
 
-    await client.post('/register').json(ownerUser)
-    const ownerLogin = await client.post('/login').json({
+    await client.post('/api/register').json(ownerUser)
+    const ownerLogin = await client.post('/api/login').json({
       email: owner.email,
       password: owner.password + '1A!a',
     })
@@ -1066,10 +1066,10 @@ test.group('Team Illustrations', (group) => {
       password_confirmation: invitedUser.password + '1A!a',
     }
 
-    await client.post('/register').json(invitedUserData)
+    await client.post('/api/register').json(invitedUserData)
 
     const inviteResponse = await client
-      .post('/team/invitations')
+      .post('/api/team/invitations')
       .bearerToken(ownerLogin.body().token)
       .json({ email: invitedUser.email, role: 'editor' })
     inviteResponse.assertStatus(200)
@@ -1084,14 +1084,14 @@ test.group('Team Illustrations', (group) => {
       password_confirmation: owner.password + '1A!a',
     }
 
-    await client.post('/register').json(ownerUser)
-    const ownerLogin = await client.post('/login').json({
+    await client.post('/api/register').json(ownerUser)
+    const ownerLogin = await client.post('/api/login').json({
       email: owner.email,
       password: owner.password + '1A!a',
     })
 
     const inviteResponse = await client
-      .post('/team/invitations')
+      .post('/api/team/invitations')
       .bearerToken(ownerLogin.body().token)
       .json({ email: 'nonexistent@example.com', role: 'editor' })
     inviteResponse.assertStatus(404)
@@ -1106,14 +1106,14 @@ test.group('Team Illustrations', (group) => {
       password_confirmation: owner.password + '1A!a',
     }
 
-    await client.post('/register').json(ownerUser)
-    const ownerLogin = await client.post('/login').json({
+    await client.post('/api/register').json(ownerUser)
+    const ownerLogin = await client.post('/api/login').json({
       email: owner.email,
       password: owner.password + '1A!a',
     })
 
     const inviteResponse = await client
-      .post('/team/invitations')
+      .post('/api/team/invitations')
       .bearerToken(ownerLogin.body().token)
       .json({ email: owner.email, role: 'editor' })
     inviteResponse.assertStatus(400)
@@ -1128,8 +1128,8 @@ test.group('Team Illustrations', (group) => {
       password_confirmation: owner.password + '1A!a',
     }
 
-    await client.post('/register').json(ownerUser)
-    const ownerLogin = await client.post('/login').json({
+    await client.post('/api/register').json(ownerUser)
+    const ownerLogin = await client.post('/api/login').json({
       email: owner.email,
       password: owner.password + '1A!a',
     })
@@ -1141,15 +1141,15 @@ test.group('Team Illustrations', (group) => {
       password_confirmation: invitedUser.password + '1A!a',
     }
 
-    await client.post('/register').json(invitedUserData)
+    await client.post('/api/register').json(invitedUserData)
 
     await client
-      .post('/team/invitations')
+      .post('/api/team/invitations')
       .bearerToken(ownerLogin.body().token)
       .json({ email: invitedUser.email, role: 'editor' })
 
     const invitationsResponse = await client
-      .get('/team/invitations')
+      .get('/api/team/invitations')
       .bearerToken(ownerLogin.body().token)
     invitationsResponse.assertStatus(200)
     const invitations = invitationsResponse.body()
@@ -1165,8 +1165,8 @@ test.group('Team Illustrations', (group) => {
       password_confirmation: owner.password + '1A!a',
     }
 
-    await client.post('/register').json(ownerUser)
-    const ownerLogin = await client.post('/login').json({
+    await client.post('/api/register').json(ownerUser)
+    const ownerLogin = await client.post('/api/login').json({
       email: owner.email,
       password: owner.password + '1A!a',
     })
@@ -1178,20 +1178,20 @@ test.group('Team Illustrations', (group) => {
       password_confirmation: invitedUser.password + '1A!a',
     }
 
-    await client.post('/register').json(invitedUserData)
+    await client.post('/api/register').json(invitedUserData)
 
     const inviteResponse = await client
-      .post('/team/invitations')
+      .post('/api/team/invitations')
       .bearerToken(ownerLogin.body().token)
       .json({ email: invitedUser.email, role: 'editor' })
 
     const invitationsResponse = await client
-      .get('/team/invitations')
+      .get('/api/team/invitations')
       .bearerToken(ownerLogin.body().token)
     const invitationId = invitationsResponse.body()[0].id
 
     const cancelResponse = await client
-      .delete(`/team/invitations/${invitationId}`)
+      .delete(`/api/team/invitations/${invitationId}`)
       .bearerToken(ownerLogin.body().token)
     cancelResponse.assertStatus(200)
     cancelResponse.assertBodyContains({ message: 'Invitation cancelled' })
@@ -1205,8 +1205,8 @@ test.group('Team Illustrations', (group) => {
       password_confirmation: owner.password + '1A!a',
     }
 
-    await client.post('/register').json(ownerUser)
-    const ownerLogin = await client.post('/login').json({
+    await client.post('/api/register').json(ownerUser)
+    const ownerLogin = await client.post('/api/login').json({
       email: owner.email,
       password: owner.password + '1A!a',
     })
@@ -1218,24 +1218,24 @@ test.group('Team Illustrations', (group) => {
       password_confirmation: invitedUser.password + '1A!a',
     }
 
-    await client.post('/register').json(invitedUserData)
-    const invitedLogin = await client.post('/login').json({
+    await client.post('/api/register').json(invitedUserData)
+    const invitedLogin = await client.post('/api/login').json({
       email: invitedUser.email,
       password: invitedUser.password + '1A!a',
     })
 
     await client
-      .post('/team/invitations')
+      .post('/api/team/invitations')
       .bearerToken(ownerLogin.body().token)
       .json({ email: invitedUser.email, role: 'editor' })
 
     const userInvitationsResponse = await client
-      .get('/user/invitations')
+      .get('/api/user/invitations')
       .bearerToken(invitedLogin.body().token)
     const invitationId = userInvitationsResponse.body()[0].id
 
     const acceptResponse = await client
-      .post(`/team/invitations/${invitationId}/accept`)
+      .post(`/api/team/invitations/${invitationId}/accept`)
       .bearerToken(invitedLogin.body().token)
     acceptResponse.assertStatus(200)
     acceptResponse.assertBodyContains({ message: 'Joined team successfully' })
@@ -1249,8 +1249,8 @@ test.group('Team Illustrations', (group) => {
       password_confirmation: owner.password + '1A!a',
     }
 
-    await client.post('/register').json(ownerUser)
-    const ownerLogin = await client.post('/login').json({
+    await client.post('/api/register').json(ownerUser)
+    const ownerLogin = await client.post('/api/login').json({
       email: owner.email,
       password: owner.password + '1A!a',
     })
@@ -1262,24 +1262,24 @@ test.group('Team Illustrations', (group) => {
       password_confirmation: invitedUser.password + '1A!a',
     }
 
-    await client.post('/register').json(invitedUserData)
-    const invitedLogin = await client.post('/login').json({
+    await client.post('/api/register').json(invitedUserData)
+    const invitedLogin = await client.post('/api/login').json({
       email: invitedUser.email,
       password: invitedUser.password + '1A!a',
     })
 
     await client
-      .post('/team/invitations')
+      .post('/api/team/invitations')
       .bearerToken(ownerLogin.body().token)
       .json({ email: invitedUser.email, role: 'editor' })
 
     const userInvitationsResponse = await client
-      .get('/user/invitations')
+      .get('/api/user/invitations')
       .bearerToken(invitedLogin.body().token)
     const invitationId = userInvitationsResponse.body()[0].id
 
     const declineResponse = await client
-      .post(`/team/invitations/${invitationId}/decline`)
+      .post(`/api/team/invitations/${invitationId}/decline`)
       .bearerToken(invitedLogin.body().token)
     declineResponse.assertStatus(200)
     declineResponse.assertBodyContains({ message: 'Invitation declined' })
@@ -1293,8 +1293,8 @@ test.group('Team Illustrations', (group) => {
       password_confirmation: owner.password + '1A!a',
     }
 
-    await client.post('/register').json(ownerUser)
-    const ownerLogin = await client.post('/login').json({
+    await client.post('/api/register').json(ownerUser)
+    const ownerLogin = await client.post('/api/login').json({
       email: owner.email,
       password: owner.password + '1A!a',
     })
@@ -1306,19 +1306,19 @@ test.group('Team Illustrations', (group) => {
       password_confirmation: invitedUser.password + '1A!a',
     }
 
-    await client.post('/register').json(invitedUserData)
-    const invitedLogin = await client.post('/login').json({
+    await client.post('/api/register').json(invitedUserData)
+    const invitedLogin = await client.post('/api/login').json({
       email: invitedUser.email,
       password: invitedUser.password + '1A!a',
     })
 
     await client
-      .post('/team/invitations')
+      .post('/api/team/invitations')
       .bearerToken(ownerLogin.body().token)
       .json({ email: invitedUser.email, role: 'editor' })
 
     const userInvitationsResponse = await client
-      .get('/user/invitations')
+      .get('/api/user/invitations')
       .bearerToken(invitedLogin.body().token)
     userInvitationsResponse.assertStatus(200)
     const invitations = userInvitationsResponse.body()
@@ -1334,8 +1334,8 @@ test.group('Team Illustrations', (group) => {
       password_confirmation: owner.password + '1A!a',
     }
 
-    await client.post('/register').json(ownerUser)
-    const ownerLogin = await client.post('/login').json({
+    await client.post('/api/register').json(ownerUser)
+    const ownerLogin = await client.post('/api/login').json({
       email: owner.email,
       password: owner.password + '1A!a',
     })
@@ -1349,19 +1349,19 @@ test.group('Team Illustrations', (group) => {
       password_confirmation: blockedUser.password + '1A!a',
     }
 
-    await client.post('/register').json(blockedUserData)
-    const blockedLogin = await client.post('/login').json({
+    await client.post('/api/register').json(blockedUserData)
+    const blockedLogin = await client.post('/api/login').json({
       email: blockedUser.email,
       password: blockedUser.password + '1A!a',
     })
 
     await client
-      .post('/user/blocks')
+      .post('/api/user/blocks')
       .bearerToken(blockedLogin.body().token)
       .json({ teamId: team!.id })
 
     const inviteResponse = await client
-      .post('/team/invitations')
+      .post('/api/team/invitations')
       .bearerToken(ownerLogin.body().token)
       .json({ email: blockedUser.email, role: 'editor' })
     inviteResponse.assertStatus(400)
@@ -1376,13 +1376,13 @@ test.group('Team Illustrations', (group) => {
       password_confirmation: owner.password + '1A!a',
     }
 
-    await client.post('/register').json(ownerUser)
-    const ownerLogin = await client.post('/login').json({
+    await client.post('/api/register').json(ownerUser)
+    const ownerLogin = await client.post('/api/login').json({
       email: owner.email,
       password: owner.password + '1A!a',
     })
 
-    const teamResponse = await client.get('/team').bearerToken(ownerLogin.body().token)
+    const teamResponse = await client.get('/api/team').bearerToken(ownerLogin.body().token)
     const teamId = teamResponse.body().id
 
     const blocker = await UserFactory.make()
@@ -1392,14 +1392,14 @@ test.group('Team Illustrations', (group) => {
       password_confirmation: blocker.password + '1A!a',
     }
 
-    await client.post('/register').json(blockerData)
-    const blockerLogin = await client.post('/login').json({
+    await client.post('/api/register').json(blockerData)
+    const blockerLogin = await client.post('/api/login').json({
       email: blocker.email,
       password: blocker.password + '1A!a',
     })
 
     const blockResponse = await client
-      .post('/user/blocks')
+      .post('/api/user/blocks')
       .bearerToken(blockerLogin.body().token)
       .json({ teamId })
     blockResponse.assertStatus(200)
@@ -1414,13 +1414,13 @@ test.group('Team Illustrations', (group) => {
       password_confirmation: owner.password + '1A!a',
     }
 
-    await client.post('/register').json(ownerUser)
-    const ownerLogin = await client.post('/login').json({
+    await client.post('/api/register').json(ownerUser)
+    const ownerLogin = await client.post('/api/login').json({
       email: owner.email,
       password: owner.password + '1A!a',
     })
 
-    const teamResponse = await client.get('/team').bearerToken(ownerLogin.body().token)
+    const teamResponse = await client.get('/api/team').bearerToken(ownerLogin.body().token)
     const teamId = teamResponse.body().id
 
     const blocker = await UserFactory.make()
@@ -1430,15 +1430,15 @@ test.group('Team Illustrations', (group) => {
       password_confirmation: blocker.password + '1A!a',
     }
 
-    await client.post('/register').json(blockerData)
-    const blockerLogin = await client.post('/login').json({
+    await client.post('/api/register').json(blockerData)
+    const blockerLogin = await client.post('/api/login').json({
       email: blocker.email,
       password: blocker.password + '1A!a',
     })
 
-    await client.post('/user/blocks').bearerToken(blockerLogin.body().token).json({ teamId })
+    await client.post('/api/user/blocks').bearerToken(blockerLogin.body().token).json({ teamId })
 
-    const blocksResponse = await client.get('/user/blocks').bearerToken(blockerLogin.body().token)
+    const blocksResponse = await client.get('/api/user/blocks').bearerToken(blockerLogin.body().token)
     blocksResponse.assertStatus(200)
     const blocks = blocksResponse.body()
     assert.equal(blocks.length, 1)
@@ -1452,13 +1452,13 @@ test.group('Team Illustrations', (group) => {
       password_confirmation: owner.password + '1A!a',
     }
 
-    await client.post('/register').json(ownerUser)
-    const ownerLogin = await client.post('/login').json({
+    await client.post('/api/register').json(ownerUser)
+    const ownerLogin = await client.post('/api/login').json({
       email: owner.email,
       password: owner.password + '1A!a',
     })
 
-    const teamResponse = await client.get('/team').bearerToken(ownerLogin.body().token)
+    const teamResponse = await client.get('/api/team').bearerToken(ownerLogin.body().token)
     const teamId = teamResponse.body().id
 
     const blocker = await UserFactory.make()
@@ -1468,16 +1468,16 @@ test.group('Team Illustrations', (group) => {
       password_confirmation: blocker.password + '1A!a',
     }
 
-    await client.post('/register').json(blockerData)
-    const blockerLogin = await client.post('/login').json({
+    await client.post('/api/register').json(blockerData)
+    const blockerLogin = await client.post('/api/login').json({
       email: blocker.email,
       password: blocker.password + '1A!a',
     })
 
-    await client.post('/user/blocks').bearerToken(blockerLogin.body().token).json({ teamId })
+    await client.post('/api/user/blocks').bearerToken(blockerLogin.body().token).json({ teamId })
 
     const unblockResponse = await client
-      .delete(`/user/blocks/${teamId}`)
+      .delete(`/api/user/blocks/${teamId}`)
       .bearerToken(blockerLogin.body().token)
     unblockResponse.assertStatus(200)
     unblockResponse.assertBodyContains({ message: 'Team unblocked' })
@@ -1491,13 +1491,13 @@ test.group('Team Illustrations', (group) => {
       password_confirmation: owner.password + '1A!a',
     }
 
-    await client.post('/register').json(ownerUser)
-    const ownerLogin = await client.post('/login').json({
+    await client.post('/api/register').json(ownerUser)
+    const ownerLogin = await client.post('/api/login').json({
       email: owner.email,
       password: owner.password + '1A!a',
     })
 
-    const teamResponse = await client.get('/team').bearerToken(ownerLogin.body().token)
+    const teamResponse = await client.get('/api/team').bearerToken(ownerLogin.body().token)
     const teamId = teamResponse.body().id
 
     const blockedUser = await UserFactory.make()
@@ -1507,21 +1507,21 @@ test.group('Team Illustrations', (group) => {
       password_confirmation: blockedUser.password + '1A!a',
     }
 
-    await client.post('/register').json(blockedUserData)
-    const blockedLogin = await client.post('/login').json({
+    await client.post('/api/register').json(blockedUserData)
+    const blockedLogin = await client.post('/api/login').json({
       email: blockedUser.email,
       password: blockedUser.password + '1A!a',
     })
 
     await client
-      .post('/team/invitations')
+      .post('/api/team/invitations')
       .bearerToken(ownerLogin.body().token)
       .json({ email: blockedUser.email, role: 'editor' })
 
-    await client.post('/user/blocks').bearerToken(blockedLogin.body().token).json({ teamId })
+    await client.post('/api/user/blocks').bearerToken(blockedLogin.body().token).json({ teamId })
 
     const userInvitationsResponse = await client
-      .get('/user/invitations')
+      .get('/api/user/invitations')
       .bearerToken(blockedLogin.body().token)
     const invitations = userInvitationsResponse.body()
     assert.equal(invitations.length, 0)
@@ -1535,13 +1535,13 @@ test.group('Team Illustrations', (group) => {
       password_confirmation: owner.password + '1A!a',
     }
 
-    await client.post('/register').json(ownerUser)
-    const ownerLogin = await client.post('/login').json({
+    await client.post('/api/register').json(ownerUser)
+    const ownerLogin = await client.post('/api/login').json({
       email: owner.email,
       password: owner.password + '1A!a',
     })
 
-    const teamResponse = await client.get('/team').bearerToken(ownerLogin.body().token)
+    const teamResponse = await client.get('/api/team').bearerToken(ownerLogin.body().token)
     const teamId = teamResponse.body().id
 
     const blocker = await UserFactory.make()
@@ -1551,16 +1551,16 @@ test.group('Team Illustrations', (group) => {
       password_confirmation: blocker.password + '1A!a',
     }
 
-    await client.post('/register').json(blockerData)
-    const blockerLogin = await client.post('/login').json({
+    await client.post('/api/register').json(blockerData)
+    const blockerLogin = await client.post('/api/login').json({
       email: blocker.email,
       password: blocker.password + '1A!a',
     })
 
-    await client.post('/user/blocks').bearerToken(blockerLogin.body().token).json({ teamId })
+    await client.post('/api/user/blocks').bearerToken(blockerLogin.body().token).json({ teamId })
 
     const blockAgainResponse = await client
-      .post('/user/blocks')
+      .post('/api/user/blocks')
       .bearerToken(blockerLogin.body().token)
       .json({ teamId })
     blockAgainResponse.assertStatus(400)
@@ -1575,13 +1575,13 @@ test.group('Team Illustrations', (group) => {
       password_confirmation: owner.password + '1A!a',
     }
 
-    await client.post('/register').json(ownerUser)
-    const ownerLogin = await client.post('/login').json({
+    await client.post('/api/register').json(ownerUser)
+    const ownerLogin = await client.post('/api/login').json({
       email: owner.email,
       password: owner.password + '1A!a',
     })
 
-    const teamResponse = await client.get('/team').bearerToken(ownerLogin.body().token)
+    const teamResponse = await client.get('/api/team').bearerToken(ownerLogin.body().token)
     const teamId = teamResponse.body().id
 
     const blocker = await UserFactory.make()
@@ -1591,14 +1591,14 @@ test.group('Team Illustrations', (group) => {
       password_confirmation: blocker.password + '1A!a',
     }
 
-    await client.post('/register').json(blockerData)
-    const blockerLogin = await client.post('/login').json({
+    await client.post('/api/register').json(blockerData)
+    const blockerLogin = await client.post('/api/login').json({
       email: blocker.email,
       password: blocker.password + '1A!a',
     })
 
     const unblockResponse = await client
-      .delete(`/user/blocks/${teamId}`)
+      .delete(`/api/user/blocks/${teamId}`)
       .bearerToken(blockerLogin.body().token)
     unblockResponse.assertStatus(404)
     unblockResponse.assertBodyContains({ message: 'Block not found' })

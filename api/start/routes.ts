@@ -61,9 +61,17 @@ router
 
     router.get('/illustrations', [IllustrationViewController, 'index']).as('illustrations')
     router.get('/illustrations/new', [IllustrationViewController, 'new']).as('illustrations.new')
-    router.post('/illustrations', [IllustrationViewController, 'new']).as('illustrations.create')
+    router.post('/illustrations', [IllustrationViewController, 'store']).as('illustrations.create')
     router.get('/illustrations/:id', [IllustrationViewController, 'show']).as('illustrations.show')
-    router.get('/illustrations/:id/edit', [IllustrationViewController, 'edit']).as('illustrations.edit')
+    router
+      .get('/illustrations/:id/edit', [IllustrationViewController, 'edit'])
+      .as('illustrations.edit')
+    router
+      .put('/illustrations/:id', [IllustrationViewController, 'update'])
+      .as('illustrations.update')
+    router
+      .delete('/illustrations/:id', [IllustrationViewController, 'destroy'])
+      .as('illustrations.destroy')
 
     router.get('/tags', [TagViewController, 'index']).as('tags.index')
     router.get('/tags/:name', [TagViewController, 'show']).as('tags.show')
@@ -94,14 +102,10 @@ router.post('/contact', [ContactViewController, 'store']).as('contact.store')
 | API Routes (token guard - API auth)
 |--------------------------------------------------------------------------
 */
-router
-  .post('api/contact', [ContactsController, 'store'])
-  .use(contactThrottle)
+router.post('api/contact', [ContactsController, 'store']).use(contactThrottle)
 
 // Auth
-router
-  .post('api/register', [UsersController, 'store'])
-  .use(authThrottle)
+router.post('api/register', [UsersController, 'store']).use(authThrottle)
 router.post('/api/login', [UsersController, 'login']).use(authThrottle)
 router.get('/api/healthz', [HealthChecksController])
 router.get('/api/users/:uid', [UsersController, 'show']).use([
@@ -117,10 +121,18 @@ router
     router.post('/illustration', [IllustrationsController, 'store']).as('api.illustrations.store')
     router.get('/illustration/authors', [AuthorsController, 'index']).as('api.authors.index')
     router.get('/illustration/:id', [IllustrationsController, 'show']).as('api.illustrations.show')
-    router.get('/illustrations/:id', [IllustrationsController, 'showOld']).as('api.illustrations.showOld')
-    router.put('/illustration/:id', [IllustrationsController, 'update']).as('api.illustrations.update')
-    router.delete('/illustration/:id', [IllustrationsController, 'destroy']).as('api.illustrations.destroy')
-    router.put('/illustrations/bulk', [IllustrationsController, 'bulk']).as('api.illustrations.bulk')
+    router
+      .get('/illustrations/:id', [IllustrationsController, 'showOld'])
+      .as('api.illustrations.showOld')
+    router
+      .put('/illustration/:id', [IllustrationsController, 'update'])
+      .as('api.illustrations.update')
+    router
+      .delete('/illustration/:id', [IllustrationsController, 'destroy'])
+      .as('api.illustrations.destroy')
+    router
+      .put('/illustrations/bulk', [IllustrationsController, 'bulk'])
+      .as('api.illustrations.bulk')
 
     router.get('/author/:name', [AuthorsController, 'show']).as('api.authors.show')
     router.put('/author/:name', [AuthorsController, 'update']).as('api.authors.update')
@@ -134,7 +146,9 @@ router
     router.get('/tag/:name', [TagsController, 'illustrations']).as('api.tags.illustrations')
     router.put('/tags/:id', [TagsController, 'update']).as('api.tags.update')
     router.delete('/tags/:id', [TagsController, 'destroy']).as('api.tags.destroy')
-    router.delete('/tags/:id/illustrations', [TagsController, 'removeIllustrations']).as('api.tags.removeIllustrations')
+    router
+      .delete('/tags/:id/illustrations', [TagsController, 'removeIllustrations'])
+      .as('api.tags.removeIllustrations')
 
     // places
     router.get('/places/:illustration_id', [PlacesController, 'show']).as('api.places.show')
@@ -146,16 +160,10 @@ router
     router.post('/search', [HybridSearchController, 'search']).as('api.search')
 
     // Import highlights
-    router
-      .post('/import', [ImportsController, 'store'])
-      .use(importThrottle)
-      .as('api.imports.store')
+    router.post('/import', [ImportsController, 'store']).use(importThrottle).as('api.imports.store')
 
     // Images
-    router
-      .post('/upload', [UploadsController, 'store'])
-      .use(uploadThrottle)
-      .as('api.uploads.store')
+    router.post('/upload', [UploadsController, 'store']).use(uploadThrottle).as('api.uploads.store')
     router.delete('/upload/:id', [UploadsController, 'destroy']).as('api.uploads.destroy')
 
     // Teams
@@ -163,21 +171,43 @@ router
     router.put('/team', [TeamsController, 'updateTeam']).as('api.team.update')
     router.get('/team/members', [TeamsController, 'getMembers']).as('api.team.members.index')
     router.post('/team/members', [TeamsController, 'addMember']).as('api.team.members.add')
-    router.put('/team/members/:userId', [TeamsController, 'updateMember']).as('api.team.members.update')
-    router.delete('/team/members/:userId', [TeamsController, 'removeMember']).as('api.team.members.remove')
+    router
+      .put('/team/members/:userId', [TeamsController, 'updateMember'])
+      .as('api.team.members.update')
+    router
+      .delete('/team/members/:userId', [TeamsController, 'removeMember'])
+      .as('api.team.members.remove')
     router.post('/teams/join/:inviteCode', [TeamsController, 'joinTeam']).as('api.teams.join')
-    router.get('/team/illustrations', [TeamsController, 'getTeamIllustrations']).as('api.team.illustrations')
+    router
+      .get('/team/illustrations', [TeamsController, 'getTeamIllustrations'])
+      .as('api.team.illustrations')
     router.get('/team/memberships', [TeamsController, 'getMemberships']).as('api.team.memberships')
-    router.delete('/team/memberships/:teamId', [TeamsController, 'leaveTeam']).as('api.team.memberships.leave')
-    router.get('/team/invitations', [TeamsController, 'getTeamInvitations']).as('api.team.invitations.index')
-    router.post('/team/invitations', [TeamsController, 'createInvitation']).as('api.team.invitations.create')
-    router.delete('/team/invitations/:id', [TeamsController, 'cancelInvitation']).as('api.team.invitations.cancel')
-    router.post('/team/invitations/:id/accept', [TeamsController, 'acceptInvitation']).as('api.team.invitations.accept')
-    router.post('/team/invitations/:id/decline', [TeamsController, 'declineInvitation']).as('api.team.invitations.decline')
-    router.get('/user/invitations', [TeamsController, 'getUserInvitations']).as('api.user.invitations')
+    router
+      .delete('/team/memberships/:teamId', [TeamsController, 'leaveTeam'])
+      .as('api.team.memberships.leave')
+    router
+      .get('/team/invitations', [TeamsController, 'getTeamInvitations'])
+      .as('api.team.invitations.index')
+    router
+      .post('/team/invitations', [TeamsController, 'createInvitation'])
+      .as('api.team.invitations.create')
+    router
+      .delete('/team/invitations/:id', [TeamsController, 'cancelInvitation'])
+      .as('api.team.invitations.cancel')
+    router
+      .post('/team/invitations/:id/accept', [TeamsController, 'acceptInvitation'])
+      .as('api.team.invitations.accept')
+    router
+      .post('/team/invitations/:id/decline', [TeamsController, 'declineInvitation'])
+      .as('api.team.invitations.decline')
+    router
+      .get('/user/invitations', [TeamsController, 'getUserInvitations'])
+      .as('api.user.invitations')
     router.get('/user/blocks', [TeamsController, 'getUserBlocks']).as('api.user.blocks')
     router.post('/user/blocks', [TeamsController, 'blockTeam']).as('api.user.blocks.create')
-    router.delete('/user/blocks/:teamId', [TeamsController, 'unblockTeam']).as('api.user.blocks.delete')
+    router
+      .delete('/user/blocks/:teamId', [TeamsController, 'unblockTeam'])
+      .as('api.user.blocks.delete')
   })
   .prefix('/api')
   .use([

@@ -75,6 +75,7 @@ test.group('Security', (group) => {
   test('Contact endpoint requires valid email', async ({ client, assert }) => {
     const response = await client
       .post('/api/contact')
+      .accept('json') // Tells AdonisJS to return JSON instead of redirecting
       .json({ email: 'not-valid', reason: 'general', message: 'test' })
 
     response.assertStatus(422)

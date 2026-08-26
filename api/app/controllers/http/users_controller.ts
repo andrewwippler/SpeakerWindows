@@ -25,7 +25,7 @@ export default class UsersController {
     try {
       await LoginValidator.validate({ email, password })
     } catch (error) {
-      return response.status(400).send(error.messages)
+      return response.status(400).send((error as { messages: unknown }).messages)
     }
 
     const throttleKey = `login_${email}_${request.ip()}`
@@ -116,7 +116,7 @@ export default class UsersController {
         team: teamData,
         memberships: membershipsData,
       }
-    } catch (error) {
+    } catch (error: any) {
       console.log('login error: ', error)
       await locallimit.increment(throttleKey)
     }
@@ -140,7 +140,7 @@ export default class UsersController {
         password_confirmation: passwordConfirmation,
       })
     } catch (error) {
-      return response.status(400).send(error.messages)
+      return response.status(400).send((error as { messages: unknown }).messages)
     }
 
     const user = await User.create({ email, password })

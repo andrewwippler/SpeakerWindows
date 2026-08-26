@@ -1,89 +1,90 @@
 @layout()
-  <div class="mb-8">
-    <h1 class="text-2xl font-bold text-sky-800 dark:text-sky-200">Settings</h1>
+<h2>Settings</h2>
+
+@flashMessage('success')
+  <div role="alert" data-variant="success">
+    {{ $message }}
+  </div>
+@end
+
+@flashMessage('error')
+  <div role="alert" data-variant="error">
+    {{ $message }}
+  </div>
+@end
+
+<ot-tabs data-anchor="settings">
+  <div role="tablist">
+    <button role="tab" id="tab-account">Account</button>
+    <button role="tab" id="tab-defaults">Defaults</button>
+    @if(team)
+      <button role="tab" id="tab-team">Team</button>
+    @endif
   </div>
 
-  @if(flashMessages.has('success'))
-    <div role="alert" data-variant="success" class="mb-6">
-      {{ flashMessages.get('success') }}
-    </div>
-  @endif
+  <div role="tabpanel" aria-labelledby="tab-account">
+    <article class="card">
+      <form action="/settings" method="POST">
+        <input type="hidden" name="_csrf" value="{{ csrfToken || '' }}" />
+        <label data-field>
+          Email
+          <input type="email" value="{{ auth?.user?.email || '' }}" disabled />
+          <small>Email cannot be changed here.</small>
+        </label>
+        <label data-field>
+          Illustrations
+          <p>{{ illustrationsCount || 0 }} total</p>
+        </label>
+      </form>
+    </article>
+  </div>
 
-  @if(flashMessages.has('error'))
-    <div role="alert" data-variant="error" class="mb-6">
-      {{ flashMessages.get('error') }}
-    </div>
-  @endif
-
-  <ot-tabs data-anchor="settings">
-    <div role="tablist">
-      <button role="tab" id="tab-account">Account Settings</button>
-      @if(team)
-        <button role="tab" id="tab-team">Team</button>
-      @endif
-    </div>
-
-    <div role="tabpanel" aria-labelledby="tab-account">
-      <div class="rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-6">
-        <form action="/settings" method="POST">
-          <input type="hidden" name="_csrf" value="{{ csrfToken || '' }}" />
-          <div class="space-y-4">
-            <div>
-              <label for="fullName" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Full Name
-              </label>
-              <input
-                id="fullName"
-                type="text"
-                name="fullName"
-                value="{{ auth?.user?.fullName || '' }}"
-                class="w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-2 text-sm text-gray-900 dark:text-gray-100 shadow-sm focus:border-sky-500 focus:ring-sky-500"
-              />
-            </div>
-            <div>
-              <label for="email" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Email
-              </label>
-              <input
-                id="email"
-                type="email"
-                name="email"
-                value="{{ auth?.user?.email || '' }}"
-                class="w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-2 text-sm text-gray-900 dark:text-gray-100 shadow-sm focus:border-sky-500 focus:ring-sky-500"
-              />
-            </div>
-            <div class="pt-2">
-              <button
-                type="submit"
-                class="rounded-md bg-sky-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-sky-500"
-              >
-                Save Changes
-              </button>
-            </div>
+  <div role="tabpanel" aria-labelledby="tab-defaults">
+    <article class="card">
+      <form action="/settings" method="POST">
+        <input type="hidden" name="_csrf" value="{{ csrfToken || '' }}" />
+        <label data-field>
+          Default Place
+          <input type="text" name="place" value="{{ settings.place || '' }}" placeholder="e.g. Home, Office" />
+        </label>
+        <label data-field>
+          Default Location
+          <input type="text" name="location" value="{{ settings.location || '' }}" placeholder="e.g. New York, NY" />
+        </label>
+        @if(settings.count)
+          <div role="alert" data-variant="warning">
+            {{ settings.count }} illustration(s) tagged "To-Fix" or "Untitled"
           </div>
-        </form>
-      </div>
-    </div>
+        @endif
+        @if(settings.emptyTags)
+          <div role="alert" data-variant="warning">
+            {{ settings.emptyTags }} illustration(s) with no tags
+          </div>
+        @endif
+        <button type="submit">Save Defaults</button>
+      </form>
+    </article>
+  </div>
 
-    @if(team)
-      <div role="tabpanel" aria-labelledby="tab-team">
-        <div class="rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-6">
-          <dl class="space-y-2 text-sm">
-            <div class="flex justify-between">
-              <dt class="text-gray-500 dark:text-gray-400">Team Name</dt>
-              <dd class="font-medium text-gray-900 dark:text-gray-100">{{ team.name }}</dd>
-            </div>
-            <div class="flex justify-between">
-              <dt class="text-gray-500 dark:text-gray-400">Members</dt>
-              <dd class="font-medium text-gray-900 dark:text-gray-100">{{ team.membersCount || '?' }}</dd>
-            </div>
-            <div class="flex justify-between">
-              <dt class="text-gray-500 dark:text-gray-400">Role</dt>
-              <dd class="font-medium text-gray-900 dark:text-gray-100">{{ team.role || 'Member' }}</dd>
-            </div>
-          </dl>
-        </div>
-      </div>
-    @endif
-  </ot-tabs>
+  @if(team)
+    <div role="tabpanel" aria-labelledby="tab-team">
+      <article class="card">
+        <dl>
+          <div style="display: flex; justify-content: space-between;">
+            <dt>Team Name</dt>
+            <dd>{{ team.name }}</dd>
+          </div>
+          <div style="display: flex; justify-content: space-between;">
+            <dt>Members</dt>
+            <dd>{{ team.membersCount || '?' }}</dd>
+          </div>
+          <div style="display: flex; justify-content: space-between;">
+            <dt>Role</dt>
+            <dd>{{ team.role || 'Member' }}</dd>
+          </div>
+        </dl>
+      </article>
+    </div>
+  @endif
+</ot-tabs>
 @end

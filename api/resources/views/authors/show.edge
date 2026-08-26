@@ -1,70 +1,45 @@
 @layout()
-  <div class="mb-8">
-    <h1 class="text-2xl font-bold text-sky-800 dark:text-sky-200">
-      {{ author.name }}
-    </h1>
-    <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-      {{ illustrations.length }} illustration{{ illustrations.length !== 1 ? 's' : '' }}
-    </p>
-  </div>
+<h2>{{ author.name }}</h2>
+<p>{{ illustrations.length }} illustration{{ illustrations.length !== 1 ? 's' : '' }}</p>
 
-  <div class="mb-8 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-4">
-    <form hx-patch="/api/authors/{{ author.id }}" hx-target="#author-name" hx-swap="outerHTML">
-      <label for="author-name-input" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-        Author Name
-      </label>
-      <div class="flex gap-2">
-        <input
-          id="author-name-input"
-          type="text"
-          name="name"
-          value="{{ author.name }}"
-          class="flex-1 rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-2 text-sm text-gray-900 dark:text-gray-100 shadow-sm focus:border-sky-500 focus:ring-sky-500"
-        />
-        <button
-          type="submit"
-          class="rounded-md bg-sky-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-sky-500"
-        >
-          Save
-        </button>
+<article class="card">
+  <form hx-patch="/api/authors/{{ author.id }}" hx-target="#author-name" hx-swap="outerHTML">
+    <label data-field id="author-name">
+      Author Name
+      <div style="display: flex; gap: var(--space-2);">
+        <input type="text" name="name" value="{{ author.name }}" style="flex: 1;" />
+        <button type="submit">Save</button>
       </div>
-    </form>
-  </div>
+    </label>
+  </form>
+</article>
 
-  @if(illustrations.length)
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+@if(illustrations.length)
+  <div class="container" style="margin-top: var(--space-6);">
+    <div class="row">
       @each(illustration in illustrations)
-        <a
-          href="/illustrations/{{ illustration.id }}"
-          class="block rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm hover:shadow-md transition-shadow"
-        >
-          @if(illustration.thumbnailUrl)
-            <img
-              src="{{ illustration.thumbnailUrl }}"
-              alt="{{ illustration.title }}"
-              class="w-full h-48 object-cover rounded-t-lg"
-            />
-          @else
-            <div class="w-full h-48 bg-gray-100 dark:bg-gray-700 rounded-t-lg flex items-center justify-center">
-              <svg class="h-12 w-12 text-gray-400 dark:text-gray-500" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M3.75 21h16.5A2.25 2.25 0 0022.5 18.75V5.25A2.25 2.25 0 0020.25 3H3.75A2.25 2.25 0 001.5 5.25v13.5A2.25 2.25 0 003.75 21z" />
-              </svg>
-            </div>
-          @endif
-          <div class="p-4">
-            <h3 class="font-semibold text-gray-900 dark:text-gray-100 truncate">
-              {{ illustration.title }}
-            </h3>
-          </div>
-        </a>
-      @endeach
+        <div class="col-4">
+          <a href="/illustrations/{{ illustration.id }}" class="card">
+            @if(illustration.thumbnailUrl)
+              <img
+                src="{{ illustration.thumbnailUrl }}"
+                alt="{{ illustration.title }}"
+                style="width: 100%; height: 12rem; object-fit: cover; border-radius: var(--radius) var(--radius) 0 0;"
+              />
+            @else
+              <div style="width: 100%; height: 12rem; display: flex; align-items: center; justify-content: center; background: var(--muted);">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M3.75 21h16.5A2.25 2.25 0 0022.5 18.75V5.25A2.25 2.25 0 0020.25 3H3.75A2.25 2.25 0 001.5 5.25v13.5A2.25 2.25 0 003.75 21z" />
+                </svg>
+              </div>
+            @end
+            <h4>{{ illustration.title }}</h4>
+          </a>
+        </div>
+      @end
     </div>
-  @else
-    <div class="text-center py-12">
-      <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M3.75 21h16.5A2.25 2.25 0 0022.5 18.75V5.25A2.25 2.25 0 0020.25 3H3.75A2.25 2.25 0 001.5 5.25v13.5A2.25 2.25 0 003.75 21z" />
-      </svg>
-      <p class="mt-4 text-gray-500 dark:text-gray-400">No illustrations by this author yet.</p>
-    </div>
-  @endif
+  </div>
+@else
+  <p>No illustrations by this author yet.</p>
+@end
 @end

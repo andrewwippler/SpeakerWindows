@@ -9,6 +9,9 @@ export default class DashboardController {
         .preload('tags', (builder) => {
           builder.orderBy('name', 'asc')
         })
+        .preload('uploads', (builder) => {
+          builder.orderBy('name', 'asc')
+        })
         .preload('user')
         .orderBy('created_at', 'desc')
 
