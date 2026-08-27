@@ -1,18 +1,6 @@
 @layout()
 <h2>Settings</h2>
 
-@flashMessage('success')
-  <div role="alert" data-variant="success">
-    {{ $message }}
-  </div>
-@end
-
-@flashMessage('error')
-  <div role="alert" data-variant="error">
-    {{ $message }}
-  </div>
-@end
-
 <ot-tabs data-anchor="settings">
   <div role="tablist">
     <button role="tab" id="tab-account">Account</button>

@@ -6,18 +6,6 @@
 
 <h2>Edit Illustration</h2>
 
-@flashMessage('error')
-<div role="alert" data-variant="error">
-  {{ $message }}
-</div>
-@end
-
-@flashMessage('success')
-<div role="alert" data-variant="success">
-  {{ $message }}
-</div>
-@end
-
 <form action="/illustrations/{{ illustration.id }}" method="POST">
   <input type="hidden" name="_csrf" value="{{ csrfToken || '' }}" />
   <input type="hidden" name="_method" value="PUT" />

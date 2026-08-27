@@ -1,18 +1,6 @@
 @layout()
 <h2>Contact Us</h2>
 
-@flashMessage('success')
-  <div role="alert" data-variant="success">
-    {{ $message }}
-  </div>
-@end
-
-@flashMessage('error')
-  <div role="alert" data-variant="error">
-    {{ $message }}
-  </div>
-@end
-
 <article class="card">
   <form action="/contact" method="POST">
     <input type="hidden" name="_csrf" value="{{ csrfToken || '' }}" />

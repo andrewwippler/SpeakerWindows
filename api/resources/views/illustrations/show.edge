@@ -4,18 +4,6 @@
   <a href="/illustrations">&larr; Back to Illustrations</a>
 </div>
 
-@flashMessage('error')
-  <div role="alert" data-variant="error">
-    {{ $message }}
-  </div>
-@end
-
-@flashMessage('success')
-  <div role="alert" data-variant="success">
-    {{ $message }}
-  </div>
-@end
-
 <article class="card">
   <header>
     <h2>{{ illustration.title }}</h2>
@@ -67,19 +55,24 @@
 </article>
 
 <dialog id="delete-illustration" closedby="any">
-  <form method="dialog">
-    <header>
-      <h3>Confirm Delete</h3>
-      <p>Are you sure you want to delete "{{ illustration.title }}"? This action cannot be undone.</p>
-    </header>
-    <footer>
-      <button type="button" commandfor="delete-illustration" command="close" class="outline">Cancel</button>
-      <form action="/illustrations/{{ illustration.id }}" method="POST" style="display:inline">
-        <input type="hidden" name="_csrf" value="{{ csrfToken || '' }}" />
-        <input type="hidden" name="_method" value="DELETE" />
-        <button type="submit" value="confirm" data-variant="danger">Delete</button>
-      </form>
-    </footer>
-  </form>
+  <!-- Outer dialog structure without a parent form wrapping the sub-form -->
+  <header>
+    <h3>Confirm Delete</h3>
+    <p>Are you sure you want to delete "{{ illustration.title }}"? This action cannot be undone.</p>
+  </header>
+
+  <footer>
+    <!-- Standard method="dialog" form containing just the close action -->
+    <form method="dialog" style="display:inline">
+      <button type="submit" class="outline">Cancel</button>
+    </form>
+
+    <!-- The actual POST/DELETE action form -->
+    <form action="/illustrations/{{ illustration.id }}" method="POST" style="display:inline">
+      {{ csrfField() }}
+      <input type="hidden" name="_method" value="DELETE" />
+      <button type="submit" value="confirm" data-variant="danger">Delete</button>
+    </form>
+  </footer>
 </dialog>
 @end

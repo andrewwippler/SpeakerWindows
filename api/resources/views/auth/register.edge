@@ -4,16 +4,6 @@
     <header>
       <h3>Create Account</h3>
     </header>
-    @flashMessage('error')
-      <div role="alert" data-variant="error">
-        {{ $message }}
-      </div>
-    @end
-    @flashMessage('success')
-      <div role="alert" data-variant="success">
-        {{ $message }}
-      </div>
-    @end
 
     <form method="POST" action="/register">
       {{ csrfField() }}

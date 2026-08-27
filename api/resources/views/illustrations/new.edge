@@ -3,12 +3,6 @@
   <a href="/illustrations">&larr; Back to Illustrations</a>
 </div>
 
-@flashMessage('error')
-  <div role="alert" data-variant="error">
-    {{ $message }}
-  </div>
-@end
-
 <article class="card">
   <header>
     <h3>New Illustration</h3>
@@ -29,13 +23,9 @@
       <input type="text" name="source" />
     </label>
     <label data-field>
-      Content
-      <textarea name="content" rows="8"></textarea>
-    </label>
-    <label data-field>
       Tags
       <ot-taginput>
-        <input name="tags" list="tag-list" placeholder="Add tags..." />
+        <input name="tags" list="tag-list" placeholder="Add tags..." oninput="tagInputAutoComplete(this)" />
         <datalist id="tag-list">
           @each(tag in tags)
             <option value="{{ tag.name }}">
@@ -43,7 +33,28 @@
         </datalist>
       </ot-taginput>
     </label>
+    <label data-field>
+      Content
+      <textarea name="content" rows="8"></textarea>
+    </label>
     <button type="submit">Create</button>
   </form>
 </article>
+<script>
+  const allTags = {{{ JSON.stringify(tags.map(t => t.name)) }}};
+
+  function tagInputAutoComplete(el) {
+    if (!el.list) return;
+
+    const filtered = allTags.filter(name =>
+      name.toLowerCase().startsWith(el.value.toLowerCase())
+    );
+
+    el.list.replaceChildren(...filtered.map(name => {
+      const option = document.createElement('option');
+      option.value = name;
+      return option;
+    }));
+  }
+</script>
 @end

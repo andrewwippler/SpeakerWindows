@@ -30,7 +30,7 @@ export const http = defineConfig({
   | so on.
   |
   */
-  allowMethodSpoofing: true,
+  allowMethodSpoofing: true, // Allow _method input field to override POST
 
   /*
   |--------------------------------------------------------------------------

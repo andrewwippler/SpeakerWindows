@@ -1,18 +1,6 @@
 @layout()
 <h2>Invitations</h2>
 
-@flashMessage('success')
-  <div role="alert" data-variant="success">
-    {{ $message }}
-  </div>
-@end
-
-@flashMessage('error')
-  <div role="alert" data-variant="error">
-    {{ $message }}
-  </div>
-@end
-
 @if(invitations.length)
   <div style="display: flex; flex-direction: column; gap: var(--space-4);">
     @each(invitation in invitations)
