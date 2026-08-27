@@ -23,51 +23,103 @@
     </div>
   @endif
 
-  @if(illustration.places && illustration.places.length)
+  @if(illustration.uploads && illustration.uploads.length)
     <div style="margin-top: var(--space-4);">
-      <h4>Places</h4>
-      <ul>
-        @each(place in illustration.places)
-          <li>
-            {{ place.place }}
-            @if(place.location)
-              &mdash; {{ place.location }}
-            @endif
-            @if(place.used)
-              ({{ place.used.toFormat('yyyy-MM-dd') }})
-            @endif
-          </li>
+      <h4>Attachments</h4>
+      <div style="display: flex; flex-wrap: wrap; gap: var(--space-2);">
+        @each(upload in illustration.uploads)
+          <a href="/uploads/{{ upload.name }}" target="_blank" rel="noopener">
+            @if(upload.type === 'image')
+              <img
+                src="/uploads/{{ upload.name }}"
+                alt="{{ upload.name }}"
+                style="width: 8rem; height: 8rem; object-fit: cover; border-radius: var(--radius);"
+              />
+            @else
+              <ot-tag>{{ upload.name }}</ot-tag>
+            @end
+          </a>
         @end
-      </ul>
+      </div>
     </div>
-  @endif
+  @end
 
   @if(illustration.content)
-    <div style="margin-top: var(--space-4);">
+    <div style="margin-top: var(--space-4); white-space: pre-wrap;">
       {{{ illustration.content }}}
     </div>
-  @endif
+  @end
 
   <footer>
-    <a href="/illustrations/{{ illustration.id }}/edit" class="outline">Edit</a>
-    <button commandfor="delete-illustration" command="show-modal" data-variant="danger">Delete</button>
+    @if(canEdit)
+      <a href="/illustrations/{{ illustration.id }}/edit" class="outline">Edit</a>
+      <button commandfor="delete-illustration" command="show-modal" data-variant="danger">Delete</button>
+    @end
   </footer>
 </article>
 
+@if(canEdit)
+  <article class="card" style="margin-top: var(--space-6);">
+    <header>
+      <h4>Places</h4>
+    </header>
+
+    @if(illustration.places && illustration.places.length)
+      <ul>
+        @each(place in illustration.places)
+          <li style="display: flex; justify-content: space-between; align-items: center; gap: var(--space-3);">
+            <span>
+              {{ place.place }}{{ place.location ? ', ' + place.location : '' }}
+              @if(place.used)
+                &mdash; {{ place.used.toFormat ? place.used.toFormat('yyyy-MM-dd') : place.used }}
+              @end
+            </span>
+            <form action="/illustrations/{{ illustration.id }}/places/{{ place.id }}" method="POST" style="display: inline;">
+              {{ csrfField() }}
+              <input type="hidden" name="_method" value="DELETE" />
+              <button type="submit" class="ghost small" data-variant="danger" aria-label="Delete {{ place.place }}">Delete</button>
+            </form>
+          </li>
+        @end
+      </ul>
+    @else
+      <p>No places found.</p>
+    @end
+
+    <form action="/illustrations/{{ illustration.id }}/places" method="POST" style="margin-top: var(--space-4);">
+      {{ csrfField() }}
+      <div class="grid" style="grid-template-columns: 1fr 1fr 1fr auto; gap: var(--space-3);">
+        <label data-field>
+          Place
+          <input type="text" name="place" value="{{ settings?.place || '' }}" placeholder="Place" />
+        </label>
+        <label data-field>
+          Location
+          <input type="text" name="location" value="{{ settings?.location || '' }}" placeholder="Location" />
+        </label>
+        <label data-field>
+          Used
+          <input type="date" name="used" value="{{ today }}" placeholder="yyyy-mm-dd" />
+        </label>
+        <div style="align-self: end;">
+          <button type="submit">Add Place</button>
+        </div>
+      </div>
+    </form>
+  </article>
+@end
+
 <dialog id="delete-illustration" closedby="any">
-  <!-- Outer dialog structure without a parent form wrapping the sub-form -->
   <header>
     <h3>Confirm Delete</h3>
     <p>Are you sure you want to delete "{{ illustration.title }}"? This action cannot be undone.</p>
   </header>
 
   <footer>
-    <!-- Standard method="dialog" form containing just the close action -->
     <form method="dialog" style="display:inline">
       <button type="submit" class="outline">Cancel</button>
     </form>
 
-    <!-- The actual POST/DELETE action form -->
     <form action="/illustrations/{{ illustration.id }}" method="POST" style="display:inline">
       {{ csrfField() }}
       <input type="hidden" name="_method" value="DELETE" />

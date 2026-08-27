@@ -83,6 +83,11 @@ export default defineConfig({
         files: ['tests/functional/**/*.spec.{ts,js}'],
         timeout: 60000,
       },
+      {
+        name: 'browser',
+        files: ['tests/browser/**/*.spec.{ts,js}'],
+        timeout: 60000,
+      },
     ],
   },
 })

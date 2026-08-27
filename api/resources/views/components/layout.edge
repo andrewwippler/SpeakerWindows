@@ -29,7 +29,7 @@
       <a href="/" class="unstyled"><strong>SpeakerWindows</strong></a>
 
       <menu class="buttons desktop-nav">
-        <li><a href="/" class="ghost">Tags</a></li>
+        <li><a href="/tags" class="ghost">Tags</a></li>
         <li><a href="/illustrations/new" class="ghost">New</a></li>
         <li><a href="/articles" class="ghost">Articles</a></li>
         <li><a href="/authors" class="ghost">Authors</a></li>
@@ -62,7 +62,7 @@
           x-show="mobileOpen"
           @click.outside="mobileOpen = false"
           x-transition
-          class="fixed inset-0 z-50 bg-white dark:bg-gray-900 p-6 overflow-y-auto"
+          style="position: fixed; inset: 0; z-index: 50; background: var(--background); padding: var(--space-6); overflow-y: auto;"
         >
           <div class="hstack" style="justify-content: space-between; margin-bottom: var(--space-6);">
             <a href="/" class="unstyled"><strong>SpeakerWindows</strong></a>
@@ -73,7 +73,7 @@
             </button>
           </div>
           <menu>
-            <li><a href="/" class="ghost" @click="mobileOpen = false">Tags</a></li>
+            <li><a href="/tags" class="ghost" @click="mobileOpen = false">Tags</a></li>
             <li><a href="/illustrations/new" class="ghost" @click="mobileOpen = false">New</a></li>
             <li><a href="/articles" class="ghost" @click="mobileOpen = false">Articles</a></li>
             <li><a href="/authors" class="ghost" @click="mobileOpen = false">Authors</a></li>

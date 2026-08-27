@@ -1,36 +1,114 @@
 @layout()
-<h2>Tag: {{ tag.name }}</h2>
-<p>{{ illustrations.length }} illustration{{ illustrations.length !== 1 ? 's' : '' }}</p>
 
-@if(illustrations.length)
-  <div class="container">
-    <div class="row">
-      @each(illustration in illustrations)
-        <div class="col-4">
-          <a href="/illustrations/{{ illustration.id }}" class="card">
-            @if(illustration.thumbnailUrl)
-              <img
-                src="{{ illustration.thumbnailUrl }}"
-                alt="{{ illustration.title }}"
-                style="width: 100%; height: 12rem; object-fit: cover; border-radius: var(--radius) var(--radius) 0 0;"
-              />
-            @else
-              <div style="width: 100%; height: 12rem; display: flex; align-items: center; justify-content: center; background: var(--muted);">
-                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M3.75 21h16.5A2.25 2.25 0 0022.5 18.75V5.25A2.25 2.25 0 0020.25 3H3.75A2.25 2.25 0 001.5 5.25v13.5A2.25 2.25 0 003.75 21z" />
-                </svg>
-              </div>
-            @end
-            <h4>{{ illustration.title }}</h4>
-            @if(illustration.author)
-              <p>{{ illustration.author.name }}</p>
-            @end
-          </a>
-        </div>
-      @end
-    </div>
+<div x-data="{ selected: [] }">
+  <h2>Tag: {{ tag.name }}</h2>
+  <p>{{ illustrations.length }} illustration{{ illustrations.length !== 1 ? 's' : '' }}</p>
+
+  <div style="display: flex; gap: var(--space-2); margin-bottom: var(--space-4);" x-data="{ editing: false }">
+    <button type="button" class="ghost small" @click="editing = !editing">Edit Tag</button>
+    <form
+      action="/tags/{{ tag.id }}/delete"
+      method="POST"
+      style="display: inline;"
+      onsubmit="return confirm('Delete tag &quot;{{ tag.name }}&quot;? This will remove it from all illustrations.');"
+    >
+      {{ csrfField() }}
+      <button type="submit" class="ghost small" data-variant="danger">Delete Tag</button>
+    </form>
   </div>
-@else
-  <p>No illustrations with this tag yet.</p>
-@end
+
+  <div x-cloak x-show="editing" style="margin-bottom: var(--space-4);">
+    <form action="/tags/{{ tag.id }}" method="POST" class="card">
+      {{ csrfField() }}
+      <label data-field>
+        Rename Tag
+        <input type="text" name="name" value="{{ tag.name }}" required />
+      </label>
+      <button type="submit">Update Tag</button>
+    </form>
+  </div>
+
+  @if(illustrations.length)
+
+    <form id="bulk-form" action="/tags/{{ tag.name }}/bulk" method="POST">
+      {{ csrfField() }}
+      <input type="hidden" name="action" />
+      <input type="hidden" name="private" />
+      <template
+        x-for="id in selected"
+        :key="id"
+      >
+        <input type="hidden" name="ids[]" :value="id" />
+      </template>
+    </form>
+
+    <div style="display: flex; flex-wrap: wrap; gap: var(--space-2); margin-bottom: var(--space-4);">
+      <button
+        type="button"
+        class="ghost small"
+        :disabled="selected.length === 0"
+        @click="document.querySelector('#bulk-form input[name=action]').value = 'remove_tag'; document.querySelector('#bulk-form').submit()"
+      >Remove Illustrations</button>
+      <button
+        type="button"
+        class="ghost small"
+        :disabled="selected.length === 0"
+        @click="document.querySelector('#bulk-form input[name=action]').value = 'toggle_privacy'; document.querySelector('#bulk-form input[name=private]').value = 'true'; document.querySelector('#bulk-form').submit()"
+      >Make Private</button>
+      <button
+        type="button"
+        class="ghost small"
+        :disabled="selected.length === 0"
+        @click="document.querySelector('#bulk-form input[name=action]').value = 'toggle_privacy'; document.querySelector('#bulk-form input[name=private]').value = 'false'; document.querySelector('#bulk-form').submit()"
+      >Make Public</button>
+      <button
+        type="button"
+        class="ghost small"
+        @click="selected = []"
+      >Clear Selection</button>
+      <span style="align-self: center;">Selected: <span x-text="selected.length">0</span></span>
+    </div>
+
+    <div class="container">
+      <div class="row">
+        @each(illustration in illustrations)
+          <div class="col-4">
+            <div style="display: flex; gap: var(--space-2); align-items: flex-start; margin-bottom: var(--space-1);">
+              <input
+                type="checkbox"
+                :value="'{{ illustration.id }}'"
+                x-model="selected"
+                style="margin-top: 0.5rem;"
+              />
+              @if(illustration.private)
+                <span class="ot-badge" data-variant="secondary">Private</span>
+              @end
+            </div>
+            <a href="/illustrations/{{ illustration.id }}" class="card">
+              @if(illustration.thumbnailUrl)
+                <img
+                  src="{{ illustration.thumbnailUrl }}"
+                  alt="{{ illustration.title }}"
+                  style="width: 100%; height: 12rem; object-fit: cover; border-radius: var(--radius) var(--radius) 0 0;"
+                />
+              @else
+                <div style="width: 100%; height: 12rem; display: flex; align-items: center; justify-content: center; background: var(--muted);">
+                  <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M3.75 21h16.5A2.25 2.25 0 0022.5 18.75V5.25A2.25 2.25 0 0020.25 3H3.75A2.25 2.25 0 001.5 5.25v13.5A2.25 2.25 0 003.75 21z" />
+                  </svg>
+                </div>
+              @end
+              <h4>{{ illustration.title }}</h4>
+              @if(illustration.author)
+                <p>{{ illustration.author }}</p>
+              @end
+            </a>
+          </div>
+        @end
+      </div>
+    </div>
+  @else
+    <p>No illustrations with this tag yet.</p>
+  @end
+</div>
 @end

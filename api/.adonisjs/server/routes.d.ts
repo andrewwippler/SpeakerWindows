@@ -14,6 +14,7 @@ export type ScannedRoutes = {
     'settings': { paramsTuple?: []; params?: {} }
     'settings.update': { paramsTuple?: []; params?: {} }
     'search': { paramsTuple?: []; params?: {} }
+    'search.query': { paramsTuple?: []; params?: {} }
     'illustrations': { paramsTuple?: []; params?: {} }
     'illustrations.new': { paramsTuple?: []; params?: {} }
     'illustrations.create': { paramsTuple?: []; params?: {} }
@@ -21,8 +22,15 @@ export type ScannedRoutes = {
     'illustrations.edit': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'illustrations.update': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'illustrations.destroy': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'illustrations.upload': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'illustrations.upload.destroy': { paramsTuple: [ParamValue,ParamValue]; params: {'id': ParamValue,'uploadId': ParamValue} }
+    'illustrations.place.store': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'illustrations.place.destroy': { paramsTuple: [ParamValue,ParamValue]; params: {'id': ParamValue,'placeId': ParamValue} }
     'tags.index': { paramsTuple?: []; params?: {} }
     'tags.show': { paramsTuple: [ParamValue]; params: {'name': ParamValue} }
+    'tags.update': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'tags.destroy': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'tags.bulk': { paramsTuple: [ParamValue]; params: {'name': ParamValue} }
     'authors.index': { paramsTuple?: []; params?: {} }
     'authors.show': { paramsTuple: [ParamValue]; params: {'name': ParamValue} }
     'articles': { paramsTuple?: []; params?: {} }
@@ -180,7 +188,13 @@ export type ScannedRoutes = {
     'auth.doLogin': { paramsTuple?: []; params?: {} }
     'auth.doRegister': { paramsTuple?: []; params?: {} }
     'settings.update': { paramsTuple?: []; params?: {} }
+    'search.query': { paramsTuple?: []; params?: {} }
     'illustrations.create': { paramsTuple?: []; params?: {} }
+    'illustrations.upload': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'illustrations.place.store': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'tags.update': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'tags.destroy': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'tags.bulk': { paramsTuple: [ParamValue]; params: {'name': ParamValue} }
     'contact.store': { paramsTuple?: []; params?: {} }
     'contacts.store': { paramsTuple?: []; params?: {} }
     'users.store': { paramsTuple?: []; params?: {} }
@@ -210,6 +224,8 @@ export type ScannedRoutes = {
   }
   DELETE: {
     'illustrations.destroy': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'illustrations.upload.destroy': { paramsTuple: [ParamValue,ParamValue]; params: {'id': ParamValue,'uploadId': ParamValue} }
+    'illustrations.place.destroy': { paramsTuple: [ParamValue,ParamValue]; params: {'id': ParamValue,'placeId': ParamValue} }
     'api.illustrations.destroy': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'api.tags.destroy': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'api.tags.removeIllustrations': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }

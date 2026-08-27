@@ -1,9 +1,17 @@
 @layout()
 <h2>Tags</h2>
 @if(tags && tags.length)
-  <div style="display: flex; flex-wrap: wrap; gap: var(--space-2);">
-    @each(tag in tags)
-      <a href="/tags/{{ tag.name }}"><ot-tag>{{ tag.name }}</ot-tag></a>
+  <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-4);">
+    @each(column in columns)
+      <div>
+        @each(tag in column)
+          <div style="padding-bottom: var(--space-2);">
+            <a href="/tags/{{ tag.name }}" class="unstyled" style="color: var(--sky-700, inherit);">
+              {{ display(tag.name) }}
+            </a>
+          </div>
+        @end
+      </div>
     @end
   </div>
 @else

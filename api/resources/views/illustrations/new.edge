@@ -37,24 +37,12 @@
       Content
       <textarea name="content" rows="8"></textarea>
     </label>
+    <label data-field style="flex-direction: row; align-items: center; gap: var(--space-2);">
+      <input type="checkbox" name="private" id="private" style="width: auto;" />
+      <span>Private/Personal illustration</span>
+    </label>
     <button type="submit">Create</button>
   </form>
 </article>
-<script>
-  const allTags = {{{ JSON.stringify(tags.map(t => t.name)) }}};
-
-  function tagInputAutoComplete(el) {
-    if (!el.list) return;
-
-    const filtered = allTags.filter(name =>
-      name.toLowerCase().startsWith(el.value.toLowerCase())
-    );
-
-    el.list.replaceChildren(...filtered.map(name => {
-      const option = document.createElement('option');
-      option.value = name;
-      return option;
-    }));
-  }
-</script>
+@include('components/tag_input_script')
 @end

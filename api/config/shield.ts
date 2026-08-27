@@ -20,7 +20,6 @@ const shieldConfig = defineConfig({
         "'unsafe-inline'",
         "'unsafe-eval'",
         'https://unpkg.com',
-        'https://cdn.tailwindcss.com',
         'https://cdn.jsdelivr.net',
       ],
       styleSrc: ["'self'", "'unsafe-inline'"],

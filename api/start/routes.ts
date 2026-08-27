@@ -58,6 +58,7 @@ router
     router.get('/settings', [SettingsViewController, 'index']).as('settings')
     router.post('/settings', [SettingsViewController, 'update']).as('settings.update')
     router.get('/search', [SearchViewController, 'index']).as('search')
+    router.post('/search', [SearchViewController, 'query']).as('search.query')
 
     router.get('/illustrations', [IllustrationViewController, 'index']).as('illustrations')
     router.get('/illustrations/new', [IllustrationViewController, 'new']).as('illustrations.new')
@@ -72,9 +73,30 @@ router
     router
       .delete('/illustrations/:id', [IllustrationViewController, 'destroy'])
       .as('illustrations.destroy')
+    router
+      .post('/illustrations/:id/upload', [IllustrationViewController, 'upload'])
+      .as('illustrations.upload')
+    router
+      .delete('/illustrations/:id/upload/:uploadId', [IllustrationViewController, 'destroyUpload'])
+      .as('illustrations.upload.destroy')
+    router
+      .post('/illustrations/:id/places', [IllustrationViewController, 'storePlace'])
+      .as('illustrations.place.store')
+    router
+      .delete('/illustrations/:id/places/:placeId', [IllustrationViewController, 'destroyPlace'])
+      .as('illustrations.place.destroy')
 
     router.get('/tags', [TagViewController, 'index']).as('tags.index')
     router.get('/tags/:name', [TagViewController, 'show']).as('tags.show')
+    router
+      .post('/tags/:id', [TagViewController, 'update'])
+      .as('tags.update')
+    router
+      .post('/tags/:id/delete', [TagViewController, 'destroy'])
+      .as('tags.destroy')
+    router
+      .post('/tags/:name/bulk', [TagViewController, 'bulk'])
+      .as('tags.bulk')
 
     router.get('/authors', [AuthorViewController, 'index']).as('authors.index')
     router.get('/authors/:name', [AuthorViewController, 'show']).as('authors.show')

@@ -5,14 +5,11 @@
     <div class="row">
       @each(author in authors)
         <div class="col-4">
-          <a href="/authors/{{ author.name }}" class="card">
-            <figure data-variant="avatar" class="small" aria-label="{{ author.name }}">
-              <abbr>{{ titleCase(author.name) }}</abbr>
+          <a href="/authors/{{ encodeURIComponent(author.author) }}" class="card">
+            <figure data-variant="avatar" class="small" aria-label="{{ author.author }}">
+              <abbr>{{ titleCase(author.author) }}</abbr>
             </figure>
-            <h4>{{ author.name }}</h4>
-            @if(author.illustrationsCount)
-              <p>{{ author.illustrationsCount }} illustration{{ author.illustrationsCount !== 1 ? 's' : '' }}</p>
-            @end
+            <h4>{{ author.author }}</h4>
           </a>
         </div>
       @end

@@ -1,0 +1,31 @@
+<script>
+  const allTags = {{{ JSON.stringify(tags.map(t => t.name)) }}};
+
+  function tagInputAutoComplete(el) {
+    if (!el.list) return;
+
+    const filtered = allTags.filter(name =>
+      name.toLowerCase().startsWith(el.value.toLowerCase())
+    );
+
+    el.list.replaceChildren(...filtered.map(name => {
+      const option = document.createElement('option');
+      option.value = name;
+      return option;
+    }));
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('ot-taginput').forEach((tagInput) => {
+      const inputField = tagInput?.querySelector('input');
+      if (!inputField) return;
+
+      tagInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Backspace' && inputField.value === '') {
+          e.preventDefault();
+          e.stopImmediatePropagation();
+        }
+      }, true);
+    });
+  });
+</script>

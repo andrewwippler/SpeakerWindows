@@ -44,7 +44,10 @@ export const plugins: Config['plugins'] = [
    * Configures Playwright and creates a fresh browser
    * context before every test.
    */
-  browserClient({ runInSuites: ['browser'] }),
+  browserClient({
+    runInSuites: ['browser'],
+    contextOptions: { baseURL: 'http://localhost:3333' },
+  }),
 
   /**
    * Allows reading and writing session data

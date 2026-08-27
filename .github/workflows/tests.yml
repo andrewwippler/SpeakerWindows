@@ -44,6 +44,8 @@ jobs:
       working-directory: ./api
     - run: cp ./api/.env.test ./api/.env
     - run: sleep 10
+    - run: npx playwright install --with-deps chromium
+      working-directory: ./api
     - run: npm run test:coverage
       working-directory: ./api
       env:
