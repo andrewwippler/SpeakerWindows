@@ -20,6 +20,13 @@
       const inputField = tagInput?.querySelector('input');
       if (!inputField) return;
 
+      const form = tagInput.closest('form');
+      if (form) {
+        form.addEventListener('submit', () => {
+          inputField.value = tagInput.value.join(', ');
+        });
+      }
+
       tagInput.addEventListener('keydown', (e) => {
         if (e.key === 'Backspace' && inputField.value === '') {
           e.preventDefault();

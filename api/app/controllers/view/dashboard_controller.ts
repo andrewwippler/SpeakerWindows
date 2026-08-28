@@ -1,24 +1,14 @@
 import type { HttpContext } from '@adonisjs/core/http'
-import Illustration from '#models/illustration'
+import Tag from '#models/tag'
+import { buildColumns, displayName } from '#app/helpers/tag'
 
 export default class DashboardController {
   public async index({ auth, view }: HttpContext) {
-    try {
-      const illustrations = await Illustration.query()
-        .where('user_id', `${auth.user?.id}`)
-        .preload('tags', (builder) => {
-          builder.orderBy('name', 'asc')
-        })
-        .preload('uploads', (builder) => {
-          builder.orderBy('name', 'asc')
-        })
-        .preload('user')
-        .orderBy('created_at', 'desc')
-
-      return view.render('illustrations/index', { illustrations })
-    } catch (error) {
-      console.error('Dashboard error:', error)
-      return view.render('illustrations/index', { illustrations: [] })
-    }
+    const tags = await Tag.query().where('user_id', auth.user!.id).orderBy('name')
+    return view.render('tags/index', {
+      tags,
+      columns: buildColumns(tags),
+      display: displayName,
+    })
   }
 }

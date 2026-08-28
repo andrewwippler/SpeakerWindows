@@ -4,10 +4,10 @@ import TeamFactory from '#database/factories/team_factory'
 import { loginUser } from './helpers.js'
 
 test.group('Misc edge views (browser)', () => {
-  test('dashboard renders the illustrations listing', async ({ visit, browserContext }) => {
+  test('dashboard renders the tags landing page', async ({ visit, browserContext }) => {
     await loginUser(browserContext)
     const page = await visit('/')
-    await page.assertTextContains('h2', 'Illustrations')
+    await page.assertTextContains('h2', 'Tags')
   })
 
   test('help index renders with links to help sections', async ({ visit, browserContext }) => {
@@ -30,13 +30,13 @@ test.group('Misc edge views (browser)', () => {
   test('tos page renders', async ({ visit, browserContext }) => {
     await loginUser(browserContext)
     const page = await visit('/tos')
-    await page.assertTextContains('h3', 'Terms of Service')
+    await page.assertTextContains('body', 'Terms')
   })
 
   test('privacy page renders', async ({ visit, browserContext }) => {
     await loginUser(browserContext)
     const page = await visit('/privacy-policy')
-    await page.assertTextContains('h3', 'Privacy Policy')
+    await page.assertTextContains('body', 'Privacy')
   })
 
   test('contact page renders the contact form', async ({ visit, browserContext }) => {

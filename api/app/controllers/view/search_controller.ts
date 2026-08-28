@@ -40,10 +40,10 @@ export default class SearchController {
         .where('place', 'LIKE', `%${query}%`)
         .andWhere('user_id', userId)
 
-      return view.render('search/index', { illustrations, tags, places, query })
+      return view.render('search/results', { illustrations, tags, places, query })
     } catch (error) {
       console.error('Search error:', error)
-      return view.render('search/index', {
+      return view.render('search/results', {
         illustrations: [],
         tags: [],
         places: [],

@@ -5,25 +5,22 @@
   <div role="tablist">
     <button role="tab" id="tab-account">Account</button>
     <button role="tab" id="tab-defaults">Defaults</button>
-    @if(team)
-      <button role="tab" id="tab-team">Team</button>
-    @endif
+    <button role="tab" id="tab-team">Team</button>
+    <button role="tab" id="tab-api">API Key</button>
+    <button role="tab" id="tab-import">Import</button>
   </div>
 
   <div role="tabpanel" aria-labelledby="tab-account">
     <article class="card">
-      <form action="/settings" method="POST">
-        <input type="hidden" name="_csrf" value="{{ csrfToken || '' }}" />
-        <label data-field>
-          Email
-          <input type="email" value="{{ auth?.user?.email || '' }}" disabled />
-          <small>Email cannot be changed here.</small>
-        </label>
-        <label data-field>
-          Illustrations
-          <p>{{ illustrationsCount || 0 }} total</p>
-        </label>
-      </form>
+      <label data-field>
+        Email
+        <input type="email" value="{{ auth.user.email || '' }}" disabled />
+        <small>Email cannot be changed here.</small>
+      </label>
+      <label data-field>
+        Illustrations
+        <p>{{ illustrationsCount || 0 }} total</p>
+      </label>
     </article>
   </div>
 
@@ -43,36 +40,151 @@
           <div role="alert" data-variant="warning">
             {{ settings.count }} illustration(s) tagged "To-Fix" or "Untitled"
           </div>
-        @endif
+        @end
         @if(settings.emptyTags)
           <div role="alert" data-variant="warning">
             {{ settings.emptyTags }} illustration(s) with no tags
           </div>
-        @endif
+        @end
         <button type="submit">Save Defaults</button>
       </form>
     </article>
   </div>
 
-  @if(team)
-    <div role="tabpanel" aria-labelledby="tab-team">
-      <article class="card">
-        <dl>
-          <div style="display: flex; justify-content: space-between;">
-            <dt>Team Name</dt>
-            <dd>{{ team.name }}</dd>
-          </div>
-          <div style="display: flex; justify-content: space-between;">
-            <dt>Members</dt>
-            <dd>{{ team.membersCount || '?' }}</dd>
-          </div>
-          <div style="display: flex; justify-content: space-between;">
-            <dt>Role</dt>
-            <dd>{{ team.role || 'Member' }}</dd>
-          </div>
-        </dl>
-      </article>
-    </div>
-  @endif
+  <div role="tabpanel" aria-labelledby="tab-team">
+    <article class="card">
+      <h3>{{ team.name }}</h3>
+
+      <form action="/settings/team/members" method="POST" style="margin-bottom: var(--space-4);">
+        <input type="hidden" name="_csrf" value="{{ csrfToken || '' }}" />
+        <label data-field>
+          Add member by email
+          <input type="email" name="email" placeholder="member@example.com" required />
+        </label>
+        <label data-field>
+          Role
+          <select name="role">
+            <option value="editor">Editor</option>
+            <option value="creator">Creator</option>
+            <option value="readonly">Read Only</option>
+            <option value="owner">Owner</option>
+          </select>
+        </label>
+        <button type="submit">Add Member</button>
+      </form>
+
+      @if(team.members && team.members.length)
+        <table>
+          <thead>
+            <tr>
+              <th>Email</th>
+              <th>Role</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            @each(member in team.members)
+              <tr>
+                <td>{{ member.email }}</td>
+                <td>
+                  <form action="/settings/team/members/{{ member.userId }}" method="POST" data-role-form>
+                    <input type="hidden" name="_csrf" value="{{ csrfToken || '' }}" />
+                    <select name="role" data-role-select data-user="{{ member.userId }}">
+                      <option value="owner" {{ member.role === 'owner' ? 'selected' : '' }}>Owner</option>
+                      <option value="creator" {{ member.role === 'creator' ? 'selected' : '' }}>Creator</option>
+                      <option value="editor" {{ member.role === 'editor' ? 'selected' : '' }}>Editor</option>
+                      <option value="readonly" {{ member.role === 'readonly' ? 'selected' : '' }}>Read Only</option>
+                    </select>
+                    <button type="submit">Save</button>
+                  </form>
+                </td>
+                <td>
+                  @if(member.role !== 'owner')
+                    <form action="/settings/team/members/{{ member.userId }}/remove" method="POST" style="display: inline;">
+                      <input type="hidden" name="_csrf" value="{{ csrfToken || '' }}" />
+                      <button type="submit" class="ghost danger" data-remove-member>Remove</button>
+                    </form>
+                  @end
+                </td>
+              </tr>
+            @end
+          </tbody>
+        </table>
+      @else
+        <p>No team members yet.</p>
+      @end
+    </article>
+  </div>
+
+  <div role="tabpanel" aria-labelledby="tab-api">
+    <article class="card">
+      <h3>API Key</h3>
+      <p>
+        Use this key to authenticate against the SpeakerWindows API and the
+        <a href="/help/import">import tooling</a>.
+      </p>
+      <label data-field>
+        Your API Key
+        <input type="text" readonly value="{{ apiToken || '' }}" data-api-key-input />
+      </label>
+      <div style="display: flex; gap: var(--space-2); margin-top: var(--space-3);">
+        <button type="button" data-copy-api-key>Copy API Key</button>
+        <form action="/settings/api-key/rotate" method="POST" style="display: inline;">
+          <input type="hidden" name="_csrf" value="{{ csrfToken || '' }}" />
+          <button type="submit" class="ghost">Generate New Key</button>
+        </form>
+      </div>
+    </article>
+  </div>
+
+  <div role="tabpanel" aria-labelledby="tab-import">
+    <article class="card">
+      <h3>Import Highlights</h3>
+      <p>
+        Import your reading highlights by exporting them from your reading app and
+        uploading the file below. New highlights are added to your library without
+        duplicating anything you've already imported.
+      </p>
+      <p>Supported sources:</p>
+      <ul style="margin-top: 0;">
+        <li><strong>Readwise</strong> &mdash; export highlights as CSV</li>
+        <li><strong>KOReader</strong> &mdash; export highlights as JSON (one.json or all.json)</li>
+        <li><strong>Play Books</strong> &mdash; export notes as HTML or DOCX</li>
+        <li><strong>Kindle</strong> &mdash; export PDF notes</li>
+      </ul>
+      <p>
+        For the full walkthrough, including the <code>sw-importer</code> CLI tool,
+        see the <a href="/help/import">import help page</a>.
+      </p>
+      <form action="/settings/import" method="POST" enctype="multipart/form-data">
+        <input type="hidden" name="_csrf" value="{{ csrfToken || '' }}" />
+        <label data-field>
+          Source
+          <select name="importer">
+            <option value="readwise">Readwise (CSV)</option>
+            <option value="koreader">KOReader (JSON)</option>
+            <option value="playbooks">Play Books (HTML/DOCX)</option>
+            <option value="kindle">Kindle (PDF)</option>
+          </select>
+        </label>
+        <label data-field>
+          File
+          <input type="file" name="file" accept=".csv,.json,.html,.htm,.docx,.pdf" required />
+        </label>
+        <button type="submit">Import</button>
+      </form>
+    </article>
+  </div>
 </ot-tabs>
+
+<script>
+  document.querySelector('[data-copy-api-key]')?.addEventListener('click', function () {
+    const input = document.querySelector('[data-api-key-input]')
+    if (!input || !input.value) return
+    input.select()
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(input.value).then(() => {})
+    }
+  })
+</script>
 @end

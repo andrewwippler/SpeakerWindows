@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -12,12 +13,71 @@
   <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
   <script src="/oat.min.js" defer></script>
   <style>
-    [x-cloak] { display: none !important; }
-    .desktop-nav { display: flex; gap: var(--space-3); align-items: center; }
-    .mobile-toggle { display: none; }
+    [x-cloak] {
+      display: none !important;
+    }
+
+    .desktop-nav {
+      display: flex;
+      gap: var(--space-3);
+      align-items: center;
+    }
+
+    .mobile-toggle {
+      display: none;
+    }
+
+    .ghost {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45em;
+    }
+
+    .icon {
+      width: 1.1em;
+      height: 1.1em;
+      flex-shrink: 0;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .icon-only {
+      width: 1.1em;
+      height: 1.1em;
+      flex-shrink: 0;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .icon-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45em;
+    }
+
+    menu ul,
+    .mobile-menu ul,
+    menu > li,
+    .mobile-menu li {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
     @media (max-width: 768px) {
-      .desktop-nav { display: none !important; }
-      .mobile-toggle { display: flex; }
+      .desktop-nav {
+        display: none !important;
+      }
+
+      .mobile-toggle {
+        display: flex;
+      }
     }
   </style>
 </head>
@@ -26,27 +86,28 @@
 
   <header>
     <nav data-topnav style="justify-content: center;">
-      <a href="/" class="unstyled"><strong>SpeakerWindows</strong></a>
+      <a href="/tags" class="unstyled"><strong>SpeakerWindows</strong></a>
 
       <menu class="buttons desktop-nav">
-        <li><a href="/tags" class="ghost">Tags</a></li>
-        <li><a href="/illustrations/new" class="ghost">New</a></li>
-        <li><a href="/articles" class="ghost">Articles</a></li>
-        <li><a href="/authors" class="ghost">Authors</a></li>
-        <li><a href="/search" class="ghost">Search</a></li>
-        <li><a href="/settings" class="ghost">Settings</a></li>
-        <li><a href="/help" class="ghost">Help</a></li>
+        <li><a href="/tags" class="ghost"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="/images/feather-sprite.svg#tag"></use></svg>Tags</a></li>
+        <li><a href="/illustrations/new" class="ghost"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="/images/feather-sprite.svg#plus"></use></svg>New</a></li>
+        <li><a href="/articles" class="ghost"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="/images/feather-sprite.svg#book-open"></use></svg>Articles</a></li>
+        <li><a href="/authors" class="ghost"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="/images/feather-sprite.svg#users"></use></svg>Authors</a></li>
+        <li><a href="/search" class="ghost"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="/images/feather-sprite.svg#search"></use></svg>Search</a></li>
       </menu>
 
       <span class="desktop-nav">
         <ot-dropdown>
           <button popovertarget="user-menu" class="ghost small">
             {{ auth?.user?.fullName || 'Account' }}
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="m6 9 6 6 6-6" />
+            </svg>
           </button>
           <menu popover id="user-menu">
-            <a href="/settings" role="menuitem" class="ghost">Settings</a>
-            <a href="/logout" role="menuitem" class="ghost">Sign Out</a>
+            <a href="/settings" role="menuitem" class="ghost"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="/images/feather-sprite.svg#settings"></use></svg>Settings</a>
+            <a href="/help" role="menuitem" class="ghost"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="/images/feather-sprite.svg#help-circle"></use></svg>Help</a>
+            <a href="/logout" role="menuitem" class="ghost"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="/images/feather-sprite.svg#log-out"></use></svg>Sign Out</a>
           </menu>
         </ot-dropdown>
       </span>
@@ -54,34 +115,29 @@
       <span class="mobile-toggle" x-data="{ mobileOpen: false }">
         <button type="button" class="ghost small" @click="mobileOpen = !mobileOpen">
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"/>
+            <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
           </svg>
         </button>
-        <div
-          x-cloak
-          x-show="mobileOpen"
-          @click.outside="mobileOpen = false"
-          x-transition
-          style="position: fixed; inset: 0; z-index: 50; background: var(--background); padding: var(--space-6); overflow-y: auto;"
-        >
+        <div x-cloak x-show="mobileOpen" @click.outside="mobileOpen = false" x-transition
+          style="position: fixed; inset: 0; z-index: 50; background: var(--background); padding: var(--space-6); overflow-y: auto;">
           <div class="hstack" style="justify-content: space-between; margin-bottom: var(--space-6);">
-            <a href="/" class="unstyled"><strong>SpeakerWindows</strong></a>
+            <a href="/tags" class="unstyled"><strong>SpeakerWindows</strong></a>
             <button type="button" class="ghost small" @click="mobileOpen = false">
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
               </svg>
             </button>
           </div>
-          <menu>
-            <li><a href="/tags" class="ghost" @click="mobileOpen = false">Tags</a></li>
-            <li><a href="/illustrations/new" class="ghost" @click="mobileOpen = false">New</a></li>
-            <li><a href="/articles" class="ghost" @click="mobileOpen = false">Articles</a></li>
-            <li><a href="/authors" class="ghost" @click="mobileOpen = false">Authors</a></li>
-            <li><a href="/search" class="ghost" @click="mobileOpen = false">Search</a></li>
-            <li><a href="/settings" class="ghost" @click="mobileOpen = false">Settings</a></li>
-            <li><a href="/help" class="ghost" @click="mobileOpen = false">Help</a></li>
+          <menu class="mobile-menu">
+            <li><a href="/tags" class="ghost" @click="mobileOpen = false"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="/images/feather-sprite.svg#tag"></use></svg>Tags</a></li>
+            <li><a href="/illustrations/new" class="ghost" @click="mobileOpen = false"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="/images/feather-sprite.svg#plus"></use></svg>New</a></li>
+            <li><a href="/articles" class="ghost" @click="mobileOpen = false"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="/images/feather-sprite.svg#book-open"></use></svg>Articles</a></li>
+            <li><a href="/authors" class="ghost" @click="mobileOpen = false"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="/images/feather-sprite.svg#users"></use></svg>Authors</a></li>
+            <li><a href="/search" class="ghost" @click="mobileOpen = false"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="/images/feather-sprite.svg#search"></use></svg>Search</a></li>
+            <li><a href="/settings" class="ghost" @click="mobileOpen = false"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="/images/feather-sprite.svg#settings"></use></svg>Settings</a></li>
+            <li><a href="/help" class="ghost" @click="mobileOpen = false"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="/images/feather-sprite.svg#help-circle"></use></svg>Help</a></li>
             <hr>
-            <li><a href="/logout" class="ghost" @click="mobileOpen = false">Sign Out</a></li>
+            <li><a href="/logout" class="ghost" @click="mobileOpen = false"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="/images/feather-sprite.svg#log-out"></use></svg>Sign Out</a></li>
           </menu>
         </div>
       </span>
@@ -89,28 +145,28 @@
   </header>
 
   @flashMessage('error')
-    <div class="container" style="padding-top: var(--space-4);">
-      <div role="alert" data-variant="error">
-        {{ $message }}
-      </div>
+  <div class="container" style="padding-top: var(--space-4);">
+    <div role="alert" data-variant="error">
+      {{ $message }}
     </div>
+  </div>
   @end
 
   @flashMessage('success')
-    <div class="container" style="padding-top: var(--space-4);">
-      <div role="alert" data-variant="success">
-        {{ $message }}
-      </div>
+  <div class="container" style="padding-top: var(--space-4);">
+    <div role="alert" data-variant="success">
+      {{ $message }}
     </div>
+  </div>
   @end
 
-  <main>
-  <div class="container">
-    {{{ await $slots.main() }}}
-  </div>
+  <main class="justify-center">
+    <div class="container w-100 ">
+      {{{ await $slots.main() }}}
+    </div>
   </main>
 
-  <footer style="text-align: center;">
+  <footer class="align-center" style="margin-top: var(--space-6); padding: var(--space-6);">
     <p>
       SpeakerWindows &copy; Copyright 2017-{{ new Date().getFullYear() }} Andrew Wippler
       &middot;
@@ -123,4 +179,5 @@
   </footer>
 
 </body>
+
 </html>

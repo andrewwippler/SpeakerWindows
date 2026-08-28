@@ -13,6 +13,11 @@ export type ScannedRoutes = {
     'dashboard.index': { paramsTuple?: []; params?: {} }
     'settings': { paramsTuple?: []; params?: {} }
     'settings.update': { paramsTuple?: []; params?: {} }
+    'settings.team.add': { paramsTuple?: []; params?: {} }
+    'settings.team.update': { paramsTuple: [ParamValue]; params: {'userId': ParamValue} }
+    'settings.team.remove': { paramsTuple: [ParamValue]; params: {'userId': ParamValue} }
+    'settings.apiKey.rotate': { paramsTuple?: []; params?: {} }
+    'settings.import': { paramsTuple?: []; params?: {} }
     'search': { paramsTuple?: []; params?: {} }
     'search.query': { paramsTuple?: []; params?: {} }
     'illustrations': { paramsTuple?: []; params?: {} }
@@ -188,6 +193,11 @@ export type ScannedRoutes = {
     'auth.doLogin': { paramsTuple?: []; params?: {} }
     'auth.doRegister': { paramsTuple?: []; params?: {} }
     'settings.update': { paramsTuple?: []; params?: {} }
+    'settings.team.add': { paramsTuple?: []; params?: {} }
+    'settings.team.update': { paramsTuple: [ParamValue]; params: {'userId': ParamValue} }
+    'settings.team.remove': { paramsTuple: [ParamValue]; params: {'userId': ParamValue} }
+    'settings.apiKey.rotate': { paramsTuple?: []; params?: {} }
+    'settings.import': { paramsTuple?: []; params?: {} }
     'search.query': { paramsTuple?: []; params?: {} }
     'illustrations.create': { paramsTuple?: []; params?: {} }
     'illustrations.upload': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }

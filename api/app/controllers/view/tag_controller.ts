@@ -2,29 +2,16 @@ import type { HttpContext } from '@adonisjs/core/http'
 import Tag from '#models/tag'
 import Illustration from '#models/illustration'
 import _ from 'lodash'
+import { buildColumns, displayName } from '#app/helpers/tag'
 
 export default class TagController {
   public async index({ view, auth }: HttpContext) {
     const tags = await Tag.query().where('user_id', auth.user!.id).orderBy('name')
     return view.render('tags/index', {
       tags,
-      columns: this.buildColumns(tags),
-      display: this.displayName,
+      columns: buildColumns(tags),
+      display: displayName,
     })
-  }
-
-  private displayName(name: string): string {
-    return name.replace(/-/g, ' ')
-  }
-
-  private buildColumns(tags: Tag[]): Tag[][] {
-    if (tags.length === 0) return []
-    const rowsPerColumn = Math.ceil(tags.length / 3)
-    return [
-      tags.slice(0, rowsPerColumn),
-      tags.slice(rowsPerColumn, rowsPerColumn * 2),
-      tags.slice(rowsPerColumn * 2),
-    ]
   }
 
   public async show({ params, auth, response, view }: HttpContext) {

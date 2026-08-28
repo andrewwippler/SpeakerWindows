@@ -57,6 +57,21 @@ router
     router.get('/dashboard', [DashboardController, 'index']).as('dashboard.index')
     router.get('/settings', [SettingsViewController, 'index']).as('settings')
     router.post('/settings', [SettingsViewController, 'update']).as('settings.update')
+    router
+      .post('/settings/team/members', [SettingsViewController, 'addMember'])
+      .as('settings.team.add')
+    router
+      .post('/settings/team/members/:userId', [SettingsViewController, 'updateMember'])
+      .as('settings.team.update')
+    router
+      .post('/settings/team/members/:userId/remove', [SettingsViewController, 'removeMember'])
+      .as('settings.team.remove')
+    router
+      .post('/settings/api-key/rotate', [SettingsViewController, 'rotateApiKey'])
+      .as('settings.apiKey.rotate')
+    router
+      .post('/settings/import', [SettingsViewController, 'importHighlights'])
+      .as('settings.import')
     router.get('/search', [SearchViewController, 'index']).as('search')
     router.post('/search', [SearchViewController, 'query']).as('search.query')
 

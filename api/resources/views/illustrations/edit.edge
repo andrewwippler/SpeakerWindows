@@ -1,96 +1,132 @@
 @layout()
 
 <div style="margin-bottom: var(--space-4);">
-  <a href="/illustrations/{{ illustration.id }}">&larr; Back to Illustration</a>
+  <a class="icon-link" href="/illustrations/{{ illustration.id }}">
+    <svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="/images/feather-sprite.svg#arrow-left"></use></svg>Back to Illustration
+  </a>
 </div>
 
-<h2>Edit Illustration</h2>
+<article class="card">
+  <header>
+    <h3>Edit Illustration</h3>
+  </header>
 
-@if(illustration.uploads && illustration.uploads.length)
-  <article class="card" style="margin-bottom: var(--space-6);">
-    <header><h4>Attachments</h4></header>
-    <div style="display: flex; flex-wrap: wrap; gap: var(--space-3);">
-      @each(upload in illustration.uploads)
-        <div style="display: flex; align-items: center; gap: var(--space-3);">
-          <a href="/uploads/{{ upload.name }}" target="_blank" rel="noopener">
-            @if(upload.type === 'image')
-              <img
-                src="/uploads/{{ upload.name }}"
-                alt="{{ upload.name }}"
-                style="width: 6rem; height: 6rem; object-fit: cover; border-radius: var(--radius);"
-              />
-            @else
-              {{ upload.name }}
-            @end
-          </a>
-          <form action="/illustrations/{{ illustration.id }}/upload/{{ upload.id }}" method="POST">
-            {{ csrfField() }}
-            <input type="hidden" name="_method" value="DELETE" />
-            <button type="submit" class="ghost small" data-variant="danger" aria-label="Delete {{ upload.name }}">Delete</button>
-          </form>
-        </div>
-      @end
-    </div>
-  </article>
-@end
-
-<article class="card" style="margin-bottom: var(--space-6);">
-  <header><h4>Upload a file</h4></header>
-  <form action="/illustrations/{{ illustration.id }}/upload" method="POST" enctype="multipart/form-data">
+  <form
+    action="/illustrations/{{ illustration.id }}"
+    method="POST"
+    class="container"
+    enctype="multipart/form-data"
+  >
     {{ csrfField() }}
-    <label data-field>
-      File
-      <input type="file" name="illustration_image" accept=".png,.jpg,.jpeg,.gif,.pdf" />
-      <small>PNG, JPG, GIF, PDF &mdash; max 20MB</small>
-    </label>
-    <button type="submit" name="upload_submit" value="1">Upload</button>
+    <input type="hidden" name="_method" value="PUT" />
+
+    <div class="row">
+      <div class="col-12">
+        <label data-field>
+          <input type="checkbox" name="private" id="private" {{ illustration.private ? 'checked' : '' }} />
+          <span>Private/Personal illustration</span>
+        </label>
+      </div>
+      <div class="col-6">
+        <label data-field>
+          Title
+          <input type="text" name="title" value="{{ illustration.title || '' }}" required />
+        </label>
+      </div>
+      <div class="col-6">
+        <label data-field>
+          Author
+          <input type="text" name="author" value="{{ illustration.author || '' }}" />
+        </label>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-12">
+        <label data-field>
+          Source
+          <input type="text" name="source" value="{{ illustration.source || '' }}" />
+        </label>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-12">
+        <label data-field>
+          Illustration Image
+          <input type="file" name="illustration_image" accept=".png,.jpg,.jpeg,.gif,.pdf" />
+          <small>PNG, JPG, GIF, PDF &mdash; max 20MB</small>
+        </label>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-12">
+        <label data-field>
+          Tags
+          <ot-taginput value="{{ illustration.tags ? illustration.tags.map(t => t.name).join(', ') : '' }}">
+            <input name="tags" list="tag-list" placeholder="Add tags..." oninput="tagInputAutoComplete(this)" />
+            <datalist id="tag-list">
+              @each(tag in tags)
+                <option value="{{ tag.name }}"></option>
+              @end
+            </datalist>
+          </ot-taginput>
+        </label>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-12">
+        <label data-field>
+          Content
+          <textarea name="content" rows="8">{{ illustration.content || '' }}</textarea>
+        </label>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-12 align-right">
+        <a href="/illustrations/{{ illustration.id }}" class="outline icon-link">
+          <svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="/images/feather-sprite.svg#arrow-left"></use></svg>Back
+        </a>
+        <button type="submit" class="ghost">
+          <svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="/images/feather-sprite.svg#save"></use></svg>Save
+        </button>
+      </div>
+    </div>
   </form>
+
+  @if(illustration.uploads && illustration.uploads.length)
+    <section style="margin-top: var(--space-4);">
+      <h4>Attachments</h4>
+      <div style="display: flex; flex-wrap: wrap; gap: var(--space-3);">
+        @each(upload in illustration.uploads)
+          <div style="display: flex; align-items: center; gap: var(--space-3);">
+            <a href="/uploads/{{ upload.name }}" target="_blank" rel="noopener">
+              @if(upload.type === 'image')
+                <img
+                  src="/uploads/{{ upload.name }}"
+                  alt="{{ upload.name }}"
+                  style="width: 6rem; height: 6rem; object-fit: cover; border-radius: var(--radius);"
+                />
+              @else
+                {{ upload.name }}
+              @end
+            </a>
+            <form action="/illustrations/{{ illustration.id }}/upload/{{ upload.id }}" method="POST">
+              {{ csrfField() }}
+              <input type="hidden" name="_method" value="DELETE" />
+              <button type="submit" class="ghost small icon-link" data-variant="danger" aria-label="Delete {{ upload.name }}">
+                <svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="/images/feather-sprite.svg#trash-2"></use></svg>Delete
+              </button>
+            </form>
+          </div>
+        @end
+      </div>
+    </section>
+  @end
 </article>
 
-<form action="/illustrations/{{ illustration.id }}" method="POST">
-  <input type="hidden" name="_csrf" value="{{ csrfToken || '' }}" />
-  <input type="hidden" name="_method" value="PUT" />
-  <label data-field>
-    Title
-    <input type="text" name="title" value="{{ illustration.title || '' }}" required />
-  </label>
-  <label data-field>
-    Author
-    <input type="text" name="author" value="{{ illustration.author || '' }}" />
-  </label>
-  <label data-field>
-    Source
-    <input type="text" name="source" value="{{ illustration.source || '' }}" />
-  </label>
-  <label data-field>
-    Tags
-    <ot-taginput value="{{ illustration.tags ? illustration.tags.map(t => t.name).join(', ') : '' }}">
-      <input name="tags" list="tag-list" placeholder="Add tags..." oninput="tagInputAutoComplete(this)" />
-      <datalist id="tag-list">
-        @each(tag in tags)
-        <option value="{{ tag.name }}">
-          @end
-      </datalist>
-    </ot-taginput>
-  </label>
-  <label data-field>
-    Content
-    <textarea name="content" rows="12">{{ illustration.content || '' }}</textarea>
-  </label>
-  <label data-field style="flex-direction: row; align-items: center; gap: var(--space-2);">
-    <input
-      type="checkbox"
-      name="private"
-      id="private"
-      {{ illustration.private ? 'checked' : '' }}
-      style="width: auto;"
-    />
-    <span>Private/Personal illustration</span>
-  </label>
-  <div style="display: flex; gap: var(--space-3); margin-top: var(--space-4);">
-    <button type="submit">Save</button>
-    <a href="/illustrations/{{ illustration.id }}" class="outline">Cancel</a>
-  </div>
-</form>
 @include('components/tag_input_script')
 @end

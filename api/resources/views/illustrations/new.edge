@@ -8,41 +8,84 @@
     <h3>New Illustration</h3>
   </header>
 
-  <form action="/illustrations" method="POST">
-    <input type="hidden" name="_csrf" value="{{ csrfToken || '' }}" />
-    <label data-field>
-      Title
-      <input type="text" name="title" required />
-    </label>
-    <label data-field>
-      Author
-      <input type="text" name="author" />
-    </label>
-    <label data-field>
-      Source
-      <input type="text" name="source" />
-    </label>
-    <label data-field>
-      Tags
-      <ot-taginput>
-        <input name="tags" list="tag-list" placeholder="Add tags..." oninput="tagInputAutoComplete(this)" />
-        <datalist id="tag-list">
-          @each(tag in tags)
-            <option value="{{ tag.name }}">
-          @end
-        </datalist>
-      </ot-taginput>
-    </label>
-    <label data-field>
-      Content
-      <textarea name="content" rows="8"></textarea>
-    </label>
-    <label data-field style="flex-direction: row; align-items: center; gap: var(--space-2);">
-      <input type="checkbox" name="private" id="private" style="width: auto;" />
-      <span>Private/Personal illustration</span>
-    </label>
-    <button type="submit">Create</button>
+  <form action="/illustrations" method="POST" class="container" enctype="multipart/form-data">
+    {{ csrfField() }}
+
+    <div class="row">
+      <div class="col-12">
+        <label data-field>
+          <input type="checkbox" name="private" id="private" />
+          <span>Private/Personal illustration</span>
+        </label>
+      </div>
+      <div class="col-6">
+        <label data-field>
+          Title
+          <input type="text" name="title" required />
+        </label>
+      </div>
+      <div class="col-6">
+        <label data-field>
+          Author
+          <input type="text" name="author" />
+        </label>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-12">
+        <label data-field>
+          Source
+          <input type="text" name="source" />
+        </label>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-12">
+        <label data-field>
+          Illustration Image
+          <input type="file" name="illustration_image" accept=".png,.jpg,.jpeg,.gif,.pdf" />
+          <small>PNG, JPG, GIF, PDF &mdash; max 20MB</small>
+        </label>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-12">
+        <label data-field>
+          Tags
+          <ot-taginput>
+            <input name="tags" list="tag-list" placeholder="Add tags..." oninput="tagInputAutoComplete(this)" />
+            <datalist id="tag-list">
+              @each(tag in tags)
+                <option value="{{ tag.name }}"></option>
+              @end
+            </datalist>
+          </ot-taginput>
+        </label>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-12">
+        <label data-field>
+          Content
+          <textarea name="content" rows="8"></textarea>
+        </label>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-12 align-right">
+        <button type="button" class="icon-link" onclick="history.back()">
+          <svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="/images/feather-sprite.svg#arrow-left"></use></svg>Back
+        </button>
+        <button type="submit">Create</button>
+      </div>
+    </div>
   </form>
 </article>
+
 @include('components/tag_input_script')
 @end

@@ -1,11 +1,13 @@
 @layout()
 
-<div x-data="{ selected: [] }">
+<div x-data="{ selected: [], editing: false }">
   <h2>Tag: {{ tag.name }}</h2>
   <p>{{ illustrations.length }} illustration{{ illustrations.length !== 1 ? 's' : '' }}</p>
 
-  <div style="display: flex; gap: var(--space-2); margin-bottom: var(--space-4);" x-data="{ editing: false }">
-    <button type="button" class="ghost small" @click="editing = !editing">Edit Tag</button>
+  <div style="display: flex; gap: var(--space-2); margin-bottom: var(--space-4);">
+    <button type="button" class="ghost small icon-link" @click="editing = !editing">
+      <svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="/images/feather-sprite.svg#edit-2"></use></svg>Edit Tag
+    </button>
     <form
       action="/tags/{{ tag.id }}/delete"
       method="POST"
@@ -13,7 +15,9 @@
       onsubmit="return confirm('Delete tag &quot;{{ tag.name }}&quot;? This will remove it from all illustrations.');"
     >
       {{ csrfField() }}
-      <button type="submit" class="ghost small" data-variant="danger">Delete Tag</button>
+      <button type="submit" class="ghost small icon-link" data-variant="danger">
+        <svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="/images/feather-sprite.svg#trash-2"></use></svg>Delete Tag
+      </button>
     </form>
   </div>
 

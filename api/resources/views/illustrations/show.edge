@@ -52,8 +52,12 @@
 
   <footer>
     @if(canEdit)
-      <a href="/illustrations/{{ illustration.id }}/edit" class="outline">Edit</a>
-      <button commandfor="delete-illustration" command="show-modal" data-variant="danger">Delete</button>
+      <a href="/illustrations/{{ illustration.id }}/edit" class="outline icon-link">
+        <svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="/images/feather-sprite.svg#edit-2"></use></svg>Edit
+      </a>
+      <button commandfor="delete-illustration" command="show-modal" data-variant="danger" class="icon-link">
+        <svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="/images/feather-sprite.svg#trash-2"></use></svg>Delete
+      </button>
     @end
   </footer>
 </article>
@@ -77,7 +81,7 @@
             <form action="/illustrations/{{ illustration.id }}/places/{{ place.id }}" method="POST" style="display: inline;">
               {{ csrfField() }}
               <input type="hidden" name="_method" value="DELETE" />
-              <button type="submit" class="ghost small" data-variant="danger" aria-label="Delete {{ place.place }}">Delete</button>
+              <button type="submit" class="ghost small icon-link" data-variant="danger" aria-label="Delete {{ place.place }}"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="/images/feather-sprite.svg#trash-2"></use></svg>Delete</button>
             </form>
           </li>
         @end
@@ -123,7 +127,9 @@
     <form action="/illustrations/{{ illustration.id }}" method="POST" style="display:inline">
       {{ csrfField() }}
       <input type="hidden" name="_method" value="DELETE" />
-      <button type="submit" value="confirm" data-variant="danger">Delete</button>
+      <button type="submit" value="confirm" data-variant="danger" class="icon-link">
+        <svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="/images/feather-sprite.svg#trash-2"></use></svg>Delete
+      </button>
     </form>
   </footer>
 </dialog>

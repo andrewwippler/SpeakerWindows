@@ -10,6 +10,7 @@
   style="margin-bottom: var(--space-6);"
 >
   <fieldset class="group">
+    {{ csrfField() }}
     <input type="text" name="query" placeholder="Search illustrations..." value="{{ query || '' }}" required />
     <button type="submit">Search</button>
   </fieldset>

@@ -14,7 +14,7 @@
     @if(illustration.tags && illustration.tags.length)
       <div style="display: flex; flex-wrap: wrap; gap: var(--space-1); margin-top: var(--space-2);">
         @each(tag in illustration.tags)
-          <ot-tag>{{ tag.name }}</ot-tag>
+          <ot-tag><a href="/tags/{{ tag.name }}">{{ tag.name }}</a></ot-tag>
         @end
       </div>
     @endif

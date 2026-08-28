@@ -58,9 +58,9 @@ export default class IllustrationController {
       createData.content_hash = contentHash
       const illustration = await Illustration.create(createData)
 
-      if (tags && tags.length > 0) {
-        const tagNames = Array.isArray(tags) ? tags : [tags]
-        const newTags = [...new Set(tagNames)].map((tag: string) => ({
+      const tagNames = this.parseTags(tags)
+      if (tagNames.length > 0) {
+        const newTags = tagNames.map((tag: string) => ({
           slug: TagSlugSanitizer(tag + '-' + userId),
           name: tag,
           user_id: userId,
@@ -69,7 +69,12 @@ export default class IllustrationController {
         await illustration.related('tags').saveMany(await allTags)
       }
 
-      session.flash('success', 'Illustration created!')
+      const uploadError = await this.attachUpload(illustration, request, userId)
+      if (uploadError) {
+        session.flash('error', uploadError)
+      } else {
+        session.flash('success', 'Illustration created!')
+      }
       return response.redirect(`/illustrations/${illustration.id}`)
     } catch (error) {
       console.error('Illustration store error:', error)
@@ -237,15 +242,14 @@ export default class IllustrationController {
       await illustration.save()
 
       if (tags !== undefined) {
-        const tagNames = Array.isArray(tags) ? tags : [tags]
-        const filtered = tagNames.filter((t: string) => t && t.trim())
-        if (filtered.length > 0) {
-          const newTags = [...new Set(filtered)].map((tag: string) => ({
+        const tagNames = this.parseTags(tags)
+        if (tagNames.length > 0) {
+          const newTags = tagNames.map((tag: string) => ({
             slug: TagSlugSanitizer(
               tag +
-              '-' +
-              auth.user!.id +
-              (illustration.team_id ? '-team-' + illustration.team_id : '')
+                '-' +
+                auth.user!.id +
+                (illustration.team_id ? '-team-' + illustration.team_id : '')
             ),
             name: tag,
             user_id: auth.user!.id,
@@ -254,10 +258,17 @@ export default class IllustrationController {
           const allTags = await Tag.fetchOrCreateMany('slug', newTags)
           await illustration.related('tags').detach()
           await illustration.related('tags').saveMany(await allTags)
+        } else {
+          await illustration.related('tags').detach()
         }
       }
 
-      session.flash('success', 'Illustration updated!')
+      const uploadError = await this.attachUpload(illustration, request, auth.user!.id)
+      if (uploadError) {
+        session.flash('error', uploadError)
+      } else {
+        session.flash('success', 'Illustration updated!')
+      }
       return response.redirect(`/illustrations/${id}`)
     } catch (error) {
       console.error('Illustration update error:', error)
@@ -417,5 +428,44 @@ export default class IllustrationController {
       session.flash('error', 'Failed to delete upload')
       return response.redirect(`/illustrations/${illustrationId}/edit`)
     }
+  }
+
+  private parseTags(tags: unknown): string[] {
+    if (tags === undefined || tags === null || tags === '') return []
+    const list = Array.isArray(tags) ? tags : String(tags).split(',')
+    return [
+      ...new Set(list.map((t: string) => String(t).trim()).filter((t: string) => t.length > 0)),
+    ]
+  }
+
+  private async attachUpload(
+    illustration: Illustration,
+    request: HttpContext['request'],
+    userId: number
+  ): Promise<string | null> {
+    const sentFile = request.file('illustration_image', {
+      size: '20mb',
+      extnames: ['jpg', 'png', 'gif', 'pdf'],
+    })
+
+    if (!sentFile) {
+      return null
+    }
+
+    if (!sentFile.isValid) {
+      return sentFile.errors[0]?.message || 'Invalid file'
+    }
+
+    const pathEnv = env.get('NODE_ENV')
+    await sentFile.move(app.makePath('uploads', pathEnv), {
+      name: `${userId}/${illustration.id}/${randomUUID()}.${sentFile.extname}`,
+    })
+
+    await illustration.related('uploads').create({
+      name: sentFile.fileName!,
+      type: sentFile.type,
+    })
+
+    return null
   }
 }
