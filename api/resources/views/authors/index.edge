@@ -1,21 +1,21 @@
 @layout()
 <h2>Authors</h2>
 @if(authors && authors.length)
-  <div class="container">
-    <div class="row">
-      @each(author in authors)
-        <div class="col-4">
-          <a href="/authors/{{ encodeURIComponent(author.author) }}" class="card">
-            <figure data-variant="avatar" class="small" aria-label="{{ author.author }}">
-              <abbr>{{ titleCase(author.author) }}</abbr>
-            </figure>
-            <h4>{{ author.author }}</h4>
-          </a>
-        </div>
-      @end
+<div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-4);">
+  @each(column in columns)
+  <div>
+    @each(author in column)
+    <div style="padding-bottom: var(--space-2);">
+      <a href="/authors/{{ encodeURIComponent(author.author) }}" class="unstyled"
+        style="color: var(--sky-700, inherit);">
+        {{ titleCase(author.author) }}
+      </a>
     </div>
+    @end
   </div>
+  @end
+</div>
 @else
-  <p>No authors found.</p>
+<p>No authors found.</p>
 @end
 @end

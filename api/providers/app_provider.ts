@@ -20,6 +20,31 @@ export default class AppProvider {
         .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
         .join(' ')
     })
+    edge.global('excerpt', (text: unknown, max = 250): string => {
+      const str = String(text ?? '')
+        .replace(/\s+/g, ' ')
+        .trim()
+      if (str.length <= max) return str
+      return `${str.slice(0, max).trimEnd()}…`
+    })
+    edge.global('highlight', (text: string, query?: string | null) => {
+      if (!text) return ''
+
+      const strText = String(text)
+
+      if (!query || !query.trim()) {
+        return strText
+      }
+
+      // Escape regex special characters from search query
+      const escapedQuery = query.trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+      const regex = new RegExp(`(${escapedQuery})`, 'gi')
+
+      const highlighted = strText.replace(regex, '<strong>$1</strong>')
+
+      // Use edge.raw() directly
+      return highlighted
+    })
     // Warm up the embedding model on boot to avoid first-request delay
     try {
       await LocalEmbeddingProvider.warmUp()
@@ -27,7 +52,6 @@ export default class AppProvider {
     } catch (error) {
       console.error('Failed to warm up embedding model:', error)
     }
-
   }
 
   public async ready() { }

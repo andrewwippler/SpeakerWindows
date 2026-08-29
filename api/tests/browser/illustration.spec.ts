@@ -1,5 +1,6 @@
 import { test } from '@japa/runner'
 import { join } from 'node:path'
+import { readFile } from 'node:fs/promises'
 import { fileURLToPath } from 'node:url'
 import Place from '#models/place'
 import Upload from '#models/upload'
@@ -53,8 +54,37 @@ test.group('Illustration views (browser)', () => {
     await page.assertTextContains('h2', 'Browser Show Story')
     await page.assertTextContains('body', 'Browser Author')
     await page.assertTextContains('body', 'Once upon a time in a browser test.')
-    await page.assertVisible('ot-tag')
+    await page.assertVisible('a[href^="/tags/"]')
     await page.assertVisible(`a[href="/illustrations/${illustration.id}/edit"]`)
+    await page.assertVisible('button:has-text("Copy Illustration Content")')
+  })
+
+  test('copy button copies content and creates a place without reloading', async ({
+    visit,
+    browserContext,
+    assert,
+  }) => {
+    const { user } = await loginUser(browserContext)
+    const illustration = await IllustrationFactory.merge({
+      title: 'Copy Browser Story',
+      content: 'Copy me from the browser test.',
+      user_id: user.id,
+    }).create()
+
+    const page = await visit(`/illustrations/${illustration.id}`)
+    await page.click('button:has-text("Copy Illustration Content")')
+    await page.waitForSelector('[data-copy-label]:text("Illustration copied.")')
+
+    await page.assertTextContains('body', 'Illustration copied.')
+    await page.assertTextContains('body', 'Someplace')
+    await page.assertPath(`/illustrations/${illustration.id}`)
+
+    const place = await Place.query().where('illustration_id', illustration.id).first()
+    assert.isNotNull(place)
+    if (place) {
+      assert.equal(place.place, 'Someplace')
+      assert.equal(place.location, 'Somewhere')
+    }
   })
 
   test('edit page renders form, attachments block and file upload', async ({
@@ -71,8 +101,8 @@ test.group('Illustration views (browser)', () => {
     await page.assertTextContains('h3', 'Edit Illustration')
     await page.assertVisible('input[name="title"]')
     await page.assertVisible('textarea[name="content"]')
-    await page.assertTextContains('body', 'Illustration Image')
-    await page.assertVisible('input[type="file"][name="illustration_image"]')
+    await page.assertTextContains('body', 'Illustration Image(s)')
+    await page.assertExists('ot-upload input[type="file"][name="illustration_image"]')
     await page.assertVisible('button:has-text("Save")')
   })
 
@@ -103,14 +133,45 @@ test.group('Illustration views (browser)', () => {
     }).create()
 
     const page = await visit(`/illustrations/${illustration.id}`)
-    await page.fill('input[name="place"]', 'Newly Added Place')
-    await page.fill('input[name="location"]', 'Newly Added City')
-    await page.click('button[type="submit"]')
+    await page.fill('#add-place-form input[name="place"]', 'Newly Added Place')
+    await page.fill('#add-place-form input[name="location"]', 'Newly Added City')
+    await page.click('#add-place-form button[type="submit"]')
 
     const saved = await Place.query().where('illustration_id', illustration.id).first()
     if (saved) {
       await page.assertTextContains('body', 'Newly Added Place')
     }
+  })
+
+  test('can upload multiple files to the illustration via edit form', async ({
+    visit,
+    browserContext,
+    assert,
+  }) => {
+    const { user } = await loginUser(browserContext)
+    const illustration = await IllustrationFactory.merge({
+      title: 'Multi Upload Browser Story',
+      user_id: user.id,
+    }).create()
+
+    const page = await visit(`/illustrations/${illustration.id}/edit`)
+    await page.setInputFiles('ot-upload input[type="file"][name="illustration_image"]', [
+      {
+        name: 'one.png',
+        mimeType: 'image/png',
+        buffer: await readFile(pngAsset),
+      },
+      {
+        name: 'second.png',
+        mimeType: 'image/png',
+        buffer: await readFile(pngAsset),
+      },
+    ])
+    await page.click('button:has-text("Save")')
+    await page.waitForURL(`/illustrations/${illustration.id}`)
+
+    const uploads = await Upload.query().where('illustration_id', illustration.id)
+    assert.equal(uploads.length, 2)
   })
 
   test('can upload a file to the illustration via edit form', async ({
@@ -125,7 +186,7 @@ test.group('Illustration views (browser)', () => {
     }).create()
 
     const page = await visit(`/illustrations/${illustration.id}/edit`)
-    await page.setInputFiles('input[type="file"][name="illustration_image"]', pngAsset)
+    await page.setInputFiles('ot-upload input[type="file"][name="illustration_image"]', [pngAsset])
     await page.click('button:has-text("Save")')
     await page.waitForURL(`/illustrations/${illustration.id}`)
 
@@ -142,7 +203,7 @@ test.group('Illustration views (browser)', () => {
 
     const page = await visit('/illustrations/new')
     await page.fill('input[name="title"]', 'New Upload Browser Story')
-    await page.setInputFiles('input[type="file"][name="illustration_image"]', pngAsset)
+    await page.setInputFiles('ot-upload input[type="file"][name="illustration_image"]', [pngAsset])
     await page.click('button:has-text("Create")')
     await page.waitForURL(/\/illustrations\/\d+$/)
 

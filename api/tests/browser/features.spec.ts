@@ -107,6 +107,8 @@ test.group('Feature views (browser)', () => {
     await illustration.related('tags').attach([tag.id])
 
     const page = await visit(`/tags/${encodeURIComponent(tag.name)}`)
+    await page.click('button:has-text("Select Illustrations")')
+    await page.assertVisible('button:has-text("Select All")')
     await page.assertVisible('button:has-text("Remove Illustrations")')
     await page.assertVisible('button:has-text("Make Private")')
     await page.assertVisible('button:has-text("Make Public")')
@@ -130,7 +132,8 @@ test.group('Feature views (browser)', () => {
     await illustration.related('tags').attach([tag.id])
 
     const page = await visit(`/tags/${encodeURIComponent(tag.name)}`)
-    await page.check('input[type="checkbox"]')
+    await page.click('button:has-text("Select Illustrations")')
+    await page.click('button:has-text("Select All")')
     await page.click('button:has-text("Remove Illustrations")')
     await page.waitForURL(`/tags/${encodeURIComponent(tag.name)}`)
 
@@ -169,6 +172,7 @@ test.group('Feature views (browser)', () => {
 
     const page = await visit('/tags')
     await page.click(`a[href="/tags/${encodeURIComponent(tag.name)}"]`)
+    await page.click(`details:has(summary:has-text("Nav Flow Original Title")) summary`)
     await page.click(`a[href="/illustrations/${illustration.id}"]`)
     await page.click(`a[href="/illustrations/${illustration.id}/edit"]`)
     await page.fill('input[name="title"]', 'Nav Flow Updated Title')
@@ -247,6 +251,9 @@ test.group('Feature views (browser)', () => {
 
     // Click the tag shown on the home page
     await page.click(`a[href="/tags/${encodeURIComponent(tag.name)}"]`)
+
+    // Expand the illustration accordion
+    await page.click(`details:has(summary:has-text("Home Nav Original")) summary`)
 
     // Click the illustration within the tag
     await page.click(`a[href="/illustrations/${illustration.id}"]`)

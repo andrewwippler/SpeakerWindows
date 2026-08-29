@@ -38,6 +38,8 @@ export type ScannedRoutes = {
     'tags.bulk': { paramsTuple: [ParamValue]; params: {'name': ParamValue} }
     'authors.index': { paramsTuple?: []; params?: {} }
     'authors.show': { paramsTuple: [ParamValue]; params: {'name': ParamValue} }
+    'authors.edit': { paramsTuple: [ParamValue]; params: {'name': ParamValue} }
+    'authors.update': { paramsTuple: [ParamValue]; params: {'name': ParamValue} }
     'articles': { paramsTuple?: []; params?: {} }
     'invitations': { paramsTuple?: []; params?: {} }
     'help': { paramsTuple?: []; params?: {} }
@@ -115,6 +117,7 @@ export type ScannedRoutes = {
     'tags.show': { paramsTuple: [ParamValue]; params: {'name': ParamValue} }
     'authors.index': { paramsTuple?: []; params?: {} }
     'authors.show': { paramsTuple: [ParamValue]; params: {'name': ParamValue} }
+    'authors.edit': { paramsTuple: [ParamValue]; params: {'name': ParamValue} }
     'articles': { paramsTuple?: []; params?: {} }
     'invitations': { paramsTuple?: []; params?: {} }
     'help': { paramsTuple?: []; params?: {} }
@@ -160,6 +163,7 @@ export type ScannedRoutes = {
     'tags.show': { paramsTuple: [ParamValue]; params: {'name': ParamValue} }
     'authors.index': { paramsTuple?: []; params?: {} }
     'authors.show': { paramsTuple: [ParamValue]; params: {'name': ParamValue} }
+    'authors.edit': { paramsTuple: [ParamValue]; params: {'name': ParamValue} }
     'articles': { paramsTuple?: []; params?: {} }
     'invitations': { paramsTuple?: []; params?: {} }
     'help': { paramsTuple?: []; params?: {} }
@@ -205,6 +209,7 @@ export type ScannedRoutes = {
     'tags.update': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'tags.destroy': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'tags.bulk': { paramsTuple: [ParamValue]; params: {'name': ParamValue} }
+    'authors.update': { paramsTuple: [ParamValue]; params: {'name': ParamValue} }
     'contact.store': { paramsTuple?: []; params?: {} }
     'contacts.store': { paramsTuple?: []; params?: {} }
     'users.store': { paramsTuple?: []; params?: {} }

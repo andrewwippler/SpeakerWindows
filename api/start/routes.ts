@@ -103,18 +103,14 @@ router
 
     router.get('/tags', [TagViewController, 'index']).as('tags.index')
     router.get('/tags/:name', [TagViewController, 'show']).as('tags.show')
-    router
-      .post('/tags/:id', [TagViewController, 'update'])
-      .as('tags.update')
-    router
-      .post('/tags/:id/delete', [TagViewController, 'destroy'])
-      .as('tags.destroy')
-    router
-      .post('/tags/:name/bulk', [TagViewController, 'bulk'])
-      .as('tags.bulk')
+    router.post('/tags/:id', [TagViewController, 'update']).as('tags.update')
+    router.post('/tags/:id/delete', [TagViewController, 'destroy']).as('tags.destroy')
+    router.post('/tags/:name/bulk', [TagViewController, 'bulk']).as('tags.bulk')
 
     router.get('/authors', [AuthorViewController, 'index']).as('authors.index')
     router.get('/authors/:name', [AuthorViewController, 'show']).as('authors.show')
+    router.get('/authors/:name/edit', [AuthorViewController, 'edit']).as('authors.edit')
+    router.post('/authors/:name', [AuthorViewController, 'update']).as('authors.update')
 
     router.get('/articles', [ArticlesViewController, 'index']).as('articles')
     router.get('/invitations', [InvitationViewController, 'index']).as('invitations')

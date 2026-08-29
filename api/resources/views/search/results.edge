@@ -1,41 +1,43 @@
-@if(illustrations && illustrations.length)
-  <h3>Illustrations</h3>
-  <div class="container">
-    <div class="row">
-      @each(illustration in illustrations)
-        @include('components/illustration_card')
-      @end
-    </div>
-  </div>
-@endif
-
 @if(tags && tags.length)
-  <h3>Tags</h3>
-  <div style="display: flex; flex-wrap: wrap; gap: var(--space-2); margin-bottom: var(--space-4);">
-    @each(tag in tags)
-      <a href="/tags/{{ tag.name }}"><ot-tag>{{ tag.name }}</ot-tag></a>
-    @end
-  </div>
+<h3>Tags</h3>
+<div style="display: flex; flex-wrap: wrap; gap: var(--space-2); margin-bottom: var(--space-4);">
+  @each(tag in tags)
+  <a href="/tags/{{ tag.name }}"><ot-tag>{{ tag.name }}</ot-tag></a>
+  @end
+</div>
 @endif
 
 @if(places && places.length)
-  <h3>Places</h3>
-  <ul style="margin-bottom: var(--space-4);">
-    @each(place in places)
-      @if(place.illustration)
-        <li>
-          <a href="/illustrations/{{ place.illustration.id }}">
-            {{ place.place }}{{ place.location ? ', ' + place.location : '' }}
-          </a>
-          &mdash; {{ place.illustration.title }}
-        </li>
-      @else
-        <li>{{ place.place }}{{ place.location ? ', ' + place.location : '' }}</li>
-      @end
+<h3>Places</h3>
+<ul style="margin-bottom: var(--space-4);">
+  @each(place in places)
+  @if(place.illustration)
+  @component('components/illustration_card', { illustration, query })
+  @end
+  @else
+  <li>
+    <a href="/illustrations/{{ place.illustration.id }}">
+      {{ place.place }}{{ place.location ? ', ' + place.location : '' }}
+    </a>
+    &mdash; {{ place.illustration.title }}
+  </li>
+  @end
+  @end
+</ul>
+@endif
+
+@if(illustrations && illustrations.length)
+<h3>Illustrations</h3>
+<div class="container">
+  <div class="row">
+    @each(illustration in illustrations)
+    @component('components/illustration_card', { illustration, query })
     @end
-  </ul>
+    @end
+  </div>
+</div>
 @endif
 
 @if((!illustrations || !illustrations.length) && (!tags || !tags.length) && (!places || !places.length))
-  <p>No results found for "{{ query }}".</p>
+<p>No results found for "{{ query }}".</p>
 @end

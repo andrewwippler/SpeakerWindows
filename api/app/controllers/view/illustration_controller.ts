@@ -4,13 +4,14 @@ import Tag from '#models/tag'
 import Place from '#models/place'
 import Upload from '#models/upload'
 import Setting from '#models/setting'
-import TagSlugSanitizer from '#app/helpers/tag'
+import TagSlugSanitizer, { displayName } from '#app/helpers/tag'
 import { randomUUID, createHash } from 'node:crypto'
 import {
   canViewIllustration,
   canEditIllustration,
   canDeleteIllustration,
 } from '#app/abilities/main'
+import TeamMember from '#models/team_member'
 import _ from 'lodash'
 import app from '@adonisjs/core/services/app'
 import env from '#start/env'
@@ -69,7 +70,7 @@ export default class IllustrationController {
         await illustration.related('tags').saveMany(await allTags)
       }
 
-      const uploadError = await this.attachUpload(illustration, request, userId)
+      const uploadError = await this.attachUploads(illustration, request, userId)
       if (uploadError) {
         session.flash('error', uploadError)
       } else {
@@ -158,7 +159,12 @@ export default class IllustrationController {
       }
 
       const canEdit = await canEditIllustration(auth.user!, illustration)
+      const canDelete = await canDeleteIllustration(auth.user!, illustration)
       const settings = await Setting.query().where('user_id', auth.user!.id).first()
+
+      const userRole = illustration.team_id
+        ? await this.getUserRoleInTeam(auth.user!.id, illustration.team_id)
+        : null
 
       const recentIds: number[] = session.get('recentlyViewed') || []
       const filtered = recentIds.filter((rid: number) => rid !== id)
@@ -168,7 +174,10 @@ export default class IllustrationController {
       return view.render('illustrations/show', {
         illustration,
         canEdit,
+        canDelete,
+        userRole,
         settings,
+        display: displayName,
         today: DateTime.now().toFormat('yyyy-MM-dd'),
       })
     } catch (error) {
@@ -263,7 +272,7 @@ export default class IllustrationController {
         }
       }
 
-      const uploadError = await this.attachUpload(illustration, request, auth.user!.id)
+      const uploadError = await this.attachUploads(illustration, request, auth.user!.id)
       if (uploadError) {
         session.flash('error', uploadError)
       } else {
@@ -304,29 +313,51 @@ export default class IllustrationController {
 
   public async storePlace({ params, auth, request, response, session }: HttpContext) {
     const illustrationId = Number.parseInt(_.get(params, 'id', 0), 10) || 0
+    const isAjax = request.ajax()
 
     try {
       const illustration = await Illustration.findByOrFail('id', illustrationId)
 
       const canEdit = await canEditIllustration(auth.user!, illustration)
       if (!canEdit) {
+        if (isAjax) return response.forbidden({ message: 'Not authorized to add places' })
         session.flash('error', 'Not authorized to add places')
         return response.redirect(`/illustrations/${illustrationId}`)
       }
 
       const { place, location, used } = request.all()
 
-      await illustration.related('places').create({
+      const createdPlace = await illustration.related('places').create({
         user_id: auth.user!.id,
         place: String(place || '').trim() || 'Someplace',
         location: String(location || '').trim() || 'Somewhere',
         used: used ? used : null,
       })
 
-      session.flash('success', `Added ${place || 'Someplace'}, ${location || 'Somewhere'} to "${illustration.title}"`)
+      if (isAjax) {
+        return response.created({
+          message: 'Illustration copied.',
+          place: {
+            id: createdPlace.id,
+            place: createdPlace.place,
+            location: createdPlace.location,
+            used: createdPlace.used
+              ? typeof createdPlace.used.toFormat === 'function'
+                ? createdPlace.used.toFormat('yyyy-MM-dd')
+                : String(createdPlace.used)
+              : null,
+          },
+        })
+      }
+
+      session.flash(
+        'success',
+        `Added ${createdPlace.place}, ${createdPlace.location} to "${illustration.title}"`
+      )
       return response.redirect(`/illustrations/${illustrationId}`)
     } catch (error) {
       console.error('Place store error:', error)
+      if (isAjax) return response.internalServerError({ message: 'Failed to copy illustration' })
       session.flash('error', 'Failed to add place')
       return response.redirect(`/illustrations/${illustrationId}`)
     }
@@ -366,32 +397,36 @@ export default class IllustrationController {
         return response.redirect(`/illustrations/${illustrationId}`)
       }
 
-      const sentFile = request.file('illustration_image', {
-        size: '20mb',
-        extnames: ['jpg', 'png', 'gif', 'pdf'],
-      })
+      const sentFiles = this.sentFiles(request)
 
-      if (!sentFile) {
+      if (sentFiles.length === 0) {
         session.flash('error', 'No file uploaded')
         return response.redirect(`/illustrations/${illustrationId}/edit`)
       }
 
-      if (!sentFile.isValid) {
-        session.flash('error', 'Invalid file')
+      const invalid = sentFiles.find((file) => !file.isValid)
+      if (invalid) {
+        session.flash('error', invalid.errors[0]?.message || 'Invalid file')
         return response.redirect(`/illustrations/${illustrationId}/edit`)
       }
 
       const pathEnv = env.get('NODE_ENV')
-      await sentFile.move(app.makePath('uploads', pathEnv), {
-        name: `${auth.user!.id}/${illustrationId}/${randomUUID()}.${sentFile.extname}`,
-      })
+      for (const sentFile of sentFiles) {
+        await sentFile.move(app.makePath('uploads', pathEnv), {
+          name: `${auth.user!.id}/${illustrationId}/${randomUUID()}.${sentFile.extname}`,
+        })
 
-      await illustration.related('uploads').create({
-        name: sentFile.fileName!,
-        type: sentFile.type,
-      })
+        await illustration.related('uploads').create({
+          name: sentFile.fileName!,
+          type: sentFile.type,
+        })
+      }
 
-      session.flash('success', 'File uploaded successfully')
+      const count = sentFiles.length
+      session.flash(
+        'success',
+        count === 1 ? 'File uploaded successfully' : `${count} files uploaded successfully`
+      )
       return response.redirect(`/illustrations/${illustrationId}/edit`)
     } catch (error) {
       console.error('Upload error:', error)
@@ -438,33 +473,52 @@ export default class IllustrationController {
     ]
   }
 
-  private async attachUpload(
+  private async getUserRoleInTeam(userId: number, teamId: number): Promise<string | null> {
+    const membership = await TeamMember.query()
+      .where('team_id', teamId)
+      .where('user_id', userId)
+      .first()
+    return membership?.role || null
+  }
+
+  /**
+   * Collect the uploaded files regardless of whether the field was sent as
+   * a single part (`request.file`) or multiple parts (`request.files`).
+   */
+  private sentFiles(request: HttpContext['request']) {
+    return request.files('illustration_image', {
+      size: '20mb',
+      extnames: ['jpg', 'png', 'gif', 'pdf'],
+    })
+  }
+
+  private async attachUploads(
     illustration: Illustration,
     request: HttpContext['request'],
     userId: number
   ): Promise<string | null> {
-    const sentFile = request.file('illustration_image', {
-      size: '20mb',
-      extnames: ['jpg', 'png', 'gif', 'pdf'],
-    })
+    const sentFiles = this.sentFiles(request)
 
-    if (!sentFile) {
+    if (sentFiles.length === 0) {
       return null
     }
 
-    if (!sentFile.isValid) {
-      return sentFile.errors[0]?.message || 'Invalid file'
+    const invalid = sentFiles.find((file) => !file.isValid)
+    if (invalid) {
+      return invalid.errors[0]?.message || 'Invalid file'
     }
 
     const pathEnv = env.get('NODE_ENV')
-    await sentFile.move(app.makePath('uploads', pathEnv), {
-      name: `${userId}/${illustration.id}/${randomUUID()}.${sentFile.extname}`,
-    })
+    for (const sentFile of sentFiles) {
+      await sentFile.move(app.makePath('uploads', pathEnv), {
+        name: `${userId}/${illustration.id}/${randomUUID()}.${sentFile.extname}`,
+      })
 
-    await illustration.related('uploads').create({
-      name: sentFile.fileName!,
-      type: sentFile.type,
-    })
+      await illustration.related('uploads').create({
+        name: sentFile.fileName!,
+        type: sentFile.type,
+      })
+    }
 
     return null
   }

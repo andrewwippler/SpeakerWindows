@@ -1,11 +1,4 @@
 @layout()
-
-<div style="margin-bottom: var(--space-4);">
-  <a class="icon-link" href="/illustrations/{{ illustration.id }}">
-    <svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="/images/feather-sprite.svg#arrow-left"></use></svg>Back to Illustration
-  </a>
-</div>
-
 <article class="card">
   <header>
     <h3>Edit Illustration</h3>
@@ -53,9 +46,16 @@
     <div class="row">
       <div class="col-12">
         <label data-field>
-          Illustration Image
-          <input type="file" name="illustration_image" accept=".png,.jpg,.jpeg,.gif,.pdf" />
-          <small>PNG, JPG, GIF, PDF &mdash; max 20MB</small>
+          Illustration Image(s)
+          <ot-upload>
+            <input type="file" name="illustration_image" multiple accept=".png,.jpg,.jpeg,.gif,.pdf" hidden />
+            <button type="button" class="ghost">
+              <svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="/images/feather-sprite.svg#upload"></use></svg>Choose files
+            </button>
+            <div data-files>
+              <small data-hint>Drop files here or click to choose (PNG, JPG, GIF, PDF &mdash; max 20MB each)</small>
+            </div>
+          </ot-upload>
         </label>
       </div>
     </div>
@@ -87,10 +87,10 @@
 
     <div class="row">
       <div class="col-12 align-right">
-        <a href="/illustrations/{{ illustration.id }}" class="outline icon-link">
+        <button onclick="window.location.href='/illustrations/{{ illustration.id }}'"  data-variant="secondary" class="icon-link">
           <svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="/images/feather-sprite.svg#arrow-left"></use></svg>Back
-        </a>
-        <button type="submit" class="ghost">
+        </button>
+        <button type="submit" class="primary">
           <svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="/images/feather-sprite.svg#save"></use></svg>Save
         </button>
       </div>

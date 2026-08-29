@@ -1,41 +1,21 @@
 @layout()
-<h2>{{ author }}</h2>
+<div style="display: flex; align-items: center; gap: var(--space-2);">
+  <h2 style="margin: 0;">{{ author }}</h2>
+  <button type="button" onclick="window.location.href='/authors/{{ encodeURIComponent(author) }}/edit'" data-variant="success" class="icon-link">
+    <svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      <use href="/images/feather-sprite.svg#edit-2"></use>
+    </svg>Edit Author
+  </button>
+</div>
 <p>{{ illustrations.length }} illustration{{ illustrations.length !== 1 ? 's' : '' }}</p>
 
-<article class="card">
-  <form hx-patch="/api/authors/{{ author.id }}" hx-target="#author-name" hx-swap="outerHTML">
-    <label data-field id="author-name">
-      Author Name
-      <div style="display: flex; gap: var(--space-2);">
-        <input type="text" name="name" value="{{ author.name }}" style="flex: 1;" />
-        <button type="submit">Save</button>
-      </div>
-    </label>
-  </form>
-</article>
+
 
 @if(illustrations.length)
   <div class="container" style="margin-top: var(--space-6);">
     <div class="row">
       @each(illustration in illustrations)
-        <div class="col-4">
-          <a href="/illustrations/{{ illustration.id }}" class="card">
-            @if(illustration.thumbnailUrl)
-              <img
-                src="{{ illustration.thumbnailUrl }}"
-                alt="{{ illustration.title }}"
-                style="width: 100%; height: 12rem; object-fit: cover; border-radius: var(--radius) var(--radius) 0 0;"
-              />
-            @else
-              <div style="width: 100%; height: 12rem; display: flex; align-items: center; justify-content: center; background: var(--muted);">
-                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M3.75 21h16.5A2.25 2.25 0 0022.5 18.75V5.25A2.25 2.25 0 0020.25 3H3.75A2.25 2.25 0 001.5 5.25v13.5A2.25 2.25 0 003.75 21z" />
-                </svg>
-              </div>
-            @end
-            <h4>{{ illustration.title }}</h4>
-          </a>
-        </div>
+        @include('components/illustration_card')
       @end
     </div>
   </div>

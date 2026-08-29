@@ -1,27 +1,197 @@
 @layout()
 
-<div style="margin-bottom: var(--space-4);">
-  <a href="/illustrations">&larr; Back to Illustrations</a>
-</div>
-
 <article class="card">
-  <header>
-    <h2>{{ illustration.title }}</h2>
-    @if(illustration.author)
-      <p>by {{ illustration.author }}</p>
-    @endif
-    @if(illustration.source)
-      <p>Source: {{ illustration.source }}</p>
-    @endif
-  </header>
-
-  @if(illustration.tags && illustration.tags.length)
-    <div style="display: flex; flex-wrap: wrap; gap: var(--space-1); margin-top: var(--space-2);">
-      @each(tag in illustration.tags)
-        <ot-tag>{{ tag.name }}</ot-tag>
+  <header class="illustration-header container" style="padding: var(--space-3) var(--space-4); opacity: 0.9;">
+    <h3>{{ illustration.title }}</h3>
+    <div class="row" style="margin-top: var(--space-2); gap: var(--space-4);">
+      @if(illustration.private)
+        <span class="badge" data-variant="secondary">Private</span>
+      @end
+      @if(illustration.author)
+        <p class="col-6"><strong>Author:</strong> {{ illustration.author }}</p>
+      @end
+      @if(illustration.source)
+        @if(illustration.source.match(/^https?:\/\//))
+          <p class="col-6"><strong>Source:</strong> <a href="{{ illustration.source }}" target="_blank" rel="noopener">{{ illustration.source }}</a></p>
+        @else
+          <p class="col-6"><strong>Source:</strong> {{ illustration.source }}</p>
+        @end
       @end
     </div>
-  @endif
+
+  @if(illustration.tags && illustration.tags.length)
+    <p class="col-12" style="margin-top: var(--space-2);">
+      @each((tag, index) in illustration.tags)
+        <a href="/tags/{{ tag.name }}">{{ display(tag.name) }}</a>{{ index < illustration.tags.length - 1 ? ', ' : '' }}
+      @endeach
+    </p>
+  @end
+  </header>
+
+  @if(illustration.content && userRole !== 'editor' && userRole !== 'readonly')
+    <form
+      action="/illustrations/{{ illustration.id }}/places"
+      method="POST"
+      id="copy-illustration-form"
+      style="margin-top: var(--space-4);"
+    >
+      {{ csrfField() }}
+      <input type="hidden" name="place" value="{{ settings?.place || '' }}" />
+      <input type="hidden" name="location" value="{{ settings?.location || '' }}" />
+      <input type="hidden" name="used" value="{{ today }}" />
+      <button type="button" id="copy-illustration-button" data-variant="secondary" style="width: 100%; display: flex; justify-content: center;">
+        <svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="/images/feather-sprite.svg#copy"></use></svg>
+        <span data-copy-label>Copy Illustration Content</span>
+      </button>
+    </form>
+    <script>
+      const copyIllustrationContent = {{{ JSON.stringify(illustration.content) }}};
+
+      const copyIllustrationForm = document.querySelector('#copy-illustration-form');
+      const copyIllustrationButton = document.querySelector('#copy-illustration-button');
+      const copyIllustrationLabel = copyIllustrationButton
+        ? copyIllustrationButton.querySelector('[data-copy-label]')
+        : null;
+
+      const copyCsrfToken = () => {
+        const meta = document.querySelector('meta[name="csrf-token"]');
+        if (meta) return meta.getAttribute('value') || '';
+        if (copyIllustrationForm) {
+          const field = copyIllustrationForm.querySelector('input[name="_csrf"]');
+          if (field) return field.value;
+        }
+        return '';
+      };
+
+      const copyAppendPlace = (place) => {
+        let list = document.querySelector('#illustration-places');
+        const emptyNotice = document.querySelector('#no-places');
+
+        if (emptyNotice) {
+          emptyNotice.remove();
+        }
+
+        if (!list) {
+          list = document.createElement('div');
+          list.className = 'row';
+          list.id = 'illustration-places';
+          list.style.cssText = 'margin-top: var(--space-3); gap: var(--space-2);';
+          const addForm = document.querySelector('#add-place-form');
+          if (addForm) {
+            addForm.insertAdjacentElement('beforebegin', list);
+          } else {
+            document.querySelector('main')?.appendChild(list);
+          }
+        }
+
+        let captionText = place.place;
+        if (place.location) {
+          captionText += ', ' + place.location;
+        }
+        if (place.used) {
+          captionText += ' \u2014 ' + place.used;
+        }
+
+        const cell = document.createElement('div');
+        cell.className = 'col-3';
+        cell.style.cssText =
+          'display: flex; justify-content: space-between; align-items: center; gap: var(--space-2); background: var(--muted); border-radius: var(--radius-medium); padding: var(--space-2) var(--space-3); min-width: 0;';
+
+        const caption = document.createElement('span');
+        caption.style.cssText =
+          'font-size: var(--text-7); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;';
+        caption.textContent = captionText;
+        cell.appendChild(caption);
+
+        const deleteForm = document.createElement('form');
+        deleteForm.method = 'POST';
+        deleteForm.action = '/illustrations/{{ illustration.id }}/places/' + place.id;
+        deleteForm.style.cssText = 'flex-shrink: 0; margin: 0;';
+
+        const csrfInput = document.createElement('input');
+        csrfInput.type = 'hidden';
+        csrfInput.name = '_csrf';
+        csrfInput.value = copyCsrfToken();
+        deleteForm.appendChild(csrfInput);
+
+        const methodInput = document.createElement('input');
+        methodInput.type = 'hidden';
+        methodInput.name = '_method';
+        methodInput.value = 'DELETE';
+        deleteForm.appendChild(methodInput);
+
+        const deleteButton = document.createElement('button');
+        deleteButton.type = 'submit';
+        deleteButton.className = 'ghost icon small';
+        deleteButton.setAttribute('data-variant', 'danger');
+        deleteButton.setAttribute('aria-label', 'Delete ' + place.place);
+        const deleteIcon = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+        deleteIcon.setAttribute('class', 'icon');
+        deleteIcon.setAttribute('viewBox', '0 0 24 24');
+        deleteIcon.setAttribute('aria-hidden', 'true');
+        deleteIcon.setAttribute('focusable', 'false');
+        deleteIcon.innerHTML = '<use href="/images/feather-sprite.svg#x"></use>';
+        deleteButton.appendChild(deleteIcon);
+        deleteForm.appendChild(deleteButton);
+
+        cell.appendChild(deleteForm);
+        list.appendChild(cell);
+      };
+
+      if (copyIllustrationButton && copyIllustrationForm) {
+        copyIllustrationButton.addEventListener('click', async () => {
+          const csrf = copyCsrfToken();
+          const body = new FormData(copyIllustrationForm);
+
+          try {
+            if (copyIllustrationContent) {
+              await navigator.clipboard.writeText(copyIllustrationContent);
+            }
+          } catch (err) {
+          }
+
+          try {
+            const response = await fetch(copyIllustrationForm.action, {
+              method: 'POST',
+              headers: {
+                'Accept': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRF-Token': csrf,
+              },
+              body,
+            });
+
+            if (!response.ok) {
+              throw new Error('Copy failed');
+            }
+
+            const data = await response.json();
+            if (data.place) {
+              copyAppendPlace(data.place);
+            }
+
+            if (copyIllustrationLabel) {
+              copyIllustrationLabel.textContent = 'Illustration copied.';
+            }
+          } catch (err) {
+            if (copyIllustrationLabel) {
+              copyIllustrationLabel.textContent = 'Copy failed';
+            }
+          }
+        });
+      }
+    </script>
+  @end
+
+  @if(userRole === 'editor')
+    <div style="margin-top: var(--space-4); padding: var(--space-3); border: 1px solid var(--warning); border-radius: var(--radius-medium);">
+      <p class="small">As an Editor, you can only edit metadata (title, author, source, tags). You cannot edit the content of this illustration.</p>
+    </div>
+  @elseif(userRole === 'readonly')
+    <div style="margin-top: var(--space-4); padding: var(--space-3); border: 1px solid var(--border); border-radius: var(--radius-medium);">
+      <p class="small">As a Read-Only member, you can view this illustration but cannot edit it.</p>
+    </div>
+  @end
 
   @if(illustration.uploads && illustration.uploads.length)
     <div style="margin-top: var(--space-4);">
@@ -50,87 +220,86 @@
     </div>
   @end
 
-  <footer>
+  <footer style="margin-top: var(--space-4); display: flex; flex-wrap: wrap; gap: var(--space-2);">
+    <button type="button" onclick="window.location.href='/illustrations'"  data-variant="warning" class="icon-link">
+      <svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="/images/feather-sprite.svg#arrow-left"></use></svg>Back
+    </button>
     @if(canEdit)
-      <a href="/illustrations/{{ illustration.id }}/edit" class="outline icon-link">
-        <svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="/images/feather-sprite.svg#edit-2"></use></svg>Edit
-      </a>
+      <button type="button" onclick="window.location.href='/illustrations/{{ illustration.id }}/edit'"  data-variant="success" class="icon-link">
+        <svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="/images/feather-sprite.svg#edit-2"></use></svg>Edit Illustration
+      </button>
+    @end
+    @if(canDelete)
       <button commandfor="delete-illustration" command="show-modal" data-variant="danger" class="icon-link">
-        <svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="/images/feather-sprite.svg#trash-2"></use></svg>Delete
+        <svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="/images/feather-sprite.svg#trash-2"></use></svg>Delete Illustration
       </button>
     @end
   </footer>
 </article>
 
-@if(canEdit)
-  <article class="card" style="margin-top: var(--space-6);">
-    <header>
-      <h4>Places</h4>
-    </header>
-
-    @if(illustration.places && illustration.places.length)
-      <ul>
-        @each(place in illustration.places)
-          <li style="display: flex; justify-content: space-between; align-items: center; gap: var(--space-3);">
-            <span>
-              {{ place.place }}{{ place.location ? ', ' + place.location : '' }}
-              @if(place.used)
-                &mdash; {{ place.used.toFormat ? place.used.toFormat('yyyy-MM-dd') : place.used }}
-              @end
-            </span>
-            <form action="/illustrations/{{ illustration.id }}/places/{{ place.id }}" method="POST" style="display: inline;">
-              {{ csrfField() }}
-              <input type="hidden" name="_method" value="DELETE" />
-              <button type="submit" class="ghost small icon-link" data-variant="danger" aria-label="Delete {{ place.place }}"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="/images/feather-sprite.svg#trash-2"></use></svg>Delete</button>
-            </form>
-          </li>
-        @end
-      </ul>
-    @else
-      <p>No places found.</p>
-    @end
-
-    <form action="/illustrations/{{ illustration.id }}/places" method="POST" style="margin-top: var(--space-4);">
-      {{ csrfField() }}
-      <div class="grid" style="grid-template-columns: 1fr 1fr 1fr auto; gap: var(--space-3);">
-        <label data-field>
-          Place
-          <input type="text" name="place" value="{{ settings?.place || '' }}" placeholder="Place" />
-        </label>
-        <label data-field>
-          Location
-          <input type="text" name="location" value="{{ settings?.location || '' }}" placeholder="Location" />
-        </label>
-        <label data-field>
-          Used
-          <input type="date" name="used" value="{{ today }}" placeholder="yyyy-mm-dd" />
-        </label>
-        <div style="align-self: end;">
-          <button type="submit">Add Place</button>
-        </div>
-      </div>
-    </form>
-  </article>
-@end
-
-<dialog id="delete-illustration" closedby="any">
+<article class="card" style="margin-top: var(--space-6);">
   <header>
-    <h3>Confirm Delete</h3>
-    <p>Are you sure you want to delete "{{ illustration.title }}"? This action cannot be undone.</p>
+    <h4>Illustration Use</h4>
   </header>
 
-  <footer>
-    <form method="dialog" style="display:inline">
-      <button type="submit" class="outline">Cancel</button>
-    </form>
+  @if(illustration.places && illustration.places.length)
+    <div class="row" id="illustration-places" style="margin-top: var(--space-3); gap: var(--space-2);">
+      @each(place in illustration.places)
+        <div class="col-3" style="display: flex; justify-content: space-between; align-items: center; gap: var(--space-2); background: var(--muted); border-radius: var(--radius-medium); padding: var(--space-2) var(--space-3); min-width: 0;">
+          <span style="font-size: var(--text-7); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+            {{ place.place }}{{ place.location ? ', ' + place.location : '' }}
+            @if(place.used)
+              <span style="color: var(--muted-foreground);">&mdash; {{ place.used.toFormat ? place.used.toFormat('yyyy-MM-dd') : place.used }}</span>
+            @end
+          </span>
+          <form action="/illustrations/{{ illustration.id }}/places/{{ place.id }}" method="POST" style="flex-shrink: 0; margin: 0;">
+            {{ csrfField() }}
+            <input type="hidden" name="_method" value="DELETE" />
+            <button type="submit" class="ghost icon" data-variant="danger" aria-label="Delete {{ place.place }}">
+              <svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="/images/feather-sprite.svg#trash-2"></use></svg>
+            </button>
+          </form>
+        </div>
+      @endeach
+    </div>
+  @else
+    <p id="no-places">No places found.</p>
+  @end
 
-    <form action="/illustrations/{{ illustration.id }}" method="POST" style="display:inline">
-      {{ csrfField() }}
-      <input type="hidden" name="_method" value="DELETE" />
-      <button type="submit" value="confirm" data-variant="danger" class="icon-link">
-        <svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="/images/feather-sprite.svg#trash-2"></use></svg>Delete
+  <form id="add-place-form" action="/illustrations/{{ illustration.id }}/places" method="POST" style="margin-top: var(--space-4);">
+    {{ csrfField() }}
+    <fieldset class="group">
+      <input id="place" type="text" name="place" value="{{ settings?.place || '' }}" placeholder="Place" aria-label="Place" />
+      <input id="location" type="text" name="location" value="{{ settings?.location || '' }}" placeholder="Location" aria-label="Location" />
+      <input id="used" type="date" name="used" value="{{ today }}" aria-label="Used" />
+      <button type="submit">
+        <svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="/images/feather-sprite.svg#plus"></use></svg>Add a place
       </button>
-    </form>
-  </footer>
-</dialog>
+    </fieldset>
+  </form>
+</article>
+
+@if(canDelete)
+  <dialog id="delete-illustration" closedby="any">
+    <header>
+      <h3>Confirm Delete</h3>
+      <p>Are you sure you want to delete "{{ illustration.title }}"? This action cannot be undone.</p>
+    </header>
+
+    <footer>
+      <form method="dialog" style="display:inline">
+        <button type="submit" class="outline">Cancel</button>
+      </form>
+
+      <form action="/illustrations/{{ illustration.id }}" method="POST" style="display:inline">
+        {{ csrfField() }}
+        <input type="hidden" name="_method" value="DELETE" />
+        <button type="submit" value="confirm" data-variant="danger" class="icon-link">
+          <svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="/images/feather-sprite.svg#trash-2"></use></svg>Delete
+        </button>
+      </form>
+    </footer>
+  </dialog>
+@end
+
 @end

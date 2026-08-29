@@ -1,22 +1,24 @@
-<div class="col-4">
-  <a href="/illustrations/{{ illustration.id }}" class="card">
-    @if(illustration.uploads && illustration.uploads.length)
-      <img
-        src="/uploads/{{ illustration.uploads[0].name }}"
-        alt="{{ illustration.title }}"
-        style="width: 100%; aspect-ratio: 16/9; object-fit: cover; border-radius: var(--radius);"
-      />
-    @endif
-    <h4>{{ illustration.title }}</h4>
-    @if(illustration.author)
-      <p>{{ illustration.author }}</p>
-    @endif
-    @if(illustration.tags && illustration.tags.length)
-      <div style="display: flex; flex-wrap: wrap; gap: var(--space-1); margin-top: var(--space-2);">
-        @each(tag in illustration.tags)
-          <ot-tag><a href="/tags/{{ tag.name }}">{{ tag.name }}</a></ot-tag>
+@let(activeQuery = query || '')
+<div class="col-12">
+  <details>
+    <summary>
+      <span style="display: flex; align-items: center; gap: var(--space-3);">
+        @if(selectable)
+          <input
+            type="checkbox"
+            :value="'{{ illustration.id }}'"
+            x-model="selected"
+            x-show="selectable"
+            @click.stop
+          />
         @end
-      </div>
-    @endif
-  </a>
+        @if(illustration.private)
+          <span class="badge" data-variant="warning">Private</span>
+        @end
+        {{{ highlight(illustration.title, activeQuery) }}}
+      </span>
+    </summary>
+    <p class="p-4">{{{ highlight(excerpt(illustration.content, 250), activeQuery) }}}</p>
+    <p><a href="/illustrations/{{ illustration.id }}">View the full illustration</a></p>
+  </details>
 </div>

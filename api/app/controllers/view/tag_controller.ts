@@ -47,6 +47,8 @@ export default class TagController {
       return view.render('tags/show', {
         tag,
         illustrations,
+        selectable: true,
+        allIds: illustrations.map((i) => String(i.id)),
       })
     } catch (error) {
       console.error('Tag show error:', error)

@@ -44,9 +44,16 @@
     <div class="row">
       <div class="col-12">
         <label data-field>
-          Illustration Image
-          <input type="file" name="illustration_image" accept=".png,.jpg,.jpeg,.gif,.pdf" />
-          <small>PNG, JPG, GIF, PDF &mdash; max 20MB</small>
+          Illustration Image(s)
+          <ot-upload>
+            <input type="file" name="illustration_image" multiple accept=".png,.jpg,.jpeg,.gif,.pdf" hidden />
+            <button type="button" class="ghost">
+              <svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="/images/feather-sprite.svg#upload"></use></svg>Choose files
+            </button>
+            <div data-files>
+              <small data-hint>Drop files here or click to choose (PNG, JPG, GIF, PDF &mdash; max 20MB each)</small>
+            </div>
+          </ot-upload>
         </label>
       </div>
     </div>

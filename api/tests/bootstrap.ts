@@ -7,6 +7,7 @@ import { sessionApiClient } from '@adonisjs/session/plugins/api_client'
 import { authApiClient } from '@adonisjs/auth/plugins/api_client'
 import { authBrowserClient } from '@adonisjs/auth/plugins/browser_client'
 import { sessionBrowserClient } from '@adonisjs/session/plugins/browser_client'
+import { shieldApiClient } from '@adonisjs/shield/plugins/api_client'
 
 import { fileSystem } from '@japa/file-system'
 import { apiClient } from '@japa/api-client'
@@ -23,7 +24,7 @@ import { browserClient } from '@japa/browser-client'
 export const plugins: Config['plugins'] = [
   assert(),
   pluginAdonisJS(app),
-    /**
+  /**
    * Configures Japa's API client for making HTTP requests
    */
   apiClient(),
@@ -35,6 +36,10 @@ export const plugins: Config['plugins'] = [
    * Adds support for authenticating users during requests
    */
   authApiClient(app),
+  /**
+   * Allows making CSRF-protected requests for API testing
+   */
+  shieldApiClient(),
   /**
    * Allows reading and writing session data
    * via the browser context.

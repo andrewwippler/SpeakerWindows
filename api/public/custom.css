@@ -14,3 +14,35 @@
   --border: #e2e8f0;
   --ring: #0369a1;
 }
+@layer base {
+  :is(button, [role='button']):is(
+    [data-variant='error'],
+    [data-variant='danger'],
+    [data-variant='success'],
+    [data-variant='warning']
+  ) {
+    color: var(--_variant-color) !important;
+    background-color: light-dark(
+      color-mix(in srgb, var(--_variant-color) 8%, transparent),
+      color-mix(in srgb, var(--_variant-color) 20%, transparent)
+    ) !important;
+  }
+}
+.illustration-header {
+  background-color: var(--muted);
+}
+.bg-primary {
+  background-color: var(--primary);
+  color: var(--primary-foreground);
+}
+.bg-secondary {
+  background-color: var(--secondary);
+  color: var(--secondary-foreground);
+}
+.bg-accent {
+  background-color: var(--accent);
+}
+.bg-muted {
+  background-color: var(--muted);
+  color: var(--muted-foreground);
+}

@@ -1,0 +1,35 @@
+@layout()
+
+<h2>Edit Author</h2>
+
+<article class="card">
+  <form action="/authors/{{ encodeURIComponent(author) }}" method="POST">
+    {{ csrfField() }}
+
+    <div class="row">
+      <div class="col-12">
+        <label data-field>
+          Author Name
+          <input type="text" name="name" value="{{ author }}" required />
+        </label>
+      </div>
+
+      <!-- Right-aligned action buttons -->
+      <div class="col-3 col-end">
+        <button type="button" onclick="window.location.href='/authors/{{ encodeURIComponent(author) }}'"  data-variant="warning" class="secondary icon-link">
+          <svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <use href="/images/feather-sprite.svg#x"></use>
+          </svg>
+          Cancel
+        </button>
+        <button type="submit" class="icon-link">
+          <svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <use href="/images/feather-sprite.svg#save"></use>
+          </svg>
+          Save
+        </button>
+      </div>
+    </div>
+  </form>
+</article>
+@end
