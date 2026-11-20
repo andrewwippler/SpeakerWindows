@@ -67,6 +67,7 @@ jobs:
             -H "Content-Type: application/json" \
             -H "X-Deploy-Key: $WEBHOOK_SECRET" \
             -d "{
+              \"version\": \"${{ github.sha }}\",
               \"ns\": \"web\",
               \"deploy\": \"speakerwindows-api\",
               \"container\": \"api\",
