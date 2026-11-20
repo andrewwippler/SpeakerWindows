@@ -40,10 +40,10 @@ jobs:
           context: api/.
           push: true
           tags: |
-            ${{ env.REGISTRY }}/${{ env.REPOSITORY }}:monolith-${{ github.sha }}
-            ${{ env.REGISTRY }}/${{ env.REPOSITORY }}:monolith-latest
-            ghcr.io/${{ github.repository_owner }}/${{ env.REPOSITORY }}:monolith-${{ github.sha }}
-            ghcr.io/${{ github.repository_owner }}/${{ env.REPOSITORY }}:monolith-latest
+            ${{ env.REGISTRY }}/${{ env.REPOSITORY }}:${{ github.sha }}
+            ${{ env.REGISTRY }}/${{ env.REPOSITORY }}:latest
+            ghcr.io/${{ github.repository_owner }}/${{ env.REPOSITORY }}:${{ github.sha }}
+            ghcr.io/${{ github.repository_owner }}/${{ env.REPOSITORY }}:latest
 
   deploy:
     name: Deploy
@@ -56,11 +56,23 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
-      - name: Updating Monolith
-        uses: appleboy/ssh-action@master
-        with:
-          host: ${{ secrets.HOST }}
-          username: kubedeploy
-          key: ${{ secrets.SSH_KEY }}
-          port: 22
-          script: kubectl --namespace web set image deployment/speakerwindows monolith=${{ env.REGISTRY }}/${{ env.REPOSITORY }}:monolith-${{ github.sha }}
+      - name: Trigger external webhook
+        if: success()
+        env:
+          WEBHOOK_URL: ${{ secrets.WEBHOOK_URL }}
+          WEBHOOK_SECRET: ${{ secrets.WEBHOOK_SECRET }}
+        run: |
+          curl --fail-with-body --silent --show-error \
+            -X POST "$WEBHOOK_URL" \
+            -H "Content-Type: application/json" \
+            -H "X-Deploy-Key: $WEBHOOK_SECRET" \
+            -d "{
+              \"repository\": \"${{ github.repository }}\",
+              \"ref\": \"${{ github.ref }}\",
+              \"sha\": \"${{ github.sha }}\",
+              \"actor\": \"${{ github.actor }}\",
+              \"version\": \"${{ github.sha }}\",
+              \"ns\": \"web\",
+              \"deploy\": "speakerwindows-api",
+              \"prefix\": \"${{ env.REGISTRY }}/${{ env.REPOSITORY }}\"
+            }"
