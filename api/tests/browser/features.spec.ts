@@ -174,7 +174,7 @@ test.group('Feature views (browser)', () => {
     await page.click(`a[href="/tags/${encodeURIComponent(tag.name)}"]`)
     await page.click(`details:has(summary:has-text("Nav Flow Original Title")) summary`)
     await page.click(`a[href="/illustrations/${illustration.id}"]`)
-    await page.click(`a[href="/illustrations/${illustration.id}/edit"]`)
+    await page.click(`button[onclick*="/illustrations/${illustration.id}/edit"]`)
     await page.fill('input[name="title"]', 'Nav Flow Updated Title')
     await page.click('button:has-text("Save")')
     await page.waitForURL(`/illustrations/${illustration.id}`)
@@ -302,7 +302,7 @@ test.group('Feature views (browser)', () => {
     await page.click(`a[href="/illustrations/${illustration.id}"]`)
 
     // Select edit
-    await page.click(`a[href="/illustrations/${illustration.id}/edit"]`)
+    await page.click(`button[onclick*="/illustrations/${illustration.id}/edit"]`)
 
     // Update the title and save
     await page.fill('input[name="title"]', 'Home Nav Updated')

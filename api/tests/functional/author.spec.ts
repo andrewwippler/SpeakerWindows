@@ -1,6 +1,8 @@
 import { test } from '@japa/runner'
 import db from '@adonisjs/lucid/services/db'
 import UserFactory from '#database/factories/user_factory'
+import TeamFactory from '#database/factories/team_factory'
+import IllustrationFactory from '#database/factories/illustration_factory'
 import type User from '#models/user'
 let goodUser: User
 let badUser: User
@@ -140,5 +142,66 @@ test.group('Authors', (group) => {
       .bearerToken(loggedInUser.body().token)
       .json({ author: 'new author' })
     response.assertStatus(200)
+  })
+})
+
+test.group('Team scoped authors', (group) => {
+  group.each.setup(async () => {
+    await db.beginGlobalTransaction()
+    return () => db.rollbackGlobalTransaction()
+  })
+
+  test('team members can list and show team authors', async ({ client, assert }) => {
+    const owner = await UserFactory.merge({ password: 'oasssadfasdf' }).create()
+    const team = await TeamFactory.merge({ userId: owner.id }).create()
+    await IllustrationFactory.merge({
+      author: 'Team Author',
+      user_id: owner.id,
+      team_id: team.id,
+    }).create()
+
+    const login = await client
+      .post('/api/login')
+      .json({ email: owner.email, password: 'oasssadfasdf' })
+    const token = login.body().token
+
+    const authors = await client
+      .get('/api/illustration/authors')
+      .qs({ team_id: team.id })
+      .bearerToken(token)
+    authors.assertStatus(200)
+    assert.deepEqual(
+      authors.body().map((author: any) => author.author),
+      ['Team Author']
+    )
+
+    const author = await client
+      .get('/api/author/Team%20Author')
+      .qs({ team_id: team.id })
+      .bearerToken(token)
+    author.assertStatus(200)
+    assert.equal(author.body().length, 1)
+  })
+
+  test('non members cannot list or show team authors', async ({ client }) => {
+    const owner = await UserFactory.create()
+    const outsider = await UserFactory.merge({ password: 'oasssadfasdf' }).create()
+    const team = await TeamFactory.merge({ userId: owner.id }).create()
+
+    const login = await client
+      .post('/api/login')
+      .json({ email: outsider.email, password: 'oasssadfasdf' })
+
+    const authors = await client
+      .get('/api/illustration/authors')
+      .qs({ team_id: team.id })
+      .bearerToken(login.body().token)
+    authors.assertStatus(403)
+
+    const author = await client
+      .get('/api/author/Team%20Author')
+      .qs({ team_id: team.id })
+      .bearerToken(login.body().token)
+    author.assertStatus(403)
   })
 })

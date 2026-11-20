@@ -5,6 +5,7 @@ import Team from '#models/team'
 import TeamMember from '#models/team_member'
 import IllustrationFactory from '#database/factories/illustration_factory'
 import PlaceFactory from '#database/factories/place_factory'
+import { generateInviteCode } from '#services/invite_code_service'
 import _ from 'lodash'
 
 function getPrivateTags(userId: number) {
@@ -69,7 +70,7 @@ export default class IndexSeeder extends BaseSeeder {
     }
 
     const team = await Team.create({
-      inviteCode: 'TEAM' + Math.random().toString(36).substring(2, 6).toUpperCase(),
+      inviteCode: `TEAM${generateInviteCode(4)}`,
       name: 'Test Team',
       userId: user2.id,
     })

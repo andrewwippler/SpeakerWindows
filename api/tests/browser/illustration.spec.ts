@@ -55,7 +55,7 @@ test.group('Illustration views (browser)', () => {
     await page.assertTextContains('body', 'Browser Author')
     await page.assertTextContains('body', 'Once upon a time in a browser test.')
     await page.assertVisible('a[href^="/tags/"]')
-    await page.assertVisible(`a[href="/illustrations/${illustration.id}/edit"]`)
+    await page.assertVisible(`button[onclick*="/illustrations/${illustration.id}/edit"]`)
     await page.assertVisible('button:has-text("Copy Illustration Content")')
   })
 

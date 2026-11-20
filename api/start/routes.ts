@@ -155,7 +155,8 @@ router.post('/api/login', [UsersController, 'login']).use(authThrottle)
 router
   .post('/api/change-password', [PasswordsController, 'update'])
   .use(middleware.auth({ guards: ['api'] }))
-router.get('/api/healthz', [HealthChecksController])
+router.get('/healthz', [HealthChecksController]).as('healthz')
+router.get('/api/healthz', [HealthChecksController]).as('api.healthz')
 router.get('/api/users/:uid', [UsersController, 'show']).use([
   middleware.auth({
     guards: ['api'],
