@@ -39,6 +39,7 @@ COPY --chown=node:node ./package*.json ./
 RUN npm ci --omit=dev
 COPY --chown=node:node --from=build /home/node/app/build ./
 COPY --chown=node:node --from=model-cache /home/node/app/model-cache ./model-cache
+COPY --chown=node:node ./resources ./resources
 COPY --chown=node:node ./public ./public
 EXPOSE 3333
 CMD [ "dumb-init", "node", "bin/server.js" ]

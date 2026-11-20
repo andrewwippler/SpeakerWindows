@@ -8,18 +8,7 @@ import { BaseModel, column } from '@adonisjs/lucid/orm'
 import { DateTime } from 'luxon'
 
 export class AuthAccessTokenSchema extends BaseModel {
-  static $columns = [
-    'abilities',
-    'createdAt',
-    'expiresAt',
-    'hash',
-    'id',
-    'lastUsedAt',
-    'name',
-    'tokenableId',
-    'type',
-    'updatedAt',
-  ] as const
+  static $columns = ['abilities', 'createdAt', 'expiresAt', 'hash', 'id', 'lastUsedAt', 'name', 'tokenableId', 'type', 'updatedAt'] as const
   $columns = AuthAccessTokenSchema.$columns
   @column()
   declare abilities: string
@@ -61,18 +50,7 @@ export class ContactSchema extends BaseModel {
 }
 
 export class DocumentSearchSchema extends BaseModel {
-  static $columns = [
-    'bodyTsv',
-    'createdAt',
-    'documentId',
-    'embedding',
-    'id',
-    'titleTrigram',
-    'titleTsv',
-    'updatedAt',
-    'userInteractionScore',
-    'viewCount',
-  ] as const
+  static $columns = ['bodyTsv', 'createdAt', 'documentId', 'embedding', 'id', 'titleTrigram', 'titleTsv', 'updatedAt', 'userInteractionScore', 'viewCount'] as const
   $columns = DocumentSearchSchema.$columns
   @column()
   declare bodyTsv: string | null
@@ -112,21 +90,7 @@ export class IllustrationTagSchema extends BaseModel {
 }
 
 export class IllustrationSchema extends BaseModel {
-  static $columns = [
-    'author',
-    'content',
-    'contentHash',
-    'contentTsv',
-    'createdAt',
-    'id',
-    'legacyId',
-    'private',
-    'source',
-    'teamId',
-    'title',
-    'updatedAt',
-    'userId',
-  ] as const
+  static $columns = ['author', 'content', 'contentHash', 'contentTsv', 'createdAt', 'id', 'legacyId', 'private', 'source', 'teamId', 'title', 'updatedAt', 'userId'] as const
   $columns = IllustrationSchema.$columns
   @column()
   declare author: string | null
@@ -157,16 +121,7 @@ export class IllustrationSchema extends BaseModel {
 }
 
 export class PlaceSchema extends BaseModel {
-  static $columns = [
-    'createdAt',
-    'id',
-    'illustrationId',
-    'location',
-    'place',
-    'updatedAt',
-    'used',
-    'userId',
-  ] as const
+  static $columns = ['createdAt', 'id', 'illustrationId', 'location', 'place', 'updatedAt', 'used', 'userId'] as const
   $columns = PlaceSchema.$columns
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime | null
@@ -306,18 +261,7 @@ export class UploadSchema extends BaseModel {
 }
 
 export class UserSchema extends BaseModel {
-  static $columns = [
-    'createdAt',
-    'email',
-    'id',
-    'mustChangePassword',
-    'password',
-    'rememberMeToken',
-    'thirteen',
-    'tos',
-    'uid',
-    'updatedAt',
-  ] as const
+  static $columns = ['createdAt', 'email', 'id', 'mustChangePassword', 'password', 'rememberMeToken', 'thirteen', 'tos', 'uid', 'updatedAt'] as const
   $columns = UserSchema.$columns
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime | null
@@ -325,7 +269,7 @@ export class UserSchema extends BaseModel {
   declare email: string
   @column({ isPrimary: true })
   declare id: number
-  @column({ serializeAs: null })
+  @column()
   declare mustChangePassword: boolean
   @column({ serializeAs: null })
   declare password: string

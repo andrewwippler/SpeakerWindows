@@ -22,10 +22,20 @@ jobs:
         env:
           POSTGRES_DB: testing
           POSTGRES_PASSWORD: adonis
+        options: >-
+          --health-cmd "pg_isready -U postgres -d testing"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
       redis:
         image: redis:5-alpine
         ports:
           - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
 
     strategy:
       matrix:
@@ -44,7 +54,13 @@ jobs:
     - run: cp ./api/.env.test ./api/.env
     - run: npx playwright install --with-deps chromium
       working-directory: ./api
-    - run: sleep 10
+    - name: Run database migrations
+      run: node ace migration:run
+      working-directory: ./api
+      env:
+        CI: true
+        DB_PORT: ${{ job.services.pg.ports[5432] }}
+        REDIS_PORT: ${{ job.services.redis.ports[6379] }}
     - run: npm run test:ui
       working-directory: ./api
       env:
