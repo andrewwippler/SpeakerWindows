@@ -74,5 +74,6 @@ jobs:
               \"version\": \"${{ github.sha }}\",
               \"ns\": \"web\",
               \"deploy\": \"speakerwindows\",
+              \"container\": \"speakerwindows-api\",
               \"prefix\": \"${{ env.REGISTRY }}\"
             }"
