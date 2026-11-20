@@ -67,13 +67,9 @@ jobs:
             -H "Content-Type: application/json" \
             -H "X-Deploy-Key: $WEBHOOK_SECRET" \
             -d "{
-              \"repository\": \"${{ github.repository }}\",
-              \"ref\": \"${{ github.ref }}\",
-              \"sha\": \"${{ github.sha }}\",
-              \"actor\": \"${{ github.actor }}\",
-              \"version\": \"${{ github.sha }}\",
               \"ns\": \"web\",
-              \"deploy\": \"speakerwindows\",
-              \"container\": \"speakerwindows-api\",
+              \"deploy\": \"speakerwindows-api\",
+              \"container\": \"api\",
+              \"image\": \"speakerwindows\",
               \"prefix\": \"${{ env.REGISTRY }}\"
             }"
