@@ -46,6 +46,8 @@
     </form>
     <script>
       const copyIllustrationContent = {{{ JSON.stringify(illustration.content) }}};
+      const copyIllustrationAuthor = {{{ JSON.stringify(illustration.author || '') }}};
+      const copyIllustrationTitle = {{{ JSON.stringify(illustration.title || '') }}};
 
       const copyIllustrationForm = document.querySelector('#copy-illustration-form');
       const copyIllustrationButton = document.querySelector('#copy-illustration-button');
@@ -145,7 +147,48 @@
 
           try {
             if (copyIllustrationContent) {
-              await navigator.clipboard.writeText(copyIllustrationContent);
+              const escapeHtml = (str) =>
+                String(str)
+                  .replace(/&/g, '&amp;')
+                  .replace(/</g, '&lt;')
+                  .replace(/>/g, '&gt;')
+                  .replace(/"/g, '&quot;');
+              const fullUrl = window.location.href;
+              const authorText = copyIllustrationAuthor ? copyIllustrationAuthor + '. ' : '';
+              const contentHtml = escapeHtml(copyIllustrationContent).replace(/\n/g, '<br>');
+              const fontStyle = "font-family: 'Source Sans Pro', sans-serif;";
+              const htmlContent =
+                '<p style="' +
+                fontStyle +
+                '">' +
+                contentHtml +
+                '<a class="sdfootnoteanc" name="sdfootnote1anc" href="#sdfootnote1sym"><sup>1</sup></a></p>' +
+                '<div id="sdfootnote1"><p class="sdfootnote" style="' +
+                fontStyle +
+                ' font-size: 10pt;"> ' +
+                '<a class="sdfootnotesym" name="sdfootnote1sym" href="#sdfootnote1anc">1</a> ' +
+                escapeHtml(authorText) +
+                '<a href="' +
+                escapeHtml(fullUrl) +
+                '">' +
+                escapeHtml(fullUrl) +
+                '</a></p></div>';
+              const plainTextContent =
+                copyIllustrationContent +
+                '\n\n [1] ' +
+                authorText +
+                fullUrl;
+
+              if (navigator.clipboard && navigator.clipboard.write && typeof ClipboardItem !== 'undefined') {
+                await navigator.clipboard.write([
+                  new ClipboardItem({
+                    'text/html': new Blob([htmlContent], { type: 'text/html' }),
+                    'text/plain': new Blob([plainTextContent], { type: 'text/plain' }),
+                  }),
+                ]);
+              } else {
+                await navigator.clipboard.writeText(plainTextContent);
+              }
             }
           } catch (err) {
           }
