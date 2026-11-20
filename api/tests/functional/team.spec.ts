@@ -115,7 +115,7 @@ test.group('Teams', (group) => {
     assert.exists(membership)
   })
 
-  test('Owner can add members to team', async ({ client, assert }) => {
+  test('Owner can add members to team', async ({ client }) => {
     const owner = await UserFactory.make()
     const ownerUser = {
       email: owner.email,
@@ -129,8 +129,7 @@ test.group('Teams', (group) => {
       password: owner.password + '1A!a',
     })
 
-    const teamResponse = await client.get('/api/team').bearerToken(ownerLogin.body().token)
-    const teamId = teamResponse.body().id
+    await client.get('/api/team').bearerToken(ownerLogin.body().token)
 
     const newMember = await UserFactory.create()
 
@@ -344,7 +343,7 @@ test.group('Team Illustrations', (group) => {
     assert.equal(getResponse.body().title, 'Team Illustration')
   })
 
-  test('Non-members cannot view team illustrations', async ({ client, assert }) => {
+  test('Non-members cannot view team illustrations', async ({ client }) => {
     const owner = await UserFactory.make()
     const ownerUser = {
       email: owner.email,
@@ -498,7 +497,7 @@ test.group('Team Illustrations', (group) => {
     assert.equal(updateMetadataResponse.body().illustration.title, 'Updated Title')
   })
 
-  test('Readonly cannot edit team illustration', async ({ client, assert }) => {
+  test('Readonly cannot edit team illustration', async ({ client }) => {
     const owner = await UserFactory.make()
     const ownerUser = {
       email: owner.email,
@@ -551,7 +550,7 @@ test.group('Team Illustrations', (group) => {
     updateResponse.assertStatus(403)
   })
 
-  test('Creator can delete team illustration', async ({ client, assert }) => {
+  test('Creator can delete team illustration', async ({ client }) => {
     const owner = await UserFactory.make()
     const ownerUser = {
       email: owner.email,
@@ -601,7 +600,7 @@ test.group('Team Illustrations', (group) => {
     deleteResponse.assertStatus(200)
   })
 
-  test('Editor cannot delete team illustration', async ({ client, assert }) => {
+  test('Editor cannot delete team illustration', async ({ client }) => {
     const owner = await UserFactory.make()
     const ownerUser = {
       email: owner.email,
@@ -651,7 +650,7 @@ test.group('Team Illustrations', (group) => {
     deleteResponse.assertStatus(403)
   })
 
-  test('User cannot join team if already member of another', async ({ client, assert }) => {
+  test('User cannot join team if already member of another', async ({ client }) => {
     const owner1 = await UserFactory.make()
     const owner1User = {
       email: owner1.email,
@@ -702,7 +701,7 @@ test.group('Team Illustrations', (group) => {
     joinResponse.assertStatus(200)
   })
 
-  test('Owner cannot join another team if they have members', async ({ client, assert }) => {
+  test('Owner cannot join another team if they have members', async ({ client }) => {
     const owner1 = await UserFactory.make()
     const owner1User = {
       email: owner1.email,
@@ -799,7 +798,7 @@ test.group('Team Illustrations', (group) => {
     joinResponse.assertBodyContains({ message: 'Joined team successfully' })
   })
 
-  test('Member can leave team', async ({ client, assert }) => {
+  test('Member can leave team', async ({ client }) => {
     const owner = await UserFactory.make()
     const ownerUser = {
       email: owner.email,
@@ -927,7 +926,7 @@ test.group('Team Illustrations', (group) => {
     assert.equal(membershipsResponse.body().length, 0)
   })
 
-  test('Creator can add members to team', async ({ client, assert }) => {
+  test('Creator can add members to team', async ({ client }) => {
     const owner = await UserFactory.make()
     const ownerUser = {
       email: owner.email,
@@ -983,7 +982,7 @@ test.group('Team Illustrations', (group) => {
     addMemberResponse.assertBodyContains({ message: 'Member added' })
   })
 
-  test('Creator cannot change owner role', async ({ client, assert }) => {
+  test('Creator cannot change owner role', async ({ client }) => {
     const owner = await UserFactory.make()
     const ownerUser = {
       email: owner.email,
@@ -1045,7 +1044,7 @@ test.group('Team Illustrations', (group) => {
     teamResponse.assertBodyContains({ role: 'owner' })
   })
 
-  test('Can invite user by email', async ({ client, assert }) => {
+  test('Can invite user by email', async ({ client }) => {
     const owner = await UserFactory.make()
     const ownerUser = {
       email: owner.email,
@@ -1076,7 +1075,7 @@ test.group('Team Illustrations', (group) => {
     inviteResponse.assertBodyContains({ message: 'Invitation sent' })
   })
 
-  test('Cannot invite non-existent user', async ({ client, assert }) => {
+  test('Cannot invite non-existent user', async ({ client }) => {
     const owner = await UserFactory.make()
     const ownerUser = {
       email: owner.email,
@@ -1098,7 +1097,7 @@ test.group('Team Illustrations', (group) => {
     inviteResponse.assertBodyContains({ message: 'No user found with that email' })
   })
 
-  test('Cannot invite yourself', async ({ client, assert }) => {
+  test('Cannot invite yourself', async ({ client }) => {
     const owner = await UserFactory.make()
     const ownerUser = {
       email: owner.email,
@@ -1157,7 +1156,7 @@ test.group('Team Illustrations', (group) => {
     assert.equal(invitations[0].role, 'editor')
   })
 
-  test('Can cancel invitation', async ({ client, assert }) => {
+  test('Can cancel invitation', async ({ client }) => {
     const owner = await UserFactory.make()
     const ownerUser = {
       email: owner.email,
@@ -1180,7 +1179,7 @@ test.group('Team Illustrations', (group) => {
 
     await client.post('/api/register').json(invitedUserData)
 
-    const inviteResponse = await client
+    await client
       .post('/api/team/invitations')
       .bearerToken(ownerLogin.body().token)
       .json({ email: invitedUser.email, role: 'editor' })
@@ -1197,7 +1196,7 @@ test.group('Team Illustrations', (group) => {
     cancelResponse.assertBodyContains({ message: 'Invitation cancelled' })
   })
 
-  test('Can accept invitation', async ({ client, assert }) => {
+  test('Can accept invitation', async ({ client }) => {
     const owner = await UserFactory.make()
     const ownerUser = {
       email: owner.email,
@@ -1241,7 +1240,7 @@ test.group('Team Illustrations', (group) => {
     acceptResponse.assertBodyContains({ message: 'Joined team successfully' })
   })
 
-  test('Can decline invitation', async ({ client, assert }) => {
+  test('Can decline invitation', async ({ client }) => {
     const owner = await UserFactory.make()
     const ownerUser = {
       email: owner.email,
@@ -1326,7 +1325,7 @@ test.group('Team Illustrations', (group) => {
     assert.equal(invitations[0].role, 'editor')
   })
 
-  test('Cannot invite blocked user', async ({ client, assert }) => {
+  test('Cannot invite blocked user', async ({ client }) => {
     const owner = await UserFactory.make()
     const ownerUser = {
       email: owner.email,
@@ -1368,7 +1367,7 @@ test.group('Team Illustrations', (group) => {
     inviteResponse.assertBodyContains({ message: 'You cannot invite this user' })
   })
 
-  test('Can block a team', async ({ client, assert }) => {
+  test('Can block a team', async ({ client }) => {
     const owner = await UserFactory.make()
     const ownerUser = {
       email: owner.email,
@@ -1444,7 +1443,7 @@ test.group('Team Illustrations', (group) => {
     assert.equal(blocks.length, 1)
   })
 
-  test('Can unblock a team', async ({ client, assert }) => {
+  test('Can unblock a team', async ({ client }) => {
     const owner = await UserFactory.make()
     const ownerUser = {
       email: owner.email,

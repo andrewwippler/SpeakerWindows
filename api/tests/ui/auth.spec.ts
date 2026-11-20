@@ -1,4 +1,4 @@
-import { test, expect, registerUser, loginUser, TEST_USER } from './fixtures/auth.fixture'
+import { test, expect, registerUser, loginUser, TEST_USER } from './fixtures/auth.fixture.js'
 
 test.describe('Authentication', () => {
   test('login page renders correctly', async ({ page }) => {

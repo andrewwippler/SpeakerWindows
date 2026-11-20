@@ -189,7 +189,7 @@ test.group('Feature views (browser)', () => {
     browserContext,
     assert,
   }) => {
-    const { user } = await loginUser(browserContext)
+    await loginUser(browserContext)
     const memberEmail = uniqueEmail('team-member')
     await UserFactory.merge({ email: memberEmail }).create()
 
@@ -216,6 +216,49 @@ test.group('Feature views (browser)', () => {
 
     const updated = await TeamMember.query().where('user_id', member.id).first()
     assert.equal(updated?.role, 'readonly')
+  })
+
+  test('settings shows temporary credentials and forces a password change', async ({
+    visit,
+    browserContext,
+    assert,
+  }) => {
+    await loginUser(browserContext)
+    const memberEmail = uniqueEmail('temporary-member')
+    let page = await visit('/settings')
+    await page.click('#tab-team')
+
+    await page.fill('input[name="email"]', memberEmail)
+    await page.selectOption('select[name="role"]', 'editor')
+    await page.click('button:has-text("Add Member")')
+    await page.assertPath('/settings')
+    await page.assertVisible('[data-temporary-credentials]')
+
+    const temporaryPassword = await page.locator('[data-temporary-credentials] code').textContent()
+    assert.isNotEmpty(temporaryPassword)
+
+    const member = await User.findByOrFail('email', memberEmail)
+    assert.isTrue(member.mustChangePassword)
+    const membership = await TeamMember.query().where('user_id', member.id).first()
+    assert.equal(membership?.role, 'editor')
+
+    page = await visit('/logout')
+    page = await visit('/login')
+    await page.fill('input[name="email"]', memberEmail)
+    await page.fill('input[name="password"]', temporaryPassword!)
+    await page.click('button[type="submit"]')
+    await page.waitForURL('/change-password')
+    await page.assertPath('/change-password')
+
+    await page.fill('input[name="currentPassword"]', temporaryPassword!)
+    await page.fill('input[name="newPassword"]', 'BrowserChanged123!')
+    await page.fill('input[name="newPassword_confirmation"]', 'BrowserChanged123!')
+    await page.click('button[type="submit"]')
+    await page.waitForURL('/')
+
+    await member.refresh()
+    assert.isFalse(member.mustChangePassword)
+    assert.isTrue(await member.verifyPassword('BrowserChanged123!'))
   })
 
   test('settings page shows a copyable API key', async ({ visit, browserContext, assert }) => {

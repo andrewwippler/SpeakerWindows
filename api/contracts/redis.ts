@@ -5,9 +5,4 @@
  * file.
  */
 
-import { type InferConnectionsFromConfig } from '@adonisjs/redis/build/config'
-import type redisConfig from '../config/redis.js'
-
-declare module '@ioc:Adonis/Addons/Redis' {
-  interface RedisConnectionsList extends InferConnectionsFromConfig<typeof redisConfig> {}
-}
+export {}

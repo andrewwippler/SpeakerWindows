@@ -7,7 +7,8 @@ import TeamInvitation from '#models/team_invitation'
 import TeamBlock from '#models/team_block'
 import Tag from '#models/tag'
 import type { TeamRole } from '#models/team'
-import { randomUUID } from 'node:crypto'
+import { addTeamMemberByEmail } from '#services/team_member_service'
+import { AddTeamMemberValidator } from '#validators/add_team_member_validator'
 
 function generateInviteCode(): string {
   const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
@@ -93,7 +94,7 @@ export default class TeamsController {
 
   public async addMember({ auth, request, response }: HttpContext) {
     const user = auth.user!
-    const { userId, role } = request.all()
+    const { userId, email, role } = request.all()
 
     const team = await Team.query().where('user_id', user.id).first()
     if (!team) {
@@ -107,6 +108,55 @@ export default class TeamsController {
 
     if (!userMembership || (userMembership.role !== 'owner' && userMembership.role !== 'creator')) {
       return response.status(403).send({ message: 'Only owners and creators can add members' })
+    }
+
+    if (email) {
+      let payload
+      try {
+        payload = await AddTeamMemberValidator.validate({ email, role })
+      } catch (error) {
+        return response.status(422).send((error as { messages: unknown }).messages)
+      }
+
+      const invitedUser = await User.query()
+        .whereRaw('LOWER(email) = ?', [payload.email.toLowerCase()])
+        .first()
+
+      if (invitedUser?.id === user.id) {
+        return response.status(400).send({ message: 'Cannot add yourself' })
+      }
+
+      if (invitedUser) {
+        const existingMember = await TeamMember.query()
+          .where('team_id', team.id)
+          .where('user_id', invitedUser.id)
+          .first()
+
+        if (existingMember) {
+          return response.status(400).send({ message: 'User is already a member' })
+        }
+
+        const existingBlock = await TeamBlock.query()
+          .where('team_id', team.id)
+          .where('user_id', invitedUser.id)
+          .first()
+
+        if (existingBlock) {
+          return response.status(400).send({ message: 'You cannot add this user' })
+        }
+      }
+
+      try {
+        const result = await addTeamMemberByEmail(team.id, payload.email, payload.role)
+        return {
+          message: 'Member added',
+          userId: result.user.id,
+          email: result.user.email,
+          temporaryPassword: result.temporaryPassword,
+        }
+      } catch {
+        return response.status(400).send({ message: 'Failed to add member' })
+      }
     }
 
     const existingMember = await TeamMember.query()
@@ -238,7 +288,7 @@ export default class TeamsController {
       role: 'readonly',
     })
 
-    const personalTags = await Tag.query().where('user_id', user.id).where('team_id', null)
+    const personalTags = await Tag.query().where('user_id', user.id).whereNull('team_id')
 
     const teamTags = await Tag.query().where('team_id', team.id)
 

@@ -5,6 +5,8 @@ import { Bouncer } from '@adonisjs/bouncer'
 import type { HttpContext } from '@adonisjs/core/http'
 import type { NextFn } from '@adonisjs/core/types/http'
 
+type RegisteredAbilities = Pick<typeof abilities, 'editUser' | 'editTag' | 'viewPlace'>
+
 /**
  * Init bouncer middleware is used to create a bouncer instance
  * during an HTTP request
@@ -15,9 +17,13 @@ export default class InitializeBouncerMiddleware {
      * Create bouncer instance for the ongoing HTTP request.
      * We will pull the user from the HTTP context.
      */
-    ctx.bouncer = new Bouncer(
+    ctx.bouncer = new Bouncer<
+      Exclude<HttpContext['auth']['user'], undefined>,
+      RegisteredAbilities,
+      typeof policies
+    >(
       () => ctx.auth.user || null,
-      abilities,
+      abilities as RegisteredAbilities,
       policies
     ).setContainerResolver(ctx.containerResolver)
 
@@ -36,7 +42,7 @@ declare module '@adonisjs/core/http' {
   export interface HttpContext {
     bouncer: Bouncer<
       Exclude<HttpContext['auth']['user'], undefined>,
-      typeof abilities,
+      RegisteredAbilities,
       typeof policies
     >
   }

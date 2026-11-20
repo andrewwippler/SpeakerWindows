@@ -6,7 +6,8 @@ import Team from '#models/team'
 import TeamMember from '#models/team_member'
 import type { TeamRole } from '#models/team'
 import { ImportHighlightsService } from '#services/import_highlights_service'
-import { randomUUID } from 'node:crypto'
+import { addTeamMemberByEmail } from '#services/team_member_service'
+import { AddTeamMemberValidator } from '#validators/add_team_member_validator'
 
 function generateInviteCode(): string {
   const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
@@ -117,33 +118,61 @@ export default class SettingsController {
         return response.redirect('back')
       }
 
-      const invitedUser = await User.query().where('email', email).first()
-      if (!invitedUser) {
-        session.flash('error', 'No user found with that email')
+      const userMembership = await TeamMember.query()
+        .where('team_id', team.id)
+        .where('user_id', user.id)
+        .first()
+
+      if (
+        !userMembership ||
+        (userMembership.role !== 'owner' && userMembership.role !== 'creator')
+      ) {
+        session.flash('error', 'Only owners and creators can add members')
         return response.redirect('back')
       }
 
-      if (invitedUser.id === user.id) {
+      let payload
+      try {
+        payload = await AddTeamMemberValidator.validate({ email, role: role || 'editor' })
+      } catch {
+        session.flash('error', 'Enter a valid email address and role')
+        return response.redirect('back')
+      }
+
+      const invitedUser = await User.query()
+        .whereRaw('LOWER(email) = ?', [payload.email.toLowerCase()])
+        .first()
+
+      if (invitedUser?.id === user.id) {
         session.flash('error', 'Cannot add yourself')
         return response.redirect('back')
       }
 
-      const existing = await TeamMember.query()
-        .where('team_id', team.id)
-        .where('user_id', invitedUser.id)
-        .first()
+      if (invitedUser) {
+        const existing = await TeamMember.query()
+          .where('team_id', team.id)
+          .where('user_id', invitedUser.id)
+          .first()
 
-      if (existing) {
-        session.flash('error', 'User is already a member')
-        return response.redirect('back')
+        if (existing) {
+          session.flash('error', 'User is already a member')
+          return response.redirect('back')
+        }
       }
 
-      await TeamMember.create({
-        teamId: team.id,
-        userId: invitedUser.id,
-        role: (role || 'editor') as TeamRole,
-      })
-      session.flash('success', 'Member added')
+      const result = await addTeamMemberByEmail(team.id, payload.email, payload.role)
+      if (result.temporaryPassword) {
+        session.flash(
+          'success',
+          `Member added. Share the temporary password with ${result.user.email}.`
+        )
+        session.flash('temporaryCredentials', {
+          email: result.user.email,
+          password: result.temporaryPassword,
+        })
+      } else {
+        session.flash('success', 'Member added')
+      }
     } catch (error) {
       console.error('Add member error:', error)
       session.flash('error', 'Failed to add member')

@@ -65,7 +65,7 @@ test.group('Import', (group) => {
     response.assertStatus(401)
   })
 
-  test('returns 400 for invalid importer type', async ({ client, assert }) => {
+  test('returns 400 for invalid importer type', async ({ client }) => {
     const user = await UserFactory.merge({ password: 'oasssadfasdf' }).create()
     const token = await login(client, user.email, 'oasssadfasdf')
 

@@ -91,8 +91,6 @@ export class ImportService {
       const content = this.tidyText(entry.text || '')
       if (!content) continue
 
-      const titleField = content.length > 100 ? content.slice(0, 100) : content
-
       const tags: string[] = [entry.color || '', 'To-Fix'].filter(Boolean)
       if (content.length < 150) {
         tags.push('Quotes')
@@ -293,7 +291,6 @@ export class ImportService {
   static async parseKindle(filePath: string): Promise<ImportIllustration[]> {
     const dataBuffer = await fs.readFile(filePath)
     const parser = new PDFParse({ data: dataBuffer })
-    await parser.load()
     const textResult = await parser.getText()
     const text = textResult.text.replace(/\ufffd/g, '')
 

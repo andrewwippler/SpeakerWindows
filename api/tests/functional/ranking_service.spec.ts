@@ -63,7 +63,7 @@ test.group('RankingService', (group) => {
   })
 
   test('sortByTitleMatchFirst puts matching titles first alphabetically', async ({ assert }) => {
-    const user = await IllustrationFactory.create()
+    await IllustrationFactory.create()
 
     const ill1 = Object.assign(await IllustrationFactory.create(), {
       title: 'Zebra Guide',
@@ -125,7 +125,7 @@ test.group('RankingService', (group) => {
   })
 
   test('sortByTitleMatchFirst sorts alphabetically within each group', async ({ assert }) => {
-    const user = await IllustrationFactory.create()
+    await IllustrationFactory.create()
 
     const ill1 = Object.assign(await IllustrationFactory.create(), {
       title: 'React Guide',
@@ -199,7 +199,7 @@ test.group('RankingService', (group) => {
   })
 
   test('sortByTitleMatchFirst handles case insensitive matching', async ({ assert }) => {
-    const user = await IllustrationFactory.create()
+    await IllustrationFactory.create()
 
     const ill1 = Object.assign(await IllustrationFactory.create(), {
       title: 'PYTHON Basics',
@@ -237,7 +237,7 @@ test.group('RankingService', (group) => {
   })
 
   test('sortByTitleMatchFirst handles no matches', async ({ assert }) => {
-    const user = await IllustrationFactory.create()
+    await IllustrationFactory.create()
 
     const ill1 = Object.assign(await IllustrationFactory.create(), {
       title: 'Apple Guide',

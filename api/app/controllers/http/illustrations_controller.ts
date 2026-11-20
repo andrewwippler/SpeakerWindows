@@ -150,7 +150,7 @@ export default class IllustrationsController {
    * @param {Response} ctx.response
    * @param {View} ctx.view
    */
-  public async store({ request, bouncer, auth, response }: HttpContext) {
+  public async store({ request, auth, response }: HttpContext) {
     const {
       author,
       title,
@@ -518,7 +518,7 @@ export default class IllustrationsController {
     await illustration.save()
 
     if (hasTags && tags && tags.length > 0) {
-      const newTags = [...new Set(tags)].map((tag) => {
+      const newTags = [...new Set(tags as string[])].map((tag) => {
         return {
           slug: TagSlugSanitizer(
             tag +
@@ -585,7 +585,7 @@ export default class IllustrationsController {
     const uploadsPath = app.makePath(
       'uploads',
       env.get('NODE_ENV'),
-      auth.user?.id.toString(),
+      auth.user?.id.toString()!,
       id.toString()
     )
     await fs.rm(uploadsPath, { recursive: true, force: true })
@@ -605,13 +605,13 @@ export default class IllustrationsController {
     const userId = auth.user?.id
 
     // Get all team IDs the user belongs to
-    const teamIds = await getUserTeamIds(userId)
+    const teamIds = await getUserTeamIds(userId!)
     // Get illustrations:
     // 1. Own illustrations (user_id matches)
     // 2. Team illustrations (team_id in user's teams AND not private)
     const illustrations = await Illustration.query()
       .where((query) => {
-        query.where('user_id', userId)
+        query.where('user_id', userId!)
         if (teamIds.length > 0) {
           query.orWhere((inner) => {
             inner.whereIn('team_id', teamIds).andWhere('private', false)

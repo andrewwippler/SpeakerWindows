@@ -4,9 +4,10 @@ import PlaceFactory from '#database/factories/place_factory'
 import Illustration from '#models/illustration'
 import UserFactory from '#database/factories/user_factory'
 import Place from '#models/place'
+import type User from '#models/user'
 import db from '@adonisjs/lucid/services/db'
-let goodUser
-let badUser
+let goodUser: User
+let badUser: User
 
 test.group('Place', (group) => {
   // Write your test here
@@ -22,23 +23,23 @@ test.group('Place', (group) => {
       title: 'Places Test',
       user_id: goodUser.id,
     }).create()
-    const place1 = await PlaceFactory.merge({
+    await PlaceFactory.merge({
       illustration_id: illustration.id,
       user_id: goodUser.id,
     }).create()
-    const place2 = await PlaceFactory.merge({
+    await PlaceFactory.merge({
       illustration_id: illustration.id,
       user_id: goodUser.id,
     }).create()
-    const place3 = await PlaceFactory.merge({
+    await PlaceFactory.merge({
       illustration_id: illustration.id,
       user_id: goodUser.id,
     }).create()
-    const place4 = await PlaceFactory.merge({
+    await PlaceFactory.merge({
       illustration_id: illustration.id,
       user_id: goodUser.id,
     }).create()
-    const place5 = await PlaceFactory.merge({
+    await PlaceFactory.merge({
       illustration_id: illustration.id,
       user_id: goodUser.id,
     }).create()
@@ -51,7 +52,7 @@ test.group('Place', (group) => {
 
     const illustration = await Illustration.findBy('title', 'Places Test')
     const response = await client
-      .get(`/api/places/${illustration.id}`)
+      .get(`/api/places/${illustration!.id}`)
       .bearerToken(loggedInUser.body().token)
     response.assertStatus(200)
   })
@@ -62,7 +63,7 @@ test.group('Place', (group) => {
       .json({ email: badUser.email, password: 'oasssadfasdf' })
     const illustration = await Illustration.findBy('title', 'Places Test')
     const response = await client
-      .get(`/api/places/${illustration.id}`)
+      .get(`/api/places/${illustration!.id}`)
       .bearerToken(loggedInUser.body().token)
     response.assertStatus(403)
   })
@@ -91,7 +92,7 @@ test.group('Place', (group) => {
     assert.equal(response.body().message, 'Created successfully')
     assert.isNumber(response.body().id)
     const savedPlace = await Place.find(response.body().id)
-    assert.equal(savedPlace.user_id, goodUser.id)
+    assert.equal(savedPlace!.user_id, goodUser.id)
   })
 
   test('Cannot add new place to your illustration or unknown', async ({ client, assert }) => {
@@ -201,7 +202,7 @@ test.group('Place', (group) => {
     assert.isFalse(!!deletedPlace)
   })
 
-  test('Cannot delete place on your illustration', async ({ client, assert }) => {
+  test('Cannot delete place on your illustration', async ({ client }) => {
     const loggedInUser = await client
       .post('/api/login')
       .json({ email: badUser.email, password: 'oasssadfasdf' })

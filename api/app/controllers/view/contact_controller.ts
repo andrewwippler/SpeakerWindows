@@ -5,8 +5,7 @@ export default class ContactController {
     return view.render('contact/index')
   }
 
-  public async store({ request, session, response }: HttpContext) {
-    const { name, email, subject, message } = request.all()
+  public async store({ session, response }: HttpContext) {
     // TODO: Send email in production
     session.flash('success', 'Message sent! We will get back to you soon.')
     return response.redirect('/contact')

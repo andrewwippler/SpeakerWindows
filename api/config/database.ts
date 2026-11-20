@@ -7,7 +7,6 @@
 
 import env from '#start/env'
 import app from '@adonisjs/core/services/app'
-import { DatabaseConfig } from '@adonisjs/lucid/database'
 import { defineConfig } from '@adonisjs/lucid'
 
 const databaseConfig = defineConfig({
@@ -49,7 +48,6 @@ const databaseConfig = defineConfig({
         naturalSort: true,
       },
       useNullAsDefault: true,
-      healthCheck: false,
       debug: false,
     },
 

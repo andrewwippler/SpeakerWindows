@@ -34,7 +34,7 @@ export default class AuthorsController {
     if (teamId !== null) {
       const isMember = await TeamMember.query()
         .where('team_id', teamId)
-        .where('user_id', userId)
+        .where('user_id', userId!)
         .first()
 
       const team = await Team.find(teamId)
@@ -87,7 +87,7 @@ export default class AuthorsController {
 
       const isMember = await TeamMember.query()
         .where('team_id', teamId)
-        .where('user_id', userId)
+        .where('user_id', userId!)
         .first()
 
       const team = await Team.find(teamId)

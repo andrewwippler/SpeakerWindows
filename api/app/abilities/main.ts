@@ -19,7 +19,6 @@ import _ from 'lodash'
 import type Illustration from '#models/illustration'
 import type Place from '#models/place'
 import TeamMember from '#models/team_member'
-import Team from '#models/team'
 import type { TeamRole } from '#models/team'
 
 async function getUserRoleInTeam(user: User, teamId: number): Promise<TeamRole | null> {

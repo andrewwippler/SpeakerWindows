@@ -40,4 +40,5 @@ server.use([
  */
 export const middleware = router.named({
   auth: () => import('#middleware/auth_middleware'),
+  mustChangePassword: () => import('#middleware/must_change_password_middleware'),
 })

@@ -18,7 +18,7 @@ export default class Tag extends BaseModel {
   @column()
   declare user_id: number
 
-  @column({ default: null })
+  @column()
   declare team_id: number | null
 
   @column()

@@ -1,6 +1,15 @@
 @layout()
 <h2>Settings</h2>
 
+@flashMessage('temporaryCredentials')
+  <div role="alert" data-variant="success" data-temporary-credentials>
+    <strong>Temporary password created</strong>
+    <p>Email: {{ $message.email }}</p>
+    <p>Password: <code>{{ $message.password }}</code></p>
+    <p>Share this password now. It will not be shown again.</p>
+  </div>
+@end
+
 <ot-tabs data-anchor="settings">
   <div role="tablist">
     <button role="tab" id="tab-account">Account</button>

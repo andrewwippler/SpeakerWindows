@@ -5,7 +5,6 @@
  * file.
  */
 
-import type { BodyParserConfig } from '@adonisjs/core/bodyparser'
 import { defineConfig } from '@adonisjs/core/bodyparser'
 
 const bodyParserConfig = defineConfig({
@@ -18,7 +17,7 @@ const bodyParserConfig = defineConfig({
   | to avoid body parsing for `GET` requests.
   |
   */
-  whitelistedMethods: ['POST', 'PUT', 'PATCH', 'DELETE'],
+  allowedMethods: ['POST', 'PUT', 'PATCH', 'DELETE'],
 
   /*
   |--------------------------------------------------------------------------
@@ -83,7 +82,6 @@ const bodyParserConfig = defineConfig({
   raw: {
     encoding: 'utf-8',
     limit: '1mb',
-    queryString: {},
     types: ['text/*'],
   },
 
@@ -155,8 +153,6 @@ const bodyParserConfig = defineConfig({
     | Request body encoding
     |
     */
-    encoding: 'utf-8',
-
     /*
     |--------------------------------------------------------------------------
     | Convert empty strings to null

@@ -485,7 +485,12 @@ test.group('Tag - Team Scoped', (group) => {
 
     const newPersonalTagsResponse = await client.get('/api/tags').bearerToken(tokenA)
     // filtering out any team tags to verify all were moved to team and none remain personal
-    assert.equal(newPersonalTagsResponse.body().filter((tag) => tag.teamId !== teamB.id).length, 0)
+    assert.equal(
+      newPersonalTagsResponse
+        .body()
+        .filter((tag: { teamId: number | null }) => tag.teamId !== teamB.id).length,
+      0
+    )
   })
 
   test('When joining team, personal tags with same name as team tags are merged', async ({
@@ -500,10 +505,7 @@ test.group('Tag - Team Scoped', (group) => {
       .json({ email: userA.email, password: 'oasssadfasdf' })
     const tokenA = loginA.body().token
 
-    const loginB = await client
-      .post('/api/login')
-      .json({ email: userB.email, password: 'oasssadfasdf' })
-    const tokenB = loginB.body().token
+    await client.post('/api/login').json({ email: userB.email, password: 'oasssadfasdf' })
 
     const teamB = await TeamFactory.merge({ userId: userB.id }).create()
 
@@ -569,7 +571,11 @@ test.group('Tag - Team Scoped', (group) => {
     assert.equal(joinResponse.body().message, 'Joined team successfully')
 
     const afterJoinPersonal = await client.get('/api/tags').bearerToken(tokenA)
-    assert.equal(afterJoinPersonal.body().filter((tag) => tag.teamId !== teamB.id).length, 0)
+    assert.equal(
+      afterJoinPersonal.body().filter((tag: { teamId: number | null }) => tag.teamId !== teamB.id)
+        .length,
+      0
+    )
 
     const afterJoinTeam = await client.get(`/api/tags`).qs({ team_id: teamB.id }).bearerToken(tokenA)
     assert.equal(afterJoinTeam.body().length, 3)

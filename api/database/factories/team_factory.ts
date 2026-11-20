@@ -10,7 +10,7 @@ function generateInviteCode(): string {
   return code
 }
 
-export default Factory.define(Team, ({ faker }) => {
+export default Factory.define(Team, () => {
   return {
     name: 'My Team',
     inviteCode: generateInviteCode(),

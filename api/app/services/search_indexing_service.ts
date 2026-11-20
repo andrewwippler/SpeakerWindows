@@ -40,7 +40,6 @@ export class SearchIndexingService {
 
     // Combine text for embedding
     const textForEmbedding = this.prepareEmbeddingText(illustration)
-    const textForFTS = this.prepareFTSText(illustration)
 
     // Compute embedding
     const embedding = await this.embeddingProvider.embed(textForEmbedding)
@@ -150,13 +149,6 @@ export class SearchIndexingService {
   private prepareEmbeddingText(illustration: Illustration): string {
     const parts = [illustration.title, illustration.content, illustration.author || '']
     return parts.filter((p) => p && p.trim()).join(' ')
-  }
-
-  /**
-   * Prepare text for full-text search
-   */
-  private prepareFTSText(illustration: Illustration): string {
-    return `${illustration.title} ${illustration.content} ${illustration.author || ''}`
   }
 
   /**

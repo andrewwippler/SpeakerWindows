@@ -5,7 +5,6 @@ import Tag from '#models/tag'
 import Place from '#models/place'
 import LocalEmbeddingProvider from '#services/local_embedding_provider'
 import { RankingService } from '#services/ranking_service'
-import { HybridSearchValidator } from '#validators/hybrid_search_validator'
 
 export default class SearchController {
   public async index({ view }: HttpContext) {

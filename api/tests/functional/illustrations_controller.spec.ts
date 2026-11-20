@@ -7,7 +7,6 @@ import IllustrationsController from '#controllers/http/illustrations_controller'
 import TeamFactory from '#database/factories/team_factory'
 import TeamMemberFactory from '#database/factories/team_member_factory'
 import TagFactory from '#database/factories/tag_factory'
-import Tag from '#models/tag'
 
 test.group('IllustrationsController.search', (group) => {
   group.each.setup(async () => {
@@ -25,7 +24,7 @@ test.group('IllustrationsController.search', (group) => {
     // Spy on Illustration.search
     let called = false
     const original = Illustration.search
-    ;(Illustration as any).search = async (...args: any[]) => {
+    ;(Illustration as any).search = async () => {
       called = true
       return [ill]
     }
@@ -48,7 +47,7 @@ test.group('IllustrationsController.search', (group) => {
       },
     }
 
-    const res = await controller.search(ctx as any)
+    await controller.search(ctx as any)
     assert.isTrue(called)
 
     // restore
@@ -58,12 +57,12 @@ test.group('IllustrationsController.search', (group) => {
   test('empty query returns 400', async ({ assert }) => {
     const controller = new IllustrationsController()
     const ctx: any = {
-      request: { input: (k: string) => '' },
+      request: { input: () => '' },
       auth: { user: { id: 1 } },
       response: { badRequest: (d: any) => d },
     }
 
-    const out = await controller.search(ctx as any)
+    const out: any = await controller.search(ctx as any)
     assert.equal(out.error, 'Query parameter "q" is required')
   })
 })
@@ -182,7 +181,7 @@ test.group('IllustrationsController.bulk', (group) => {
     assert.include(response.body().message, `Removed tag`)
   })
 
-  test('Creator can remove tag from team illustration', async ({ client, assert }) => {
+  test('Creator can remove tag from team illustration', async ({ client }) => {
     const teamOwner = await UserFactory.merge({ password: 'testpassword123' }).create()
     const creator = await UserFactory.merge({ password: 'testpassword123' }).create()
     const team = await TeamFactory.merge({ userId: teamOwner.id }).create()
@@ -214,7 +213,7 @@ test.group('IllustrationsController.bulk', (group) => {
     response.assertStatus(200)
   })
 
-  test('Editor can remove tag from team illustration', async ({ client, assert }) => {
+  test('Editor can remove tag from team illustration', async ({ client }) => {
     const teamOwner = await UserFactory.merge({ password: 'testpassword123' }).create()
     const editor = await UserFactory.merge({ password: 'testpassword123' }).create()
     const team = await TeamFactory.merge({ userId: teamOwner.id }).create()
@@ -282,10 +281,10 @@ test.group('IllustrationsController.bulk', (group) => {
     assert.include(response.body().message, 'permission')
   })
 
-  test('Cannot remove tag from different team illustration', async ({ client, assert }) => {
+  test('Cannot remove tag from different team illustration', async ({ client }) => {
     const teamOwner1 = await UserFactory.merge({ password: 'testpassword123' }).create()
     const teamOwner2 = await UserFactory.merge({ password: 'testpassword123' }).create()
-    const team1 = await TeamFactory.merge({ userId: teamOwner1.id }).create()
+    await TeamFactory.merge({ userId: teamOwner1.id }).create()
     const team2 = await TeamFactory.merge({ userId: teamOwner2.id }).create()
 
     const illustration = await IllustrationFactory.merge({

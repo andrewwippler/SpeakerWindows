@@ -76,7 +76,7 @@ export default class HybridSearchController {
           'id',
           candidates.map((c: any) => c.illustrationId)
         )
-        .where('user_id', auth.user?.id)
+        .where('user_id', auth.user?.id!)
 
       // Create map for ranking - use String keys to match Lucid serialization
       const illustrationMap = new Map(illustrations.map((il) => [String(il.id), il]))
@@ -93,7 +93,7 @@ export default class HybridSearchController {
       // Step 5b: Fetch illustrations where content matches LIKE query (prepend to results)
       const contentMatches = await Illustration.query()
         .where('content', 'LIKE', `%${query}%`)
-        .where('user_id', auth.user?.id)
+        .where('user_id', auth.user?.id!)
         .limit(limit)
 
       const contentMatchIds = new Set(contentMatches.map((il: any) => il.id))

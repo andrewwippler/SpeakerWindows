@@ -13,6 +13,7 @@ import { authThrottle, contactThrottle, importThrottle, uploadThrottle } from '#
 // API Controllers
 const HealthChecksController = () => import('#controllers/health_checks_controller')
 const UsersController = () => import('#controllers/http/users_controller')
+const PasswordsController = () => import('#controllers/http/passwords_controller')
 const IllustrationsController = () => import('#controllers/http/illustrations_controller')
 const AuthorsController = () => import('#controllers/http/authors_controller')
 const SettingsController = () => import('#controllers/http/settings_controller')
@@ -26,6 +27,7 @@ const ImportsController = () => import('#controllers/http/imports_controller')
 
 // View Controllers
 const AuthController = () => import('#controllers/view/auth_controller')
+const PasswordViewController = () => import('#controllers/view/password_controller')
 const DashboardController = () => import('#controllers/view/dashboard_controller')
 const IllustrationViewController = () => import('#controllers/view/illustration_controller')
 const TagViewController = () => import('#controllers/view/tag_controller')
@@ -50,6 +52,15 @@ router.post('/login', [AuthController, 'login']).as('auth.doLogin').use(authThro
 router.get('/register', [AuthController, 'showRegister']).as('auth.register')
 router.post('/register', [AuthController, 'register']).as('auth.doRegister').use(authThrottle)
 router.get('/logout', [AuthController, 'logout']).as('auth.logout')
+
+router
+  .get('/change-password', [PasswordViewController, 'show'])
+  .as('auth.changePassword')
+  .use(middleware.auth({ guards: ['web'] }))
+router
+  .post('/change-password', [PasswordViewController, 'update'])
+  .as('auth.doChangePassword')
+  .use(middleware.auth({ guards: ['web'] }))
 
 router
   .group(() => {
@@ -121,11 +132,12 @@ router
     router.get('/tos', [LegalViewController, 'tos']).as('legal.tos')
     router.get('/privacy-policy', [LegalViewController, 'privacy']).as('legal.privacy')
   })
-  .use(
+  .use([
     middleware.auth({
       guards: ['web'],
-    })
-  )
+    }),
+    middleware.mustChangePassword(),
+  ])
 
 router.get('/contact', [ContactViewController, 'index']).as('contact')
 router.post('/contact', [ContactViewController, 'store']).as('contact.store')
@@ -140,6 +152,9 @@ router.post('api/contact', [ContactsController, 'store']).use(contactThrottle)
 // Auth
 router.post('api/register', [UsersController, 'store']).use(authThrottle)
 router.post('/api/login', [UsersController, 'login']).use(authThrottle)
+router
+  .post('/api/change-password', [PasswordsController, 'update'])
+  .use(middleware.auth({ guards: ['api'] }))
 router.get('/api/healthz', [HealthChecksController])
 router.get('/api/users/:uid', [UsersController, 'show']).use([
   middleware.auth({
@@ -247,6 +262,7 @@ router
     middleware.auth({
       guards: ['api'],
     }),
+    middleware.mustChangePassword(),
   ])
 
 // Public - file uploads

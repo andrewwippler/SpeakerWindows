@@ -70,7 +70,7 @@ export default class AuthorController {
       .andWhere('user_id', `${auth.user!.id}`)
       .update({ author: newName })
 
-    if (count === 0) {
+    if (count.length === 0) {
       return response.notFound({ message: 'Author not found' })
     }
 

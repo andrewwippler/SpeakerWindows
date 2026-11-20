@@ -1,6 +1,5 @@
 import Illustration from '#models/illustration'
 import Factory from '@adonisjs/lucid/factories'
-import { _ } from 'lodash'
 
 export default Factory.define(Illustration, ({ faker }) => {
   return {

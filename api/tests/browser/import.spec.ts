@@ -1,7 +1,6 @@
 import { test } from '@japa/runner'
 import { join } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import IllustrationFactory from '#database/factories/illustration_factory'
 import Illustration from '#models/illustration'
 import { loginUser } from './helpers.js'
 

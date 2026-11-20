@@ -16,7 +16,7 @@ test.group('IndexIllustrationJob', (group) => {
 
     let embedCalled = false
     const mockProvider = {
-      embed: async (text: string) => {
+      embed: async (_text: string) => {
         embedCalled = true
         return Array(384).fill(0.1)
       },

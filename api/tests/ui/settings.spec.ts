@@ -1,4 +1,4 @@
-import { test, expect } from './fixtures/auth.fixture'
+import { test, expect } from './fixtures/auth.fixture.js'
 
 test.describe('Settings', () => {
   test('settings page renders', async ({ loggedInPage: page }) => {

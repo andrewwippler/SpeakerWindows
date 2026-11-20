@@ -2,7 +2,7 @@ import type { HttpContext } from '@adonisjs/core/http'
 import Illustration from '#models/illustration'
 
 export default class ArticlesController {
-  public async index({ view, auth, session }: HttpContext) {
+  public async index({ view, session }: HttpContext) {
     const recentIds: number[] = session.get('recentlyViewed') || []
     let recentlyViewed: any[] = []
     if (recentIds.length) {

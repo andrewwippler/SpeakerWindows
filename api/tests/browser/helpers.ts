@@ -13,7 +13,7 @@ export function uniqueEmail(prefix: string) {
  * Create a user via factory and authenticate them for the whole
  * browser context using the AdonisJS `loginAs` helper.
  */
-export async function loginUser(browserContext: any, prefix = 'browser-user') {
+export async function loginUser(browserContext: any, _prefix = 'browser-user') {
   const user = await UserFactory.merge({ password: PASSWORD }).create()
   await browserContext.loginAs(user)
   return { user }

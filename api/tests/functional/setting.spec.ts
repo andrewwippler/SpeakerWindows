@@ -1,10 +1,9 @@
 import { test } from '@japa/runner'
-import Contact from '#models/contact'
+import type User from '#models/user'
 import db from '@adonisjs/lucid/services/db'
 import UserFactory from '#database/factories/user_factory'
 
-let goodUser
-let badUser
+let goodUser: User
 
 test.group('Contact', (group) => {
   group.each.setup(async () => {
@@ -13,7 +12,6 @@ test.group('Contact', (group) => {
   })
   group.setup(async () => {
     goodUser = await UserFactory.merge({ password: 'oasssadfasdf' }).create()
-    badUser = await UserFactory.merge({ password: 'oasssadfasdf' }).create() // bad user does not have access to good user
   })
 
   test('My user has settings when I log in', async ({ client }) => {

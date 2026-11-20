@@ -87,7 +87,7 @@ test.group('Search API', (group) => {
     client,
     assert,
   }) => {
-    const user = await UserFactory.create()
+    await UserFactory.create()
     const loggedInUser = await client
       .post('/api/login')
       .json({ email: goodUser.email, password: 'oasssadfasdf' })

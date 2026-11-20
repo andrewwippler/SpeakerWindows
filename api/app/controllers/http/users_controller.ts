@@ -19,7 +19,7 @@ function generateInviteCode(): string {
 }
 
 export default class UsersController {
-  public async login({ auth, request, response }: HttpContext) {
+  public async login({ request, response }: HttpContext) {
     const { email, password } = request.all()
 
     try {
@@ -113,6 +113,7 @@ export default class UsersController {
         settings,
         email: user.email,
         uid: user.uid,
+        mustChangePassword: user.mustChangePassword,
         team: teamData,
         memberships: membershipsData,
       }
@@ -134,7 +135,7 @@ export default class UsersController {
   public async store({ response, request }: HttpContext) {
     const { email, password, password_confirmation: passwordConfirmation } = request.all()
     try {
-      const payload = await CreateUserValidator.validate({
+      await CreateUserValidator.validate({
         email,
         password,
         password_confirmation: passwordConfirmation,

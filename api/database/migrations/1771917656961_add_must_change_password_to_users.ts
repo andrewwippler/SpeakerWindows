@@ -1,0 +1,17 @@
+import { BaseSchema } from '@adonisjs/lucid/schema'
+
+export default class extends BaseSchema {
+  protected tableName = 'users'
+
+  public async up() {
+    this.schema.table(this.tableName, (table) => {
+      table.boolean('must_change_password').defaultTo(false).notNullable()
+    })
+  }
+
+  public async down() {
+    this.schema.table(this.tableName, (table) => {
+      table.dropColumn('must_change_password')
+    })
+  }
+}

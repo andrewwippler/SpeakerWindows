@@ -70,7 +70,7 @@ test.group('Misc edge views (browser)', () => {
 
   test('invitations page shows pending invitations', async ({ visit, browserContext }) => {
     const { user } = await loginUser(browserContext)
-    const team = await TeamFactory.merge({ user_id: user.id }).create()
+    const team = await TeamFactory.merge({ userId: user.id }).create()
     await TeamInvitation.create({
       userId: user.id,
       teamId: team.id,

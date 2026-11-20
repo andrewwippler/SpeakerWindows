@@ -1,5 +1,6 @@
 import { test } from '@japa/runner'
 import IllustrationFactory from '#database/factories/illustration_factory'
+import Illustration from '#models/illustration'
 import { loginUser } from './helpers.js'
 
 test.group('Authors views (browser)', () => {

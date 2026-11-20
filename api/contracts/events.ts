@@ -5,7 +5,7 @@
  * file.
  */
 
-declare module '@ioc:Adonis/Core/Event' {
+declare module '@adonisjs/core/types' {
   /*
   |--------------------------------------------------------------------------
   | Define typed events

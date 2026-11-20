@@ -51,6 +51,10 @@ export default class AuthController {
 
       await auth.use('web').login(user)
 
+      if (user.mustChangePassword) {
+        return response.redirect('/change-password')
+      }
+
       session.flash('success', 'Logged in successfully')
       return response.redirect('/')
     } catch {

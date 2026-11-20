@@ -43,7 +43,7 @@ test.group('Illustrations', (group) => {
     return () => db.rollbackGlobalTransaction()
   })
 
-  test('Unauthenticated creation fails', async ({ client, assert }) => {
+  test('Unauthenticated creation fails', async ({ client }) => {
     const testIll = {
       author: 'testy mctest',
       title: 'New Post',
@@ -246,7 +246,7 @@ test.group('Illustrations', (group) => {
       .bearerToken(loggedInUser.body().token)
 
     assert.equal(response.body().tags.length, 1)
-    assert.notEqual(response.body().tags[0].name, tag.name)
+    assert.notEqual(response.body().tags[0].name, tag!.name)
   })
 
   test('Can update illustration with auth', async ({ client, assert }) => {
@@ -262,11 +262,11 @@ test.group('Illustrations', (group) => {
       title: 'Testy mctest tester 123',
       source: 'Testing',
       content: 'This, too, shall pass',
-      tags: [tagOne.name, tagTwo.name, 'third tag'],
+      tags: [tagOne!.name, tagTwo!.name, 'third tag'],
     }
 
     const response = await client
-      .put(`/api/illustration/${illustration.id}`)
+      .put(`/api/illustration/${illustration!.id}`)
       .bearerToken(loggedInUser.body().token)
       .json(illus)
     response.assertStatus(200)
@@ -336,7 +336,7 @@ test.group('Illustrations', (group) => {
     assert.isTrue(!deletedPlace)
   })
 
-  test('Cannot delete illustration wrong auth', async ({ client, assert }) => {
+  test('Cannot delete illustration wrong auth', async ({ client }) => {
     const loggedInUser = await client
       .post('/api/login')
       .json({ email: badUser.email, password: 'oasssadfasdf' })

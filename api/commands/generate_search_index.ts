@@ -147,7 +147,7 @@ export default class GenerateSearchIndex extends BaseCommand {
     try {
       embedding = await LocalEmbeddingProvider.embed(textForEmbedding)
     } catch (error) {
-      this.logger.warn(
+      this.logger.warning(
         `Failed to generate embedding for illustration ${illustration.id}, using zeros`
       )
       embedding = Array(384).fill(0)

@@ -32,7 +32,7 @@ test.group('Illustration model search', (group) => {
     }).create()
 
     // Index them using mock embedding provider so document_search is populated
-    const mockProvider = { embed: async (text: string) => Array(384).fill(0.01) }
+    const mockProvider = { embed: async (_text: string) => Array(384).fill(0.01) }
     const indexing = new SearchIndexingService(mockProvider)
     await indexing.indexIllustration(lex.id)
     await indexing.indexIllustration(fuzzy.id)

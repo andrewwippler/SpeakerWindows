@@ -133,7 +133,7 @@ export default class TagsController {
       if (String(teamId) !== String(userId)) {
         const isMember = await TeamMember.query()
           .where('team_id', teamId)
-          .where('user_id', userId)
+          .where('user_id', userId!)
           .first()
 
         const team = await Team.find(teamId)
@@ -160,7 +160,7 @@ export default class TagsController {
 
     personalTag = await Tag.query()
       .where('name', 'ILIKE', thetag)
-      .where('user_id', userId)
+      .where('user_id', userId!)
       .whereNull('team_id')
       .first()
 
@@ -171,7 +171,7 @@ export default class TagsController {
     // Also get ALL personal tags with the same name
     const allPersonalTags = await Tag.query()
       .where('name', 'ILIKE', thetag)
-      .where('user_id', userId)
+      .where('user_id', userId!)
       .whereNull('team_id')
     for (const t of allPersonalTags) {
       if (!tags.find((existing) => existing.id === t.id)) {

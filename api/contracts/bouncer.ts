@@ -5,12 +5,4 @@
  * file.
  */
 
-import { type actions, type policies } from '../start/bouncer.js'
-
-declare module '@ioc:Adonis/Addons/Bouncer' {
-  type ApplicationActions = ExtractActionsTypes<typeof actions>
-  type ApplicationPolicies = ExtractPoliciesTypes<typeof policies>
-
-  interface ActionsList extends ApplicationActions {}
-  interface PoliciesList extends ApplicationPolicies {}
-}
+export {}

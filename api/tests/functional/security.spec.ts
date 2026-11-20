@@ -42,7 +42,7 @@ test.group('Security', (group) => {
     }
   })
 
-  test('Login endpoint validates email format', async ({ client, assert }) => {
+  test('Login endpoint validates email format', async ({ client }) => {
     const response = await client
       .post('/api/login')
       .json({ email: 'not-an-email', password: 'password' })
@@ -50,13 +50,13 @@ test.group('Security', (group) => {
     response.assertStatus(400)
   })
 
-  test('Login endpoint validates password is required', async ({ client, assert }) => {
+  test('Login endpoint validates password is required', async ({ client }) => {
     const response = await client.post('/api/login').json({ email: 'test@test.com' })
 
     response.assertStatus(400)
   })
 
-  test('Register endpoint validates email format', async ({ client, assert }) => {
+  test('Register endpoint validates email format', async ({ client }) => {
     const response = await client
       .post('/api/register')
       .json({ email: 'bad-email', password: 'Test1234!', password_confirmation: 'Test1234!' })
@@ -64,7 +64,7 @@ test.group('Security', (group) => {
     response.assertStatus(400)
   })
 
-  test('Register endpoint validates password strength', async ({ client, assert }) => {
+  test('Register endpoint validates password strength', async ({ client }) => {
     const response = await client
       .post('/api/register')
       .json({ email: 'new@test.com', password: 'weak', password_confirmation: 'weak' })
@@ -72,7 +72,7 @@ test.group('Security', (group) => {
     response.assertStatus(400)
   })
 
-  test('Contact endpoint requires valid email', async ({ client, assert }) => {
+  test('Contact endpoint requires valid email', async ({ client }) => {
     const response = await client
       .post('/api/contact')
       .accept('json') // Tells AdonisJS to return JSON instead of redirecting
@@ -81,7 +81,7 @@ test.group('Security', (group) => {
     response.assertStatus(422)
   })
 
-  test('SQL injection in login email is handled safely', async ({ client, assert }) => {
+  test('SQL injection in login email is handled safely', async ({ client }) => {
     const response = await client
       .post('/api/login')
       .json({ email: "' OR 1=1 --", password: 'password' })

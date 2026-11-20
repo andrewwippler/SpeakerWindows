@@ -1,4 +1,4 @@
-import { test, expect } from './fixtures/auth.fixture'
+import { test, expect } from './fixtures/auth.fixture.js'
 
 test.describe('Navigation', () => {
   test('header shows app name', async ({ loggedInPage: page }) => {

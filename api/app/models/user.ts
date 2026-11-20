@@ -36,6 +36,9 @@ export default class User extends compose(BaseModel, AuthFinder) {
   declare password: string
 
   @column({ serializeAs: null })
+  declare mustChangePassword: boolean
+
+  @column({ serializeAs: null })
   declare remember_me_token: string | null
 
   @column({ serializeAs: null })
