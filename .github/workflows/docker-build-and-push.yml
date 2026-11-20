@@ -73,6 +73,6 @@ jobs:
               \"actor\": \"${{ github.actor }}\",
               \"version\": \"${{ github.sha }}\",
               \"ns\": \"web\",
-              \"deploy\": "speakerwindows-api",
+              \"deploy\": \"speakerwindows-api\",
               \"prefix\": \"${{ env.REGISTRY }}/${{ env.REPOSITORY }}\"
             }"
