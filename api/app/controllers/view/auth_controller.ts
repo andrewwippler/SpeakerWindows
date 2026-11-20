@@ -12,14 +12,14 @@ export default class AuthController {
     return view.render('auth/login')
   }
 
-  public async login({ auth, request, response, session, view }: HttpContext) {
+  public async login({ auth, request, response, session }: HttpContext) {
     const { email, password } = request.all()
 
     try {
       await LoginValidator.validate({ email, password })
     } catch {
       session.flash('error', 'Invalid credentials format')
-      return view.render('auth/login')
+      return response.redirect('/login')
     }
 
     const throttleKey = `login_${email}_${request.ip()}`
@@ -32,7 +32,7 @@ export default class AuthController {
 
     if (await locallimit.isBlocked(throttleKey)) {
       session.flash('error', 'Too many requests. Please wait 30 minutes and try again.')
-      return view.render('auth/login')
+      return response.redirect('/login')
     }
 
     try {
@@ -50,7 +50,7 @@ export default class AuthController {
     } catch {
       await locallimit.increment(throttleKey)
       session.flash('error', 'Email or password is incorrect')
-      return view.render('auth/login')
+      return response.redirect('/login')
     }
   }
 

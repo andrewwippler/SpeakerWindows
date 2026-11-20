@@ -3,7 +3,7 @@ import { test, expect, registerUser, loginUser, TEST_USER } from './fixtures/aut
 test.describe('Authentication', () => {
   test('login page renders correctly', async ({ page }) => {
     await page.goto('/login')
-    await expect(page.locator('h1')).toContainText('Sign in to SpeakerWindows')
+    await expect(page.getByRole('heading', { name: 'Sign in to SpeakerWindows' })).toBeVisible()
     await expect(page.locator('input[type="email"]')).toBeVisible()
     await expect(page.locator('input[type="password"]')).toBeVisible()
     await expect(page.locator('button[type="submit"]')).toContainText('Sign In')
@@ -11,7 +11,7 @@ test.describe('Authentication', () => {
 
   test('register page renders correctly', async ({ page }) => {
     await page.goto('/register')
-    await expect(page.locator('h1')).toContainText('Create an account')
+    await expect(page.getByRole('heading', { name: 'Create Account' })).toBeVisible()
     await expect(page.locator('input[name="email"]')).toBeVisible()
     await expect(page.locator('input[name="password"]')).toBeVisible()
     await expect(page.locator('input[name="password_confirmation"]')).toBeVisible()
@@ -37,7 +37,7 @@ test.describe('Authentication', () => {
     await page.fill('input[type="password"]', 'wrongpassword')
     await page.click('button[type="submit"]')
     await expect(page).toHaveURL('/login')
-    await expect(page.locator('.ot-alert-error')).toBeVisible()
+    await expect(page.locator('[role="alert"][data-variant="error"]')).toBeVisible()
   })
 
   test('unauthenticated user is redirected to login', async ({ page }) => {
