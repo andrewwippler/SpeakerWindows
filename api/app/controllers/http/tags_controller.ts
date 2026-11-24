@@ -5,6 +5,7 @@ import TeamMember from '#models/team_member'
 import Team from '#models/team'
 import { TagValidator } from '#validators/tag_validator'
 import { editTag } from '#app/abilities/main'
+import { dedupeTags } from '#app/helpers/tag'
 
 export default class TagsController {
   /**
@@ -23,10 +24,12 @@ export default class TagsController {
 
     if (!teamId) {
       // Fetch personal tags where team_id is null
-      return await Tag.query()
+      const personalTags = await Tag.query()
         .where('user_id', user.id) // Lucid handles the mapping to user_id
         .whereNull('team_id')
         .orderBy('name', 'asc')
+
+      return dedupeTags(personalTags)
     }
 
     // Check if user belongs to the team via a relationship query (more efficient)
@@ -45,20 +48,7 @@ export default class TagsController {
 
     const tagsToReturn = await Tag.query().where('team_id', teamId).orderBy('name', 'asc')
 
-    // loop over tagsToReturn and remove duplicate tags with the same name, keeping the one with the lowest id
-    // in teams, it's possible to have multiple tags with the same name but different ids. We want to return only one tag per unique name, and we want to keep the one with the lowest id (the first one created).
-    const uniqueTagsMap: Record<string, Tag> = {}
-    tagsToReturn.forEach((tag) => {
-      if (!uniqueTagsMap[tag.name]) {
-        uniqueTagsMap[tag.name] = tag
-      } else {
-        if (tag.id < uniqueTagsMap[tag.name].id) {
-          uniqueTagsMap[tag.name] = tag
-        }
-      }
-    })
-
-    return Object.values(uniqueTagsMap)
+    return dedupeTags(tagsToReturn)
   }
 
   /**
@@ -86,7 +76,6 @@ export default class TagsController {
       .where('name', 'ILIKE', `${tag}%`)
       .andWhere('user_id', userId)
       .orderBy('name')
-      .limit(10)
 
     if (teamId === null) {
       tagQuery = tagQuery.andWhereNull('team_id')
@@ -94,7 +83,7 @@ export default class TagsController {
       tagQuery = tagQuery.andWhere('team_id', teamId)
     }
 
-    const results = await tagQuery
+    const results = dedupeTags(await tagQuery).slice(0, 10)
 
     // console.log({
     //   message: 'debug', user_id, searchString: tag, data: tagQuery
@@ -183,6 +172,8 @@ export default class TagsController {
       return response.status(404).send({ message: 'Tag not found' })
     }
 
+    const preferredTag = dedupeTags(tags)[0]
+
     const illustrationMap = new Map<number, any>()
     for (const tag of tags) {
       const tagIllustrations = await tag.related('illustrations').query().orderBy('title')
@@ -199,14 +190,14 @@ export default class TagsController {
 
     if (mergedIllustrations.length === 0) {
       return {
-        id: tags[0].id,
-        name: tags[0].name,
+        id: preferredTag.id,
+        name: preferredTag.name,
       }
     }
 
     return {
-      id: tags[0].id,
-      name: tags[0].name,
+      id: preferredTag.id,
+      name: preferredTag.name,
       illustrations: mergedIllustrations,
     }
   }

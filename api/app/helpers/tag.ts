@@ -1,5 +1,5 @@
-import Tag from "#models/tag"
-import Illustration from "#models/illustration"
+import type Tag from '#models/tag'
+import type Illustration from '#models/illustration'
 
 export default function TagSlugSanitizer(slug: string) {
   return slug
@@ -9,6 +9,32 @@ export default function TagSlugSanitizer(slug: string) {
 }
 export function displayName(name: string): string {
   return name.replace(/-/g, ' ')
+}
+
+export function dedupeTags(tags: Tag[]): Tag[] {
+  const uniqueTags = new Map<string, Tag>()
+
+  for (const tag of tags) {
+    const key = tag.name.trim().toLowerCase()
+    const existing = uniqueTags.get(key)
+
+    if (!existing || isPreferredTag(tag, existing)) {
+      uniqueTags.set(key, tag)
+    }
+  }
+
+  return Array.from(uniqueTags.values())
+}
+
+function isPreferredTag(candidate: Tag, existing: Tag): boolean {
+  const candidateIsTeamTag = candidate.team_id !== null
+  const existingIsTeamTag = existing.team_id !== null
+
+  if (candidateIsTeamTag !== existingIsTeamTag) {
+    return candidateIsTeamTag
+  }
+
+  return candidate.id < existing.id
 }
 
 export function buildColumns(tags: Tag[]): Tag[][] {

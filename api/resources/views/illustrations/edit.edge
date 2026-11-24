@@ -64,7 +64,7 @@
       <div class="col-12">
         <label data-field>
           Tags
-          <ot-taginput value="{{ illustration.tags ? illustration.tags.map(t => t.name).join(', ') : '' }}">
+          <ot-taginput value="{{ selectedTags.map(t => t.name).join(', ') }}">
             <input name="tags" list="tag-list" placeholder="Add tags..." oninput="tagInputAutoComplete(this)" />
             <datalist id="tag-list">
               @each(tag in tags)

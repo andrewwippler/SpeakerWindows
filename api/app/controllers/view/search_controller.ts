@@ -5,6 +5,7 @@ import Tag from '#models/tag'
 import Place from '#models/place'
 import LocalEmbeddingProvider from '#services/local_embedding_provider'
 import { RankingService } from '#services/ranking_service'
+import { dedupeTags } from '#app/helpers/tag'
 
 export default class SearchController {
   public async index({ view }: HttpContext) {
@@ -65,7 +66,8 @@ export default class SearchController {
 
       // Step 5b: Fetch illustrations where content matches LIKE query (prepend to results)
       const contentMatches = await Illustration.query()
-        .where('content', 'LIKE', `%${query}%`).orWhere('title', 'LIKE', `%${query}%`)
+        .where('content', 'LIKE', `%${query}%`)
+        .orWhere('title', 'LIKE', `%${query}%`)
         .where('user_id', userId)
         .limit(limit)
 
@@ -77,13 +79,15 @@ export default class SearchController {
       const tagSanitizedSearch = `${_.kebabCase(query)}-${userId}`
       const qLower = query.toLowerCase()
       const tagSlugLower = tagSanitizedSearch.toLowerCase()
-      const tags = await Tag.query()
-        .where((builder) => {
-          builder
-            .whereRaw('LOWER(name) LIKE ?', [`%${qLower}%`])
-            .orWhereRaw('LOWER(slug) LIKE ?', [`%${tagSlugLower}%`])
-        })
-        .andWhere('user_id', userId)
+      const tags = dedupeTags(
+        await Tag.query()
+          .where((builder) => {
+            builder
+              .whereRaw('LOWER(name) LIKE ?', [`%${qLower}%`])
+              .orWhereRaw('LOWER(slug) LIKE ?', [`%${tagSlugLower}%`])
+          })
+          .andWhere('user_id', userId)
+      )
 
       // Step 7: Fetch places
       const places = await Place.query()
@@ -91,7 +95,12 @@ export default class SearchController {
         .where('place', 'LIKE', `%${query}%`)
         .andWhere('user_id', userId)
 
-      return view.render('search/results', { illustrations: finalIllustrations, tags, places, query })
+      return view.render('search/results', {
+        illustrations: finalIllustrations,
+        tags,
+        places,
+        query,
+      })
     } catch (error) {
       console.error('Search error:', error)
       return view.render('search/results', {
@@ -101,5 +110,5 @@ export default class SearchController {
         query,
       })
     }
-}
+  }
 }

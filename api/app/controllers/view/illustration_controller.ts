@@ -4,7 +4,7 @@ import Tag from '#models/tag'
 import Place from '#models/place'
 import Upload from '#models/upload'
 import Setting from '#models/setting'
-import TagSlugSanitizer, { displayName } from '#app/helpers/tag'
+import TagSlugSanitizer, { dedupeTags, displayName } from '#app/helpers/tag'
 import { randomUUID, createHash } from 'node:crypto'
 import {
   canViewIllustration,
@@ -20,7 +20,7 @@ import { DateTime } from 'luxon'
 
 export default class IllustrationController {
   public async new({ view, auth }: HttpContext) {
-    const tags = await Tag.query().where('user_id', auth.user!.id).orderBy('name')
+    const tags = dedupeTags(await Tag.query().where('user_id', auth.user!.id).orderBy('name'))
     return view.render('illustrations/new', { tags })
   }
 
@@ -218,9 +218,10 @@ export default class IllustrationController {
         return response.redirect(`/illustrations/${id}`)
       }
 
-      const tags = await Tag.query().where('user_id', auth.user!.id).orderBy('name')
+      const tags = dedupeTags(await Tag.query().where('user_id', auth.user!.id).orderBy('name'))
+      const selectedTags = dedupeTags(illustration.tags as unknown as Tag[])
 
-      return view.render('illustrations/edit', { illustration, tags })
+      return view.render('illustrations/edit', { illustration, tags, selectedTags })
     } catch (error) {
       console.error('Illustration edit error:', error)
       return response.internalServerError({ message: 'Database error' })

@@ -2,11 +2,11 @@ import type { HttpContext } from '@adonisjs/core/http'
 import Tag from '#models/tag'
 import Illustration from '#models/illustration'
 import _ from 'lodash'
-import { buildColumns, displayName } from '#app/helpers/tag'
+import { buildColumns, dedupeTags, displayName } from '#app/helpers/tag'
 
 export default class TagController {
   public async index({ view, auth }: HttpContext) {
-    const tags = await Tag.query().where('user_id', auth.user!.id).orderBy('name')
+    const tags = dedupeTags(await Tag.query().where('user_id', auth.user!.id).orderBy('name'))
     return view.render('tags/index', {
       tags,
       columns: buildColumns(tags),
@@ -28,7 +28,7 @@ export default class TagController {
         return response.notFound({ message: 'Tag not found' })
       }
 
-      const tag = tags[0]
+      const tag = dedupeTags(tags)[0]
 
       const illustrationMap = new Map<number, any>()
       for (const t of tags) {

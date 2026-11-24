@@ -17,6 +17,7 @@ import Place from '#models/place'
 import _ from 'lodash'
 import { HybridSearchValidator } from '#validators/hybrid_search_validator'
 import LocalEmbeddingProvider from '#services/local_embedding_provider'
+import { dedupeTags } from '#app/helpers/tag'
 
 export default class HybridSearchController {
   private hybridSearch = HybridSearchService
@@ -104,13 +105,15 @@ export default class HybridSearchController {
       const tagSanitizedSearch = _.kebabCase(query) + '-' + (auth.user?.id || '0')
       const qLower = query.toLowerCase()
       const tagSlugLower = tagSanitizedSearch.toLowerCase()
-      const tags = await Tag.query()
-        .where((builder) => {
-          builder
-            .whereRaw('LOWER(name) LIKE ?', [`%${qLower}%`])
-            .orWhereRaw('LOWER(slug) LIKE ?', [`%${tagSlugLower}%`])
-        })
-        .andWhere('user_id', `${auth.user?.id}`)
+      const tags = dedupeTags(
+        await Tag.query()
+          .where((builder) => {
+            builder
+              .whereRaw('LOWER(name) LIKE ?', [`%${qLower}%`])
+              .orWhereRaw('LOWER(slug) LIKE ?', [`%${tagSlugLower}%`])
+          })
+          .andWhere('user_id', `${auth.user?.id}`)
+      )
 
       // Step 7: Fetch places
       const places = await Place.query()
